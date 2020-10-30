@@ -1,0 +1,29 @@
+trigger:
+  - master
+
+pr: none
+
+stages:
+  - stage: 'test'
+    displayName: 'build and package:'
+
+    jobs:
+      - job: 'python_test'
+        displayName: 'Python tests'
+        timeoutInMinutes: 20
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - bash: echo "##vso[task.prependpath]$CONDA/bin"
+            displayName: 'add conda to PATH'
+          - bash: |
+             set -ex
+             conda --version
+             conda install --yes anaconda-client conda-build
+             conda config --set always_yes yes --set changeps1 no
+            displayName: 'create anaconda environment'
+          - bash: |
+             conda build conda/ --channel scipp/label/dev --channel conda-forge --label dev
+            displayName: 'package'

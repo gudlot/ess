@@ -1,0 +1,11 @@
+name: scipp-ess-latest
+
+channels:
+  - conda-forge
+  - scipp/label/dev
+
+dependencies:
+  - scipp
+  - pytest
+  - sphinx>=1.6
+  - sphinx_rtd_theme
