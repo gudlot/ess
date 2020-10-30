@@ -35,6 +35,11 @@ stages:
             env:
              ANACONDA_TOKEN: $(anaconda_token_secret)
             displayName: 'package'
+          - task: PublishBuildArtifacts@1
+            inputs:
+             PathtoPublish: "$(conda_dir)/conda-bld/linux-64"
+             ArtifactName: 'linux-64'
+            displayName: 'Publish Conda package artefacts'
   - stage: 'post_build_checks'
     displayName: 'Post Build Checks'
 
