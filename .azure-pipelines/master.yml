@@ -4,6 +4,7 @@ trigger:
 pr: none
 
 stages:
+  - template: code_quality_checks.yml
   - stage: 'test'
     displayName: 'build and package:'
 
@@ -27,3 +28,8 @@ stages:
           - bash: |
              conda build conda/ --channel scipp/label/dev --channel conda-forge --label dev
             displayName: 'package'
+  - stage: 'post_build_checks'
+    displayName: 'Post Build Checks'
+
+    jobs:
+      - template: documentation_build.yml

@@ -14,6 +14,7 @@ variables:
   target_branch: $[variables['System.PullRequest.TargetBranch']]
 
 stages:
+  - template: code_quality_checks.yml
   - stage: 'test'
     displayName: 'python tests'
 
@@ -47,3 +48,8 @@ stages:
             inputs:
               testResultsFiles: 'junit/*.xml'
             condition: succeededOrFailed()
+  - stage: 'post_build_checks'
+    displayName: 'Post Build Checks'
+
+    jobs:
+      - template: documentation_build.yml
