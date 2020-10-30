@@ -6,6 +6,8 @@ source:
   path: .. 
 
 requirements:
+  build:
+    - python {{ python }}
   run:
     - python {{ python }}
     - scipp

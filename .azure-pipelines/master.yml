@@ -1,5 +1,6 @@
 trigger:
   - master
+  - deploy
 
 pr: none
 
@@ -14,10 +15,14 @@ stages:
         timeoutInMinutes: 20
         pool:
           vmImage: 'ubuntu-18.04'
+        variables:
+          - group: tokens
         steps:
           - checkout: self
             submodules: true
-          - bash: echo "##vso[task.prependpath]$CONDA/bin"
+          - bash: |
+             echo "##vso[task.prependpath]$CONDA/bin"
+             echo "##vso[task.setvariable variable=conda_dir]$CONDA"
             displayName: 'add conda to PATH'
           - bash: |
              set -ex
@@ -26,7 +31,9 @@ stages:
              conda config --set always_yes yes --set changeps1 no
             displayName: 'create anaconda environment'
           - bash: |
-             conda build conda/ --channel scipp/label/dev --channel conda-forge --label dev
+             conda build conda/ --channel scipp/label/dev --channel conda-forge --label dev --user scipp --token "$ANACONDA_TOKEN" 
+            env:
+             ANACONDA_TOKEN: $(anaconda_token_secret)
             displayName: 'package'
   - stage: 'post_build_checks'
     displayName: 'Post Build Checks'
