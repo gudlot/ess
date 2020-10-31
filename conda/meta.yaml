@@ -11,6 +11,8 @@ requirements:
   run:
     - python {{ python }}
     - scipp
+    - fabio
+    - tifffile
     # TODO scipp-neutron (no dependency yet)
 
 test:
