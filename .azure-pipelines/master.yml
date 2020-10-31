@@ -10,8 +10,8 @@ stages:
     displayName: 'build and package:'
 
     jobs:
-      - job: 'python_test'
-        displayName: 'Python tests'
+      - job: 'linux'
+        displayName: 'linux os'
         timeoutInMinutes: 20
         pool:
           vmImage: 'ubuntu-18.04'
@@ -39,6 +39,36 @@ stages:
             inputs:
              PathtoPublish: "$(conda_dir)/conda-bld/linux-64"
              ArtifactName: 'linux-64'
+            displayName: 'Publish Conda package artefacts'
+      - job: 'osx'
+        displayName: 'mac os'
+        timeoutInMinutes: 20
+        pool:
+          vmImage: 'macOS-10.14'
+        variables:
+          - group: tokens
+        steps:
+          - checkout: self
+            submodules: true
+          - bash: |
+             echo "##vso[task.prependpath]$CONDA/bin"
+             echo "##vso[task.setvariable variable=conda_dir]$CONDA"
+            displayName: 'add conda to PATH'
+          - bash: |
+             set -ex
+             conda --version
+             conda install --yes anaconda-client conda-build
+             conda config --set always_yes yes --set changeps1 no
+            displayName: 'create anaconda environment'
+          - bash: |
+             conda build conda/ --channel scipp/label/dev --channel conda-forge --label dev --user scipp --token "$ANACONDA_TOKEN" 
+            env:
+             ANACONDA_TOKEN: $(anaconda_token_secret)
+            displayName: 'package'
+          - task: PublishBuildArtifacts@1
+            inputs:
+             PathtoPublish: "$(conda_dir)/conda-bld/osx-64"
+             ArtifactName: 'osx-64'
             displayName: 'Publish Conda package artefacts'
   - stage: 'post_build_checks'
     displayName: 'Post Build Checks'
