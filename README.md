@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/scipp/scipp/_apis/build/status/scipp.ess%20Master?branchName=master)](https://dev.azure.com/scipp/scipp/_build/latest?definitionId=17&branchName=master)
+
 # ess
 
 European Spallation Source facility bespoke, neutron scattering tools based on [scipp](https://github.com/scipp/scipp). This is a collection of python tools providing facility and instrument specific support for the ESS.
