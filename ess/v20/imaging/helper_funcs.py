@@ -22,23 +22,23 @@ def read_x_values(tof_file):
 def _load_tiffs(tiff_dir):
     if not os.path.isdir(tiff_dir):
         raise RuntimeError(tiff_dir + " is not directory")
+    stack = []
     path_length = len(tiff_dir) + 1
     filenames = sorted(glob.glob(tiff_dir + "/*.tiff"))
     nfiles = len(filenames)
     count = 0
     print(f"Loading {nfiles} files from '{tiff_dir}'")
-    stack = None
     for filename in filenames:
         count += 1
         print('\r{0}: Image {1}, of {2}'.format(filename[path_length:], count,
                                                 nfiles),
               end="")
         img = fabio.open(os.path.join(tiff_dir, filename))
-        stack = np.dstack((stack, np.flipud(
-            img.data))) if stack is not None else np.flipud(img.data)
+        stack.append(np.flipud(img.data))
 
     print()  # Print a newline to separate each load message
-    return stack.transpose()
+
+    return np.array(stack)
 
 
 def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
