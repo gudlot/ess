@@ -1,5 +1,5 @@
 package:
-  name: scipp-ess 
+  name: ess 
   version: {{ GIT_DESCRIBE_TAG }}
 
 source:
