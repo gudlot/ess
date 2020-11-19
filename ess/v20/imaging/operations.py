@@ -74,6 +74,7 @@ def mean_from_adj_pixels(data):
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
     container = sc.Variable(['neighbor'] + data.dims,
+                            dtype=data.dtype,
                             shape=[
                                 9,
                             ] + data.shape,
@@ -120,6 +121,7 @@ def median_from_adj_pixels(data):
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
     container = sc.Variable(['neighbor'] + data.dims,
+                            dtype=data.dtype,
                             shape=[
                                 9,
                             ] + data.shape,
