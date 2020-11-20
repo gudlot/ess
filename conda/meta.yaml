@@ -1,14 +1,18 @@
 package:
-  name: scipp-ess 
+  name: ess 
   version: {{ GIT_DESCRIBE_TAG }}
 
 source:
   path: .. 
 
 requirements:
+  build:
+    - python {{ python }}
   run:
     - python {{ python }}
     - scipp
+    - fabio
+    - tifffile
     # TODO scipp-neutron (no dependency yet)
 
 test:
