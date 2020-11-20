@@ -1,6 +1,5 @@
 trigger:
   - master
-  - deploy
 
 pr: none
 
