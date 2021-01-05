@@ -8,11 +8,14 @@ source:
 requirements:
   build:
     - python {{ python }}
+    - sphinx>=1.6
+    - sphinx_rtd_theme
   run:
     - python {{ python }}
     - scipp
     - fabio
     - tifffile
+    - astropy
     # TODO scipp-neutron (no dependency yet)
 
 test:
