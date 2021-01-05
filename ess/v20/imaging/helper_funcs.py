@@ -87,30 +87,32 @@ def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
     print('Saved tof_of_tiff_{}.txt.'.format(base_name))
 
 
-def tiffs_to_variable(tiff_dir, dtype=np.float64, with_variances=True):
+def _image_to_variable(image_dir, loader, dtype=np.float64,
+                       with_variances=True):
     """
-    Loads all tiff images from the directory into a scipp Variable.
+    Loads all images from the directory into a scipp Variable.
     """
-    stack = _load_tiffs(tiff_dir)
+    stack = loader(image_dir)
     data = stack.astype(dtype).reshape(stack.shape[0],
                                        stack.shape[1] * stack.shape[2])
     if with_variances:
         return sc.Variable(["t", "spectrum"], values=data, variances=data)
     else:
         return sc.Variable(["t", "spectrum"], values=data)
+
+
+def tiffs_to_variable(tiff_dir, dtype=np.float64, with_variances=True):
+    """
+    Loads all tiff images from the directory into a scipp Variable.
+    """
+    return _image_to_variable(tiff_dir, _load_tiffs, dtype, with_variances)
 
 
 def fits_to_variable(fits_dir, dtype=np.float64, with_variances=True):
     """
     Loads all fits images from the directory into a scipp Variable.
     """
-    stack = _load_fits(fits_dir)
-    data = stack.astype(dtype).reshape(stack.shape[0],
-                                       stack.shape[1] * stack.shape[2])
-    if with_variances:
-        return sc.Variable(["t", "spectrum"], values=data, variances=data)
-    else:
-        return sc.Variable(["t", "spectrum"], values=data)
+    return _image_to_variable(fits_dir, _load_fits, dtype, with_variances)
 
 
 def make_detector_groups(nx_original, ny_original, nx_target, ny_target):
