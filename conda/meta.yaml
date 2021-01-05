@@ -13,7 +13,6 @@ requirements:
   run:
     - python {{ python }}
     - scipp
-    - fabio
     - tifffile
     - astropy
     # TODO scipp-neutron (no dependency yet)

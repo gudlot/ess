@@ -2,10 +2,9 @@ import csv
 import glob
 import os
 
-import fabio
 import numpy as np
 import scipp as sc
-from tifffile import imsave
+import tifffile
 from astropy.io import fits
 
 
@@ -54,7 +53,7 @@ def _load_fits(fits_dir):
 
 
 def _load_tiffs(tiff_dir):
-    return _load_images(tiff_dir, 'tiff', lambda f: fabio.open(f))
+    return _load_images(tiff_dir, 'tiff', lambda f: tifffile.imread(f))
 
 
 def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
@@ -69,7 +68,7 @@ def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
 
     # Writing tiffs
     for i in range(stack_data.shape[2]):
-        imsave(
+        tifffile.imsave(
             os.path.join(output_dir, '{:s}_{:04d}.tiff'.format(base_name, i)),
             stack_data[:, :, i].astype(np.float32))
     print('Saved {:s}_{:04d}.tiff stack.'.format(base_name, 0))

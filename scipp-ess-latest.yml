@@ -9,6 +9,5 @@ dependencies:
   - pytest
   - sphinx>=1.6
   - sphinx_rtd_theme
-  - fabio 
   - tifffile
   - astropy 
