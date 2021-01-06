@@ -86,7 +86,9 @@ def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
     print('Saved tof_of_tiff_{}.txt.'.format(base_name))
 
 
-def _image_to_variable(image_dir, loader, dtype=np.float64,
+def _image_to_variable(image_dir,
+                       loader,
+                       dtype=np.float64,
                        with_variances=True):
     """
     Loads all images from the directory into a scipp Variable.
