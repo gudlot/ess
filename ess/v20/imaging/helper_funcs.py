@@ -2,10 +2,10 @@ import csv
 import glob
 import os
 
-import fabio
 import numpy as np
 import scipp as sc
-from tifffile import imsave
+import tifffile
+from astropy.io import fits
 
 
 def read_x_values(tof_file):
@@ -19,26 +19,41 @@ def read_x_values(tof_file):
         usecols=1)  # Only use the TOF vals, not index
 
 
-def _load_tiffs(tiff_dir):
-    if not os.path.isdir(tiff_dir):
-        raise RuntimeError(tiff_dir + " is not directory")
+def _load_images(image_dir, extension, loader):
+    if not os.path.isdir(image_dir):
+        raise ValueError(image_dir + " is not directory")
     stack = []
-    path_length = len(tiff_dir) + 1
-    filenames = sorted(glob.glob(tiff_dir + "/*.tiff"))
+    path_length = len(image_dir) + 1
+    filenames = sorted(glob.glob(image_dir + f"/*.{extension}"))
     nfiles = len(filenames)
     count = 0
-    print(f"Loading {nfiles} files from '{tiff_dir}'")
+    print(f"Loading {nfiles} files from '{image_dir}'")
     for filename in filenames:
         count += 1
         print('\r{0}: Image {1}, of {2}'.format(filename[path_length:], count,
                                                 nfiles),
               end="")
-        img = fabio.open(os.path.join(tiff_dir, filename))
+        img = loader(os.path.join(image_dir, filename))
         stack.append(np.flipud(img.data))
 
     print()  # Print a newline to separate each load message
 
     return np.array(stack)
+
+
+def _load_fits(fits_dir):
+    def loader(f):
+        data = None
+        handle = fits.open(f, mode='readonly')
+        data = handle[0].data.copy()
+        handle.close()
+        return data
+
+    return _load_images(fits_dir, 'fits', loader)
+
+
+def _load_tiffs(tiff_dir):
+    return _load_images(tiff_dir, 'tiff', lambda f: tifffile.imread(f))
 
 
 def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
@@ -53,7 +68,7 @@ def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
 
     # Writing tiffs
     for i in range(stack_data.shape[2]):
-        imsave(
+        tifffile.imsave(
             os.path.join(output_dir, '{:s}_{:04d}.tiff'.format(base_name, i)),
             stack_data[:, :, i].astype(np.float32))
     print('Saved {:s}_{:04d}.tiff stack.'.format(base_name, 0))
@@ -71,17 +86,32 @@ def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
     print('Saved tof_of_tiff_{}.txt.'.format(base_name))
 
 
-def tiffs_to_variable(tiff_dir, dtype=np.float64, with_variances=True):
+def _image_to_variable(image_dir, loader, dtype=np.float64,
+                       with_variances=True):
     """
-    Loads all tiff images from the directory into a scipp Variable.
+    Loads all images from the directory into a scipp Variable.
     """
-    stack = _load_tiffs(tiff_dir)
+    stack = loader(image_dir)
     data = stack.astype(dtype).reshape(stack.shape[0],
                                        stack.shape[1] * stack.shape[2])
     if with_variances:
         return sc.Variable(["t", "spectrum"], values=data, variances=data)
     else:
-        return sc.Variable(["t", "spectrum"], values=data, variances=data)
+        return sc.Variable(["t", "spectrum"], values=data)
+
+
+def tiffs_to_variable(tiff_dir, dtype=np.float64, with_variances=True):
+    """
+    Loads all tiff images from the directory into a scipp Variable.
+    """
+    return _image_to_variable(tiff_dir, _load_tiffs, dtype, with_variances)
+
+
+def fits_to_variable(fits_dir, dtype=np.float64, with_variances=True):
+    """
+    Loads all fits images from the directory into a scipp Variable.
+    """
+    return _image_to_variable(fits_dir, _load_fits, dtype, with_variances)
 
 
 def make_detector_groups(nx_original, ny_original, nx_target, ny_target):
