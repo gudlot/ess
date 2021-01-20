@@ -9,19 +9,22 @@ import tifffile
 from astropy.io import fits
 
 
-def read_x_values(tof_file, delimiter=None, skiprows=0, usecols=None):
+def read_x_values(tof_file, **kwargs):
     """
     Reads the TOF values from the CSV into a list.
     If usecols is defined, we use the column requested by the user.
     If not, as there may be more than one column in the file (typically the
     counts are also stored in the file alongside the TOF bins), we search for
     the first column with monotonically increasing values.
+    The first argument is the name of the file to be loaded.
+    All subsequent arguments are forwarded to numpy's loadtxt.
+    (see https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html).
+
+    :param tof_file: Name of the file to be read.
+    :type tof_file: str
     """
-    data = np.loadtxt(tof_file,
-                      delimiter=delimiter,
-                      skiprows=skiprows,
-                      usecols=usecols)
-    if (usecols is not None) or (data.ndim == 1):
+    data = np.loadtxt(tof_file, **kwargs)
+    if data.ndim == 1:
         return data
 
     # Search for the first column with monotonically increasing values
@@ -29,7 +32,8 @@ def read_x_values(tof_file, delimiter=None, skiprows=0, usecols=None):
         if np.all(data[1:, i] > data[:-1, i], axis=0):
             return data[:, i]
 
-    raise RuntimeError("No column with monotonically increasing values was "
+    raise RuntimeError("Cannot automatically determine time-of-flight column. "
+                       "No column with monotonically increasing values was "
                        "found in file " + tof_file)
 
 
