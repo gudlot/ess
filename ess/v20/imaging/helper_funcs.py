@@ -1,6 +1,7 @@
 import csv
 import glob
 import os
+import re
 
 import numpy as np
 import scipp as sc
@@ -8,15 +9,32 @@ import tifffile
 from astropy.io import fits
 
 
-def read_x_values(tof_file):
+def read_x_values(tof_file, **kwargs):
     """
-    Reads the TOF values from the CSV into a list
+    Reads the TOF values from the CSV into a list.
+    If usecols is defined, we use the column requested by the user.
+    If not, as there may be more than one column in the file (typically the
+    counts are also stored in the file alongside the TOF bins), we search for
+    the first column with monotonically increasing values.
+    The first argument is the name of the file to be loaded.
+    All subsequent arguments are forwarded to numpy's loadtxt.
+    (see https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html).
+
+    :param tof_file: Name of the file to be read.
+    :type tof_file: str
     """
-    return np.loadtxt(
-        tof_file,
-        delimiter='\t',
-        skiprows=1,  # Skip header on the first line
-        usecols=1)  # Only use the TOF vals, not index
+    data = np.loadtxt(tof_file, **kwargs)
+    if data.ndim == 1:
+        return data
+
+    # Search for the first column with monotonically increasing values
+    for i in range(data.shape[1]):
+        if np.all(data[1:, i] > data[:-1, i], axis=0):
+            return data[:, i]
+
+    raise RuntimeError("Cannot automatically determine time-of-flight column. "
+                       "No column with monotonically increasing values was "
+                       "found in file " + tof_file)
 
 
 def _load_images(image_dir, extension, loader):
@@ -24,7 +42,9 @@ def _load_images(image_dir, extension, loader):
         raise ValueError(image_dir + " is not directory")
     stack = []
     path_length = len(image_dir) + 1
-    filenames = sorted(glob.glob(image_dir + f"/*.{extension}"))
+    filenames = glob.glob(image_dir + f"/*.{extension}")
+    # Sort the filenames by converting the digits in the strings to integers
+    filenames.sort(key=lambda f: int(re.sub('\D', '', f)))
     nfiles = len(filenames)
     count = 0
     print(f"Loading {nfiles} files from '{image_dir}'")
