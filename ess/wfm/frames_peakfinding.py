@@ -158,18 +158,17 @@ def frames_peakfinding(data=None,
     for p in range(len(peaks)):
         if y[peaks[p]] > threshold:
             print("Removed peak number {} at x,y = {},{} because the y value "
-                  "exceeds the threshold {}".format(
-                    p, x[peaks[p]], y[peaks[p]], threshold))
+                  "exceeds the threshold {}".format(p, x[peaks[p]],
+                                                    y[peaks[p]], threshold))
             to_be_removed.append(p)
     # Actually remove the peaks
     peaks = np.delete(peaks, to_be_removed)
 
     if len(peaks) != instrument["info"]["nframes"] - 1:
-        raise RuntimeError(
-            "The number of valleys found does not match the "
-            "required number of frames. Expected "
-            "{}, got {}.".format(instrument["info"]["nframes"] - 1,
-                                 len(peaks)))
+        raise RuntimeError("The number of valleys found does not match the "
+                           "required number of frames. Expected "
+                           "{}, got {}.".format(
+                               instrument["info"]["nframes"] - 1, len(peaks)))
 
     frame_gaps = x[peaks]
     print("The frame_gaps are:", frame_gaps)

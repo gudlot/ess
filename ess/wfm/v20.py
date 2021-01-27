@@ -67,25 +67,27 @@ def setup(file_handle=None, detector_positions=None):
                                unit="deg",
                                name="WFM2")
 
-    choppers["FOL1"] = Chopper(frequency=56,
-                               openings=np.array([
-                                   64.35, 84.99, 125.05, 148.29, 183.41, 205.22,
-                                   236.4, 254.27, 287.04, 302.8, 335.53, 360.0
-                               ]) + 15.0,
-                               phase=62.40,
-                               distance=8.8,
-                               unit="deg",
-                               name="Frame-overlap 1")
+    choppers["FOL1"] = Chopper(
+        frequency=56,
+        openings=np.array([
+            64.35, 84.99, 125.05, 148.29, 183.41, 205.22, 236.4, 254.27,
+            287.04, 302.8, 335.53, 360.0
+        ]) + 15.0,
+        phase=62.40,
+        distance=8.8,
+        unit="deg",
+        name="Frame-overlap 1")
 
-    choppers["FOL2"] = Chopper(frequency=28,
-                               openings=np.array([
-                                   79.78, 116.38, 136.41, 172.47, 191.73, 221.94,
-                                   240.81, 267.69, 287.13, 311.69, 330.89, 360.0
-                               ]) + 15.0,
-                               phase=12.27,
-                               distance=15.9,
-                               unit="deg",
-                               name="Frame-overlap 2")
+    choppers["FOL2"] = Chopper(
+        frequency=28,
+        openings=np.array([
+            79.78, 116.38, 136.41, 172.47, 191.73, 221.94, 240.81, 267.69,
+            287.13, 311.69, 330.89, 360.0
+        ]) + 15.0,
+        phase=12.27,
+        distance=15.9,
+        unit="deg",
+        name="Frame-overlap 2")
 
     # choppers["FOL1"] = Chopper(frequency=56,
     #                            openings=np.array([
@@ -118,7 +120,8 @@ def setup(file_handle=None, detector_positions=None):
     # info["detector_positions"] = {"DENEX": 30.6, "monitor": 25.7}
     # info["detector_positions"] = {"DENEX": 28.42, "monitor": 25.6}
 
-    # Midpoint between WFM choppers which acts as new source distance for stitched data
+    # Midpoint between WFM choppers which acts as new source distance
+    # for stitched data
     info["wfm_choppers_midpoint"] = 0.5 * (choppers["WFM1"].distance +
                                            choppers["WFM2"].distance)
 
