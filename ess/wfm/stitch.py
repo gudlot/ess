@@ -1,12 +1,13 @@
 import numpy as np
 import scipp as sc
+import matplotlib.pyplot as plt
 
 
 def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
 
+    if plot:
+        fig, ax = plt.subplots()
 
-    # corrected = []
-    # stitched
     for i in range(len(frames["left_edges"])):
         section = item[dim,
                              frames["left_edges"][i]*sc.units.us:frames["right_edges"][i]*sc.units.us].copy()
@@ -14,23 +15,22 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
         section.rename_dims({dim: 'tof'})
 
         target += sc.rebin(section, 'tof', target.coords["tof"])
-
-        # corrected.append(section)
-
-        #             # Sum counts from different frames
-        #     for key in sections:
-        #         for sec in sections[key]:
-        #             stitched[key] += sc.rebin(sec, 'tof', stitched.coords["tof"])
-
-
-    # empty
-
+        if plot:
+            section.name = "frame-{}".format(i)
+            # TODO: we manually remove the 2d coord here, but this should be
+            # made into a generic check
+            del section.coords["position"]
+            dims = section.dims
+            dims.remove("tof")
+            for dim_ in dims:
+                section = sc.sum(section, dim_)
+            section.plot(ax=ax, color="C{}".format(i))
 
     return target
 
 
 
-def stitch(data=None, dim=None, frames=None, nbins=None):
+def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
 
     tof_coord = sc.Variable(["tof"],
                                  unit=sc.units.us,
@@ -55,43 +55,10 @@ def stitch(data=None, dim=None, frames=None, nbins=None):
             empty.coords[key] = data.coords[key]
 
     if hasattr(data, "items"):
-        sections = {}
         stitched = sc.Dataset()
-        for key, item in data.items():
-            # stitched[key] = empty
-            stitched[key] = _stitch_item(item=item, dim=dim, frames=frames, target=empty.copy())
-    # else:
-
-
-
-
-
-
-# plot({"frame{}".format(i): sc.sum(sc.sum(sections["reference"][i], 'x'), 'y')
-#       for i in range(len(sections["reference"]))})
-
-
-
-    # # stitched.coords["tof"] = sc.Variable(["tof"],
-    # #                              unit=sc.units.us,
-    # #                              values=np.linspace(9.0e3, 5.0e4, ntof + 1))
-    # # for key in ds.coords:
-    # #     if key != "t":
-    # #         stitched.coords[key] = ds.coords[key]
-    # for key in ds:
-    #     stitched[key] = sc.zeros(dims=["tof", "y", "x"], shape=[ntof] + ds.coords["position"].shape,
-    #                                  variances=True, unit=sc.units.counts)
-    # # Sum counts from different frames
-    # for key in sections:
-    #     for sec in sections[key]:
-    #         stitched[key] += sc.rebin(sec, 'tof', stitched.coords["tof"])
-    # stitched
-
-
-    # for key in ds.coords:
-    #     if key != "t":
-    #         stitched.coords[key] = ds.coords[key]
-
-
+        for i, (key, item) in enumerate(data.items()):
+            stitched[key] = _stitch_item(item=item, dim=dim, frames=frames, target=empty.copy(), plot=(plot and i == 0))
+    else:
+        stitched = _stitch_item(item=data, dim=dim, frames=frames, target=empty.copy(), plot=plot)
 
     return stitched
