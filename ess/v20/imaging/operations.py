@@ -78,7 +78,8 @@ def mean_from_adj_pixels(data):
                             shape=[
                                 9,
                             ] + data.shape,
-                            variances=has_variances)
+                            variances=has_variances,
+                            unit=data.unit)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
     container['neighbor', 2] = _shift(data, "x", False, fill)
@@ -89,7 +90,7 @@ def mean_from_adj_pixels(data):
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False,
                                         fill)
 
-    edges_mask = sc.less_equal(container, sc.Variable(value=fill))
+    edges_mask = sc.less_equal(container, sc.Variable(value=fill, unit=data.unit))
     da = sc.DataArray(data=container, masks={'edges': edges_mask})
     return sc.mean(da, dim='neighbor').data
 
