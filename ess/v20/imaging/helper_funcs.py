@@ -44,7 +44,7 @@ def _load_images(image_dir, extension, loader):
     path_length = len(image_dir) + 1
     filenames = glob.glob(image_dir + f"/*.{extension}")
     # Sort the filenames by converting the digits in the strings to integers
-    filenames.sort(key=lambda f: int(re.sub('\D', '', f)))
+    filenames.sort(key=lambda f: int(re.sub(r'\D', '', f)))
     nfiles = len(filenames)
     count = 0
     print(f"Loading {nfiles} files from '{image_dir}'")
