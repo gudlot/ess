@@ -140,3 +140,78 @@ def median_from_adj_pixels(data):
     edges_mask = sc.less_equal(container, sc.Variable(value=fill,
                                                       variance=fill))
     return _median(container, edges_mask, dim='neighbor')
+
+
+def groupby2D(data, nbins):
+
+    dim_to_shape = dict(zip(data.dims, data.shape))
+    #     [n_wav, ny_original, nx_original] = data.shape
+    nx_target = nbins
+    ny_target = nbins
+
+    element_width_x = dim_to_shape['x'] // nx_target
+    element_width_y = dim_to_shape['y'] // ny_target
+
+    x = sc.Variable(dims=['x'],
+                    values=np.arange(dim_to_shape['x']) // element_width_x)
+    y = sc.Variable(dims=['y'],
+                    values=np.arange(dim_to_shape['y']) // element_width_y)
+    grid = x + nx_target * y
+    spectrum_mapping = sc.Variable(["spectrum"],
+                                   values=np.ravel(grid.values, order='F'))
+
+    reshaped = sc.Dataset()
+    for key in data:
+        item = sc.DataArray(data=sc.reshape(data[key].data,
+                                            dims=["wavelength", "spectrum"],
+                                            shape=(dim_to_shape['wavelength'],
+                                                   dim_to_shape['x'] *
+                                                   dim_to_shape['y'])))
+        item.coords["spectrum"] = sc.array(dims=["spectrum"],
+                                           values=np.arange(dim_to_shape['x'] *
+                                                            dim_to_shape['y']))
+        for c in ["wavelength", "source-position"]:
+            item.coords[c] = data[key].coords[c]
+        for m in data[key].masks:
+            item.masks[m] = sc.reshape(data[key].masks[m],
+                                       dims=["spectrum"],
+                                       shape=(dim_to_shape['x'] *
+                                              dim_to_shape['y'], ))
+        reshaped[key] = item
+    reshaped
+
+    reshaped.coords["spectrum_mapping"] = spectrum_mapping
+
+    grouped = sc.groupby(reshaped,
+                         "spectrum_mapping").sum("spectrum")  # try "mean"
+
+    reshaped = sc.Dataset()
+    for key in grouped:
+        item = sc.DataArray(data=sc.reshape(grouped[key].data,
+                                            dims=["wavelength", "y", "x"],
+                                            shape=(dim_to_shape['wavelength'],
+                                                   ny_target, nx_target)))
+
+        item.coords["x"] = sc.array(dims=["x"],
+                                    values=np.linspace(
+                                        data.coords['x']['x', 0].value,
+                                        data.coords['x']['x',
+                                                         -1].value, nbins + 1),
+                                    unit=data.coords['x'].unit)
+        item.coords["y"] = sc.array(dims=["y"],
+                                    values=np.linspace(
+                                        data.coords['y']['y', 0].value,
+                                        data.coords['y']['y',
+                                                         -1].value, nbins + 1),
+                                    unit=data.coords['y'].unit)
+        for c in ["wavelength", "source-position"]:
+            item.coords[c] = data[key].coords[c]
+        for m in grouped[key].masks:
+            item.masks[m] = sc.reshape(grouped[key].masks[m],
+                                       dims=["y", "x"],
+                                       shape=(
+                                           ny_target,
+                                           nx_target,
+                                       ))
+        reshaped[key] = item
+    return reshaped
