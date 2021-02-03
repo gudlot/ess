@@ -40,7 +40,6 @@ def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
                                  frames["shifts"]["frame", -1]).value,
                                 nbins + 1))
 
-    # ind = data.dims.index(dim)
     dims = data.dims
     dims.remove(dim)
     shape = data.shape

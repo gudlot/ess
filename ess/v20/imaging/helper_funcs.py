@@ -115,39 +115,44 @@ def _image_to_variable(image_dir,
     Loads all images from the directory into a scipp Variable.
     """
     stack = loader(image_dir)
-    print("stack.shape", stack.shape)
     data = stack.astype(dtype)
     if reshape:
-        data = data.reshape(stack.shape[0],
-                                       stack.shape[1] * stack.shape[2])
+        data = data.reshape(stack.shape[0], stack.shape[1] * stack.shape[2])
         dims = ["t", "spectrum"]
     else:
         dims = ["t", "y", "x"]
     var = sc.Variable(dims=dims, values=data, unit=sc.units.counts)
     if with_variances:
         var.variances = data
-    #     return sc.Variable(["t", "spectrum"], values=data, variances=data)
-    # else:
-    #     return sc.Variable(["t", "spectrum"], values=data)
     return var
 
 
-def tiffs_to_variable(tiff_dir, dtype=np.float64, with_variances=True,
-    reshape=False):
+def tiffs_to_variable(tiff_dir,
+                      dtype=np.float64,
+                      with_variances=True,
+                      reshape=False):
     """
     Loads all tiff images from the directory into a scipp Variable.
     """
-    return _image_to_variable(tiff_dir, _load_tiffs, dtype, with_variances,
-        reshape=reshape)
+    return _image_to_variable(tiff_dir,
+                              _load_tiffs,
+                              dtype,
+                              with_variances,
+                              reshape=reshape)
 
 
-def fits_to_variable(fits_dir, dtype=np.float64, with_variances=True,
-    reshape=False):
+def fits_to_variable(fits_dir,
+                     dtype=np.float64,
+                     with_variances=True,
+                     reshape=False):
     """
     Loads all fits images from the directory into a scipp Variable.
     """
-    return _image_to_variable(fits_dir, _load_fits, dtype, with_variances,
-        reshape=reshape)
+    return _image_to_variable(fits_dir,
+                              _load_fits,
+                              dtype,
+                              with_variances,
+                              reshape=reshape)
 
 
 def make_detector_groups(nx_original, ny_original, nx_target, ny_target):
