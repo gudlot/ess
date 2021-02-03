@@ -145,7 +145,6 @@ def median_from_adj_pixels(data):
 
 def groupby2D(data, nbins):
 
-    # data.sizes = dict(zip(data.dims, data.shape))
     nx_target = nbins
     ny_target = nbins
 
@@ -183,7 +182,7 @@ def groupby2D(data, nbins):
     reshaped.coords["spectrum_mapping"] = spectrum_mapping
 
     grouped = sc.groupby(reshaped,
-                         "spectrum_mapping").sum("spectrum")  # try "mean"
+                         "spectrum_mapping").sum("spectrum")
 
     reshaped = sc.Dataset()
     for key in grouped:
