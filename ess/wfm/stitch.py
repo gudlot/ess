@@ -8,11 +8,10 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
     if plot:
         fig, ax = plt.subplots()
 
-    for i in range(len(frames["left_edges"])):
-        section = item[dim, frames["left_edges"][i] *
-                       sc.units.us:frames["right_edges"][i] *
-                       sc.units.us].copy()
-        section.coords[dim] += frames["shifts"][i] * sc.units.us
+    for i in range(frames.sizes["frame"]):
+        section = item[dim, frames["left_edges"].data[
+            "frame", i]:frames["right_edges"].data["frame", i]].copy()
+        section.coords[dim] -= frames["shifts"].data["frame", i]
         section.rename_dims({dim: 'tof'})
 
         target += sc.rebin(section, 'tof', target.coords["tof"])
@@ -32,18 +31,20 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
 
 def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
 
-    tof_coord = sc.Variable(
-        ["tof"],
-        unit=sc.units.us,
-        values=np.linspace(frames["left_edges"][0] + frames["shifts"][0],
-                           frames["right_edges"][-1] + frames["shifts"][-1],
-                           nbins + 1))
+    tof_coord = sc.Variable(["tof"],
+                            unit=sc.units.us,
+                            values=np.linspace(
+                                (frames["left_edges"]["frame", 0] -
+                                 frames["shifts"]["frame", 0]).value,
+                                (frames["right_edges"]["frame", -1] -
+                                 frames["shifts"]["frame", -1]).value,
+                                nbins + 1))
 
-    ind = data.dims.index(dim)
+    # ind = data.dims.index(dim)
     dims = data.dims
     dims.remove(dim)
     shape = data.shape
-    shape.remove(data.shape[ind])
+    shape.remove(data.sizes[dim])
 
     # Make empty data container
     empty = sc.DataArray(data=sc.zeros(dims=["tof"] + dims,
