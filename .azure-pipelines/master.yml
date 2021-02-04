@@ -3,6 +3,14 @@ trigger:
 
 pr: none
 
+resources:
+  pipelines:
+  - pipeline: upstream-scipp 
+    source: scipp:Release 
+    trigger: 
+      tags:
+        - '*.*.*'
+
 stages:
   - template: code_quality_checks.yml
   - stage: 'test'
