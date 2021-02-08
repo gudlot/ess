@@ -90,8 +90,7 @@ def mean_from_adj_pixels(data):
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False,
                                         fill)
 
-    edges_mask = sc.less_equal(container,
-                               sc.Variable(value=fill, unit=data.unit))
+    edges_mask = container <= sc.Variable(value=fill, unit=data.unit)
     da = sc.DataArray(data=container, masks={'edges': edges_mask})
     return sc.mean(da, dim='neighbor').data
 
@@ -138,8 +137,7 @@ def median_from_adj_pixels(data):
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False,
                                         fill)
 
-    edges_mask = sc.less_equal(container, sc.Variable(value=fill,
-                                                      variance=fill))
+    edges_mask = container <= sc.Variable(value=fill, variance=fill)
     return _median(container, edges_mask, dim='neighbor')
 
 
@@ -181,8 +179,7 @@ def groupby2D(data, nbins):
 
     reshaped.coords["spectrum_mapping"] = spectrum_mapping
 
-    grouped = sc.groupby(reshaped,
-                         "spectrum_mapping").sum("spectrum")
+    grouped = sc.groupby(reshaped, "spectrum_mapping").sum("spectrum")
 
     reshaped = sc.Dataset()
     for key in grouped:
