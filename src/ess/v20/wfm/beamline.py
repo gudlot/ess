@@ -6,17 +6,17 @@ def _deg_to_rad(x):
     """
     Convert degrees to radians.
     """
-    return x * (np.pi * sc.units.rad / 180.0)
+    return x * (np.pi * sc.units.rad / (180.0 * sc.units.deg))
 
 
 def _to_angular_frequency(f):
     """
     Convert frequency in Hz to angular frequency.
     """
-    return (2.0 * np.pi * sc.units.rad) * (f / (1.0 * sc.units.s))
+    return (2.0 * np.pi * sc.units.rad) * f
 
 
-def beamline():
+def choppers():
     """
     Create V20 chopper cascade and component positions.
     Chopper opening angles taken from Woracek et al. (2016)
@@ -30,10 +30,10 @@ def beamline():
         values=["WFM1", "WFM2", "frame-overlap-1", "frame-overlap-2"])
 
     ds["angular_frequency"] = _to_angular_frequency(
-        sc.array(dims=["chopper"], values=[70.0, 70.0, 56.0, 28.0]))
+        sc.array(dims=["chopper"], values=[70.0, 70.0, 56.0, 28.0], unit=(sc.units.one / sc.units.s)))
 
     ds["phase"] = _deg_to_rad(
-        sc.array(dims=["chopper"], values=[47.10, 76.76, 62.40, 12.27]))
+        sc.array(dims=["chopper"], values=[47.10, 76.76, 62.40, 12.27], unit=sc.units.deg))
 
     ds["distance"] = sc.array(dims=["chopper"],
                               values=[[0, 0, 6.6], [0, 0, 7.1], [0, 0, 8.8],
@@ -53,7 +53,7 @@ def beamline():
                 15.0,
                 np.array([79.78, 136.41, 191.73, 240.81, 287.13, 330.89]) +
                 15.0
-            ]).reshape(4, 6)))
+            ]).reshape(4, 6), unit=sc.units.deg))
 
     ds["frame_end"] = _deg_to_rad(
         sc.array(
@@ -64,7 +64,7 @@ def beamline():
                 np.array([84.99, 148.29, 205.22, 254.27, 302.8, 360.0]) + 15.0,
                 np.array([116.38, 172.47, 221.94, 267.69, 311.69, 360.0]) +
                 15.0
-            ]).reshape(4, 6)))
+            ]).reshape(4, 6), unit=sc.units.deg))
 
     # Length of pulse
     ds["pulse_length"] = 2.86e+03 * sc.units.us
