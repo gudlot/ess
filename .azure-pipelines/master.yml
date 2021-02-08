@@ -5,11 +5,10 @@ pr: none
 
 resources:
   pipelines:
-  - pipeline: upstream-scipp 
-    source: scipp:Release 
-    trigger: 
-      tags:
-        - '*.*.*'
+  - pipeline: upstream_scipp_release 
+    project: scipp
+    source: Release 
+    trigger: true
 
 stages:
   - template: code_quality_checks.yml
