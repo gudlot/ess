@@ -29,7 +29,7 @@ def choppers(parameters=None):
         choppers({"WFM1": {"frequency": 17., "phase": 55.}})
     Frequencies are in Hz and angles are in degrees.
     For components distances, we assume that the origin is the source double
-    chopper.
+    chopper, and the direction of the beam is along `z`.
     """
 
     default_choppers = {
