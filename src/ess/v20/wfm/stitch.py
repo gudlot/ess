@@ -40,9 +40,16 @@ def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
                                  frames["shifts"]["frame", -1]).value,
                                 nbins + 1))
 
-    dims = data.dims
+    is_dataset = sc.is_dataset(data)
+
+    if is_dataset:
+        key = list(data.keys())[0]
+        dims = data[key].dims
+        shape = data[key].shape
+    else:
+        dims = data.dims
+        shape = data.shape
     dims.remove(dim)
-    shape = data.shape
     shape.remove(data.sizes[dim])
 
     # Make empty data container
@@ -56,7 +63,7 @@ def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
         if key != dim:
             empty.coords[key] = data.coords[key]
 
-    if hasattr(data, "items"):
+    if is_dataset:
         stitched = sc.Dataset()
         for i, (key, item) in enumerate(data.items()):
             stitched[key] = _stitch_item(item=item,
