@@ -2,7 +2,7 @@ pr: none
 trigger: none
 resources:
   pipelines:
-  - pipeline: upstream-scipp 
+  - pipeline: upstreamscipp 
     project: scipp
     source: trigger 
     trigger: true
