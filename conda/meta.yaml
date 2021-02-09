@@ -15,6 +15,7 @@ requirements:
     - scipp
     - tifffile
     - astropy
+    - matplotlib
     # TODO scipp-neutron (no dependency yet)
 
 test:
