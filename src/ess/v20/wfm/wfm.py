@@ -1,5 +1,5 @@
 from .frames_analytical import frames_analytical
-from .frames_peakfinding import frames_peakfinding
+# from .frames_peakfinding import frames_peakfinding
 
 
 def get_frames(instrument=None, plot=False, **kwargs):
