@@ -26,6 +26,7 @@ stages:
             displayName: 'create anaconda environment'
           - bash: |
              source activate scipp-ess
+             export PYTHONPATH=$PYTHONPATH:src
              python -m pytest --junitxml=junit/unit-test.xml
             displayName: 'run pytest'
           - task: PublishTestResults@2

@@ -1,9 +1,9 @@
 package:
-  name: ess 
+  name: ess
   version: {{ GIT_DESCRIBE_TAG }}
 
 source:
-  path: .. 
+  path: ..
 
 requirements:
   build:
@@ -15,6 +15,7 @@ requirements:
     - scipp
     - tifffile
     - astropy
+    - matplotlib
     # TODO scipp-neutron (no dependency yet)
 
 test:
@@ -26,7 +27,7 @@ test:
   requires:
     - pytest
   source_files:
-    - ess/
+    - tests/
   commands:
     - python -m pytest -v
 
@@ -36,7 +37,7 @@ build:
 about:
   home: https://github.com/scipp/ess
   license: GPLv3
-  summary: Neutron scattering tools for the European Spallation Source (ESS) 
-  description: Neutron scattering tools for Data Reduction bespoke to ESS facility and instruments 
+  summary: Neutron scattering tools for the European Spallation Source (ESS)
+  description: Neutron scattering tools for Data Reduction bespoke to ESS facility and instruments
   dev_url: https://github.com/scipp/ess
-  doc_url: 
+  doc_url:

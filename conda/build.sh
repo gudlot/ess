@@ -1,1 +1,1 @@
-cp -r ess "$CONDA_PREFIX"/lib/python*/
+cp -r src/ess "$CONDA_PREFIX"/lib/python*/
