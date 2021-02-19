@@ -38,6 +38,7 @@ def read_x_values(tof_file, **kwargs):
 
 
 def _load_images(image_dir, extension, loader):
+    image_dir = os.path.abspath(image_dir)
     if not os.path.isdir(image_dir):
         raise ValueError(image_dir + " is not directory")
     stack = []
@@ -115,6 +116,10 @@ def _image_to_variable(image_dir,
     Loads all images from the directory into a scipp Variable.
     """
     stack = loader(image_dir)
+
+    if stack.size == 0:
+        raise RuntimeError(f'No image files found in {image_dir}')
+
     data = stack.astype(dtype)
     if reshape:
         data = data.reshape(stack.shape[0], stack.shape[1] * stack.shape[2])
