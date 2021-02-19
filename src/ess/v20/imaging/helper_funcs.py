@@ -118,8 +118,7 @@ def _image_to_variable(image_dir,
     stack = loader(image_dir)
 
     if stack.size == 0:
-        print(f'No image files found in {image_dir}')
-        return
+        raise RuntimeError(f'No image files found in {image_dir}')
 
     data = stack.astype(dtype)
     if reshape:
