@@ -53,7 +53,7 @@ def _load_images(image_dir, extension, loader):
         print('\r{0}: Image {1}, of {2}'.format(filename[path_length:], count,
                                                 nfiles),
               end="")
-        img = loader(os.path.join(image_dir, filename))
+        img = loader(filename)
         stack.append(np.flipud(img.data))
 
     print()  # Print a newline to separate each load message
