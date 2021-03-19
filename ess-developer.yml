@@ -18,3 +18,5 @@ dependencies:
   - python
   # For developement
   - pytest
+  - ipython
+  - jupyter
