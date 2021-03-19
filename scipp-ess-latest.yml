@@ -1,4 +1,4 @@
-name: scipp-ess-latest
+name: ess-latest
 
 channels:
   - conda-forge
@@ -6,6 +6,8 @@ channels:
 
 dependencies:
   - scipp
+  - scippneutron
+  - mantid-framework
   - pytest
   - sphinx>=1.6
   - sphinx_rtd_theme
