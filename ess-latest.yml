@@ -3,6 +3,7 @@ name: ess-latest
 channels:
   - conda-forge
   - scipp/label/dev
+  - nodefaults
 
 dependencies:
   - scipp
@@ -14,3 +15,4 @@ dependencies:
   - tifffile
   - astropy 
   - matplotlib
+  - python
