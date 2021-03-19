@@ -13,10 +13,10 @@ requirements:
   run:
     - python {{ python }}
     - scipp
+    - scippneutron
     - tifffile
     - astropy
     - matplotlib
-    # TODO scipp-neutron (no dependency yet)
 
 test:
   imports:
