@@ -12,7 +12,6 @@ requirements:
     - sphinx_rtd_theme
   run:
     - python {{ python }}
-    - scipp
     - scippneutron
     - tifffile
     - astropy

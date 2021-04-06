@@ -6,7 +6,6 @@ channels:
   - nodefaults
 
 dependencies:
-  - scipp
   - scippneutron
   - mantid-framework
   - pytest
