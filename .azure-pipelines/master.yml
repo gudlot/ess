@@ -5,9 +5,9 @@ pr: none
 
 resources:
   pipelines:
-  - pipeline: upstream_scipp_release
+  - pipeline: upstream_scippneutron_main
     project: scipp
-    source: Release
+    source: Main
     trigger: true
 
 stages:

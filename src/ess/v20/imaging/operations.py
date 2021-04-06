@@ -167,7 +167,7 @@ def groupby2D(data, nbins):
         item.coords["spectrum"] = sc.array(dims=["spectrum"],
                                            values=np.arange(data.sizes['x'] *
                                                             data.sizes['y']))
-        for c in ["wavelength", "source-position"]:
+        for c in ["wavelength", "source_position"]:
             item.coords[c] = data[key].coords[c]
         for m in data[key].masks:
             item.masks[m] = sc.reshape(data[key].masks[m],
@@ -200,7 +200,7 @@ def groupby2D(data, nbins):
                                         data.coords['y']['y',
                                                          -1].value, nbins + 1),
                                     unit=data.coords['y'].unit)
-        for c in ["wavelength", "source-position"]:
+        for c in ["wavelength", "source_position"]:
             item.coords[c] = data[key].coords[c]
         for m in grouped[key].masks:
             item.masks[m] = sc.reshape(grouped[key].masks[m],

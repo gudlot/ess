@@ -1,14 +1,17 @@
-name: scipp-ess
+name: ess-latest
 
 channels:
   - conda-forge
-  - scipp
+  - scipp/label/dev
+  - nodefaults
 
 dependencies:
-  - scipp
+  - scippneutron
+  - mantid-framework
   - pytest
   - sphinx>=1.6
   - sphinx_rtd_theme
   - tifffile
   - astropy 
   - matplotlib
+  - python
