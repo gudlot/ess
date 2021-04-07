@@ -141,39 +141,41 @@ def median_from_adj_pixels(data):
     return _median(container, edges_mask, dim='neighbor')
 
 
-def groupby2D(data, nbins):
+def groupby2D(data,
+              nx_target,
+              ny_target,
+              x='x',
+              y='y',
+              z='wavelength',
+              preserve=['source_position']):
 
-    nx_target = nbins
-    ny_target = nbins
+    element_width_x = data.sizes[x] // nx_target
+    element_width_y = data.sizes[y] // ny_target
 
-    element_width_x = data.sizes['x'] // nx_target
-    element_width_y = data.sizes['y'] // ny_target
-
-    x = sc.Variable(dims=['x'],
-                    values=np.arange(data.sizes['x']) // element_width_x)
-    y = sc.Variable(dims=['y'],
-                    values=np.arange(data.sizes['y']) // element_width_y)
-    grid = x + nx_target * y
+    xx = sc.Variable(dims=[x],
+                     values=np.arange(data.sizes[x]) // element_width_x)
+    yy = sc.Variable(dims=[y],
+                     values=np.arange(data.sizes[y]) // element_width_y)
+    grid = xx + nx_target * yy
     spectrum_mapping = sc.Variable(["spectrum"],
                                    values=np.ravel(grid.values, order='F'))
 
     reshaped = sc.Dataset()
     for key in data:
         item = sc.DataArray(data=sc.reshape(data[key].data,
-                                            dims=["wavelength", "spectrum"],
-                                            shape=(data.sizes['wavelength'],
-                                                   data.sizes['x'] *
-                                                   data.sizes['y'])))
+                                            dims=[z, "spectrum"],
+                                            shape=(data.sizes[z],
+                                                   data.sizes[x] *
+                                                   data.sizes[y])))
         item.coords["spectrum"] = sc.array(dims=["spectrum"],
-                                           values=np.arange(data.sizes['x'] *
-                                                            data.sizes['y']))
-        for c in ["wavelength", "source_position"]:
+                                           values=np.arange(data.sizes[x] *
+                                                            data.sizes[y]))
+        for c in [z] + preserve:
             item.coords[c] = data[key].coords[c]
         for m in data[key].masks:
             item.masks[m] = sc.reshape(data[key].masks[m],
                                        dims=["spectrum"],
-                                       shape=(data.sizes['x'] *
-                                              data.sizes['y'], ))
+                                       shape=(data.sizes[x] * data.sizes[y], ))
         reshaped[key] = item
     reshaped
 
@@ -184,27 +186,27 @@ def groupby2D(data, nbins):
     reshaped = sc.Dataset()
     for key in grouped:
         item = sc.DataArray(data=sc.reshape(grouped[key].data,
-                                            dims=["wavelength", "y", "x"],
-                                            shape=(data.sizes['wavelength'],
-                                                   ny_target, nx_target)))
+                                            dims=[z, y, x],
+                                            shape=(data.sizes[z], ny_target,
+                                                   nx_target)))
 
-        item.coords["x"] = sc.array(dims=["x"],
-                                    values=np.linspace(
-                                        data.coords['x']['x', 0].value,
-                                        data.coords['x']['x',
-                                                         -1].value, nbins + 1),
-                                    unit=data.coords['x'].unit)
-        item.coords["y"] = sc.array(dims=["y"],
-                                    values=np.linspace(
-                                        data.coords['y']['y', 0].value,
-                                        data.coords['y']['y',
-                                                         -1].value, nbins + 1),
-                                    unit=data.coords['y'].unit)
-        for c in ["wavelength", "source_position"]:
+        item.coords[x] = sc.array(dims=[x],
+                                  values=np.linspace(
+                                      data.coords[x][x, 0].value,
+                                      data.coords[x][x,
+                                                     -1].value, nx_target + 1),
+                                  unit=data.coords[x].unit)
+        item.coords[y] = sc.array(dims=[y],
+                                  values=np.linspace(
+                                      data.coords[y][y, 0].value,
+                                      data.coords[y][y,
+                                                     -1].value, ny_target + 1),
+                                  unit=data.coords[y].unit)
+        for c in [z] + preserve:
             item.coords[c] = data[key].coords[c]
         for m in grouped[key].masks:
             item.masks[m] = sc.reshape(grouped[key].masks[m],
-                                       dims=["y", "x"],
+                                       dims=[y, x],
                                        shape=(
                                            ny_target,
                                            nx_target,
