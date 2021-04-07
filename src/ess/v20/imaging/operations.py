@@ -169,32 +169,10 @@ def groupby2D(data,
     grouped = sc.groupby(reshaped, "spectrum_mapping").sum("spectrum")
 
     reshaped = sc.Dataset()
-    for key in grouped:
-        item = sc.DataArray(data=sc.reshape(grouped[key].data,
-                                            dims=[z, y, x],
-                                            shape=(data.sizes[z], ny_target,
-                                                   nx_target)))
-
-        item.coords[x] = sc.array(dims=[x],
-                                  values=np.linspace(
-                                      data.coords[x][x, 0].value,
-                                      data.coords[x][x,
-                                                     -1].value, nx_target + 1),
-                                  unit=data.coords[x].unit)
-        item.coords[y] = sc.array(dims=[y],
-                                  values=np.linspace(
-                                      data.coords[y][y, 0].value,
-                                      data.coords[y][y,
-                                                     -1].value, ny_target + 1),
-                                  unit=data.coords[y].unit)
-        for c in [z] + preserve:
-            item.coords[c] = data[key].coords[c]
-        for m in grouped[key].masks:
-            item.masks[m] = sc.reshape(grouped[key].masks[m],
-                                       dims=[y, x],
-                                       shape=(
-                                           ny_target,
-                                           nx_target,
-                                       ))
+    for key, val in grouped.items():
+        item = sc.fold(x=val,
+                       dim="spectrum_mapping",
+                       dims=[y, x],
+                       shape=(ny_target, nx_target))
         reshaped[key] = item
     return reshaped
