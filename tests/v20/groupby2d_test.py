@@ -4,7 +4,7 @@ from ess.v20.imaging.operations import groupby2D
 
 
 def test_groupby2d_simple_case_neutron_specific():
-    data = sc.array(dims=['wavelength', 'x', 'y'],
+    data = sc.array(dims=['wavelength', 'y', 'x'],
                     values=np.arange(100.0).reshape(1, 10, 10))
     wav = sc.scalar(value=1.0)
     x = sc.array(dims=['x'], values=np.arange(10))
@@ -13,8 +13,8 @@ def test_groupby2d_simple_case_neutron_specific():
                                 dtype=sc.dtype.vector_3_float64)
     ds = sc.Dataset(data={'a': data},
                     coords={
-                        'x': x,
                         'y': y,
+                        'x': x,
                         'wavelength': wav,
                         'source_position': source_position
                     })
@@ -30,8 +30,8 @@ def _make_simple_dataset(u, v, w):
     v = sc.array(dims=['v'], values=np.arange(v))
     w = sc.array(dims=['w'], values=np.arange(w))
     return sc.Dataset(data={'a': data}, coords={
-        'v': v,
         'w': w,
+        'v': v,
         'u': u,
     })
 
@@ -41,8 +41,8 @@ def test_simple_case_any_naming():
     grouped = groupby2D(ds,
                         nx_target=5,
                         ny_target=5,
-                        x='v',
-                        y='w',
+                        x='w',
+                        y='v',
                         z='u',
                         preserve=[])
     assert grouped['a'].shape == [2, 5, 5]
@@ -63,10 +63,10 @@ def test_groupby2d_different_output_size():
     grouped = groupby2D(ds,
                         nx_target=2,
                         ny_target=5,
-                        x='v',
-                        y='w',
+                        x='w',
+                        y='v',
                         z='u',
                         preserve=[])
-    assert grouped['a'].sizes['v'] == 2
-    assert grouped['a'].sizes['w'] == 5
+    assert grouped['a'].sizes['v'] == 5
+    assert grouped['a'].sizes['w'] == 2
     assert grouped['a'].sizes['u'] == 2

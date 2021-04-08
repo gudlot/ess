@@ -162,7 +162,7 @@ def groupby2D(data,
 
     reshaped = sc.Dataset()
     for key, val in data.items():
-        reshaped[key] = sc.flatten(x=val, dims=[x, y], to='spectrum')
+        reshaped[key] = sc.flatten(x=val, dims=[y, x], to='spectrum')
 
     reshaped.coords["spectrum_mapping"] = spectrum_mapping
 
