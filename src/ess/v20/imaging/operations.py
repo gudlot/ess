@@ -141,13 +141,7 @@ def median_from_adj_pixels(data):
     return _median(container, edges_mask, dim='neighbor')
 
 
-def groupby2D(data,
-              nx_target,
-              ny_target,
-              x='x',
-              y='y',
-              z='wavelength',
-              preserve=['source_position']):
+def groupby2D(data, nx_target, ny_target, x='x', y='y', z='wavelength'):
 
     element_width_x = data.sizes[x] // nx_target
     element_width_y = data.sizes[y] // ny_target

@@ -22,6 +22,7 @@ def test_groupby2d_simple_case_neutron_specific():
     assert grouped['a'].shape == [1, 5, 5]
     grouped = groupby2D(ds, 1, 1)
     assert grouped['a'].shape == [1, 1, 1]
+    assert 'source_position' in grouped['a'].meta
 
 
 def _make_simple_dataset(u, v, w):
@@ -38,13 +39,7 @@ def _make_simple_dataset(u, v, w):
 
 def test_simple_case_any_naming():
     ds = _make_simple_dataset(u=2, v=10, w=10)
-    grouped = groupby2D(ds,
-                        nx_target=5,
-                        ny_target=5,
-                        x='w',
-                        y='v',
-                        z='u',
-                        preserve=[])
+    grouped = groupby2D(ds, nx_target=5, ny_target=5, x='w', y='v', z='u')
     assert grouped['a'].shape == [2, 5, 5]
     projection = sc.array(dims=['v', 'w'], values=np.ones((5, 5))) * 4
     expected_data = sc.reshape(sc.concatenate(projection, projection, dim='u'),
@@ -60,13 +55,7 @@ def test_simple_case_any_naming():
 
 def test_groupby2d_different_output_size():
     ds = _make_simple_dataset(u=2, v=10, w=10)
-    grouped = groupby2D(ds,
-                        nx_target=2,
-                        ny_target=5,
-                        x='w',
-                        y='v',
-                        z='u',
-                        preserve=[])
+    grouped = groupby2D(ds, nx_target=2, ny_target=5, x='w', y='v', z='u')
     assert grouped['a'].sizes['v'] == 5
     assert grouped['a'].sizes['w'] == 2
     assert grouped['a'].sizes['u'] == 2
