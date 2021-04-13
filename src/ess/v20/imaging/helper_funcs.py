@@ -41,36 +41,32 @@ def _load_images(image_dir, extension, loader):
     image_dir = os.path.abspath(image_dir)
     if not os.path.isdir(image_dir):
         raise ValueError(image_dir + " is not directory")
-    stack = []
-    path_length = len(image_dir) + 1
     filenames = glob.glob(image_dir + f"/*.{extension}")
     # Sort the filenames by converting the digits in the strings to integers
     filenames.sort(key=lambda f: int(re.sub(r'\D', '', f)))
-    nfiles = len(filenames)
-    count = 0
-    print(f"Loading {nfiles} files from '{image_dir}'")
-    for filename in filenames:
-        count += 1
-        print('\r{0}: Image {1}, of {2}'.format(filename[path_length:], count,
-                                                nfiles),
-              end="")
-        img = loader(filename)
-        stack.append(np.flipud(img.data))
-
-    print()  # Print a newline to separate each load message
-
-    return np.array(stack)
+    return loader(filenames)
 
 
-def _load_fits(fits_dir):
-    def loader(f):
-        data = None
-        handle = fits.open(f, mode='readonly')
-        data = handle[0].data.copy()
-        handle.close()
-        return data
+def _load_fits(image_dir):
+    def loader(filenames):
+        stack = []
+        path_length = len(filenames) + 1
+        nfiles = len(filenames)
+        count = 0
+        print(f"Loading {nfiles}'")
+        for filename in filenames:
+            count += 1
+            print('\r{0}: Image {1}, of {2}'.format(filename[path_length:],
+                                                    count, nfiles),
+                  end="")
+            img = None
+            handle = fits.open(filename, mode='readonly')
+            img = handle[0].data.copy()
+            handle.close()
+            stack.append(np.flipud(img.data))
+        return np.array(stack)
 
-    return _load_images(fits_dir, 'fits', loader)
+    return _load_images(image_dir, 'fits', loader)
 
 
 def _load_tiffs(tiff_dir):
@@ -132,14 +128,14 @@ def _image_to_variable(image_dir,
     return var
 
 
-def tiffs_to_variable(tiff_dir,
+def tiffs_to_variable(image_dir,
                       dtype=np.float64,
                       with_variances=True,
                       reshape=False):
     """
     Loads all tiff images from the directory into a scipp Variable.
     """
-    return _image_to_variable(tiff_dir,
+    return _image_to_variable(image_dir,
                               _load_tiffs,
                               dtype,
                               with_variances,
