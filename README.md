@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/scipp/ess/_apis/build/status/Master?branchName=master)](https://dev.azure.com/scipp/ess/_build/latest?definitionId=27&branchName=master)
+[![Build Status](https://dev.azure.com/scipp/ess/_apis/build/status/Main?branchName=main)](https://dev.azure.com/scipp/ess/_build/latest?definitionId=48&branchName=main)
 
 # ess
 
