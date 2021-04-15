@@ -12,7 +12,6 @@ class AmorData(ReflData):
     """
     Reduction of AMOR data.
     """
-
     def __init__(
         self,
         data,
@@ -60,15 +59,12 @@ class AmorData(ReflData):
         self.chopper_phase = chopper_phase
         self.wavelength_cut = wavelength_cut
         self.data.attrs["source_position"] = sc.geometry.position(
-            0.0 * sc.units.m, 0.0 * sc.units.m, -chopper_sample_distance
-        )
+            0.0 * sc.units.m, 0.0 * sc.units.m, -chopper_sample_distance)
         self.tof_correction()
         self.data.coords[
-            "sigma_lambda_by_lambda"
-        ] = self.chopper_chopper_distance / (
-            sc.geometry.z(self.data.coords["position"])
-            - sc.geometry.z(self.data.attrs["source_position"])
-        )
+            "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
+                sc.geometry.z(self.data.coords["position"]) -
+                sc.geometry.z(self.data.attrs["source_position"]))
         self.find_tof()
         self.find_theta()
         self.find_qz()
@@ -87,17 +83,12 @@ class AmorData(ReflData):
         tof_offset = self.tau * self.chopper_phase / 180.0
         tof_e = self.data.bins.constituents["data"].coords["tof"]
         tof_cut = self.wavelength_cut * self.chopper_detector_distance / HDM
-        tof_e = (
-            sc.Variable(
-                values=np.remainder(
-                    (tof_e - tof_cut + self.tau).values, self.tau.values
-                ),
-                unit=sc.units.us,
-                dims=["event"],
-            )
-            + tof_cut
-            + tof_offset
-        )
+        tof_e = (sc.Variable(
+            values=np.remainder(
+                (tof_e - tof_cut + self.tau).values, self.tau.values),
+            unit=sc.units.us,
+            dims=["event"],
+        ) + tof_cut + tof_offset)
         buf = self.data.bins.constituents["data"]
         tof = tof_e.astype(sc.dtype.float64)
         del buf.coords["tof"]
@@ -115,8 +106,7 @@ class AmorData(ReflData):
             wavelength_min = self.wavelength_cut
         if wavelength_max is None:
             wavelength_max = wavelength_min + self.tau * (
-                HDM / self.chopper_detector_distance
-            )
+                HDM / self.chopper_detector_distance)
         self.data.bins.masks["wavelength"] = (
-            self.data.bins.coords["wavelength"] < wavelength_min
-        ) | (self.data.bins.coords["wavelength"] > wavelength_max)
+            self.data.bins.coords["wavelength"] < wavelength_min) | (
+                self.data.bins.coords["wavelength"] > wavelength_max)

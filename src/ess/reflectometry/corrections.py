@@ -25,10 +25,8 @@ def angle_with_gravity(data, pixel_position, sample_position):
     # (where this is data.bins.constituents['data'].coords['wavelength'].astype(sc.dtype.float64) or similar)
     # instead of data
     velocity = sc.to_unit(
-        HDM
-        / data.bins.constituents["data"]
-        .coords["wavelength"]
-        .astype(sc.dtype.float64),
+        HDM / data.bins.constituents["data"].coords["wavelength"].astype(
+            sc.dtype.float64),
         "m/s",
     )
     data.bins.constituents["data"].coords["velocity"] = velocity
@@ -43,8 +41,7 @@ def angle_with_gravity(data, pixel_position, sample_position):
     y_true = z_measured * y_dash + intercept
     angle = sc.Variable(
         values=np.degrees(
-            sc.atan(y_true / z_measured).bins.constituents["data"].values
-        ),
+            sc.atan(y_true / z_measured).bins.constituents["data"].values),
         unit=sc.units.deg,
         dims=["event"],
     )
@@ -65,16 +62,9 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     Returns:
         (`scipp._scipp.core.VariableView` or `array_like`): The gradient of the trajectory of the neutron at the origin position.
     """
-    return (
-        (
-            -G_ACC
-            * (z_measured - z_origin)
-            * (z_measured - z_origin)
-            / (2 * velocity * velocity)
-        )
-        - y_origin
-        + y_measured
-    ) / (z_measured - z_origin)
+    return ((-G_ACC * (z_measured - z_origin) * (z_measured - z_origin) /
+             (2 * velocity * velocity)) - y_origin +
+            y_measured) / (z_measured - z_origin)
 
 
 def illumination_correction(beam_size, sample_size, theta):

@@ -8,9 +8,8 @@ import numpy as np
 import scipp as sc
 
 
-def detector_resolution(
-    spatial_resolution, z_pixel_position, z_sample_position
-):
+def detector_resolution(spatial_resolution, z_pixel_position,
+                        z_sample_position):
     """
     Calculation the resolution function due to the spatial resolution of the detector.
 
