@@ -7,3 +7,5 @@ per-file-ignores =
     src/ess/reflectometry/corrections.py: E501
     src/ess/reflectometry/plot.py: E501
     src/ess/reflectometry/resolution.py: E501
+    tests/pytest.ini: E999
+    tests/reflectometry/data_test.py: E501
