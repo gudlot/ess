@@ -193,7 +193,7 @@ class ReflData:
                 self.data.coords["position"],
                 self.data.attrs["sample_position"],
             )
-            theta = self.sample_angle_offset + nu_angle
+            theta = -self.sample_angle_offset + nu_angle
             self.data.bins.constituents["data"].coords["theta"] = theta
             # Check if the beam size on the sample is overilluminating the
             # sample. Using the beam on sample size from the value of theta
