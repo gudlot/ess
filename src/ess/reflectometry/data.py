@@ -207,8 +207,10 @@ class ReflData:
                 self.data.attrs["sample_position"], half_beam_on_sample)
             offset_negative = resolution.z_offset(
                 self.data.attrs["sample_position"], half_beam_on_sample)
-            self.data.bins.constituents['data'].attrs['offset_positive'] = offset_positive
-            self.data.bins.constituents['data'].attrs['offset_negative'] = offset_negative
+            self.data.bins.constituents['data'].attrs[
+                'offset_positive'] = offset_positive
+            self.data.bins.constituents['data'].attrs[
+                'offset_negative'] = offset_negative
             angle_max = corrections.angle_with_gravity(
                 self.data,
                 self.data.coords["position"],
