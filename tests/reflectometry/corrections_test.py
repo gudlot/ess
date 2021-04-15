@@ -23,15 +23,14 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id": sc.Variable(
-            dims=["event"], values=DETECTORS, dtype=sc.dtype.int32
-        )
+        "detector_id":
+        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32)
     },
 )
 
-DETECTOR_ID = sc.Variable(
-    dims=["detector_id"], values=np.arange(1, 5), dtype=sc.dtype.int32
-)
+DETECTOR_ID = sc.Variable(dims=["detector_id"],
+                          values=np.arange(1, 5),
+                          dtype=sc.dtype.int32)
 BINNED = sc.bin(DATA, groups=[DETECTOR_ID])
 
 PIXELS = np.array([[1, 1, 1], [1, 2, 1], [2, 1, 1], [2, 2, 1]])
@@ -72,9 +71,8 @@ class TestResolution(unittest.TestCase):
         x_sample = 0.0 * sc.units.m
         pixel_position = sc.geometry.position(x_pixel, y_pixel, z_pixel)
         sample_position = sc.geometry.position(x_sample, y_sample, z_sample)
-        actual_result = corrections.angle_with_gravity(
-            BINNED, pixel_position, sample_position
-        )
+        actual_result = corrections.angle_with_gravity(BINNED, pixel_position,
+                                                       sample_position)
         assert_almost_equal(
             actual_result.values,
             [
@@ -97,9 +95,8 @@ class TestResolution(unittest.TestCase):
         y_measured = 1.0 * sc.units.m
         y_origin = 0.0 * sc.units.m
         expected_result = 1.04903325
-        actual_result = corrections.y_dash0(
-            velocity, z_origin, y_origin, z_measured, y_measured
-        )
+        actual_result = corrections.y_dash0(velocity, z_origin, y_origin,
+                                            z_measured, y_measured)
         assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_correction_no_spill(self):
@@ -108,8 +105,7 @@ class TestResolution(unittest.TestCase):
         theta = 30.0 * sc.units.deg
         expected_result = 1
         actual_result = corrections.illumination_correction(
-            beam_size, sample_size, theta
-        )
+            beam_size, sample_size, theta)
         assert_almost_equal(actual_result, expected_result)
 
     def test_illumination_correction_with_spill(self):
@@ -118,8 +114,7 @@ class TestResolution(unittest.TestCase):
         theta = 30.0 * sc.units.deg
         expected_result = 0.59490402718695351
         actual_result = corrections.illumination_correction(
-            beam_size, sample_size, theta
-        )
+            beam_size, sample_size, theta)
         assert_almost_equal(actual_result, expected_result)
 
     def test_illumination_of_sample_big_sample(self):
@@ -128,8 +123,7 @@ class TestResolution(unittest.TestCase):
         theta = 90.0 * sc.units.deg
         expected_result = 1.0 * sc.units.m
         actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta
-        )
+            beam_size, sample_size, theta)
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_of_sample_small_sample(self):
@@ -138,8 +132,7 @@ class TestResolution(unittest.TestCase):
         theta = 90.0 * sc.units.deg
         expected_result = 0.5 * sc.units.m
         actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta
-        )
+            beam_size, sample_size, theta)
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_of_sample_off_angle(self):
@@ -148,6 +141,5 @@ class TestResolution(unittest.TestCase):
         theta = 30.0 * sc.units.deg
         expected_result = 2.0 * sc.units.m
         actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta
-        )
+            beam_size, sample_size, theta)
         assert_almost_equal(actual_result.values, expected_result.values)

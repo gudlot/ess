@@ -25,15 +25,14 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id": sc.Variable(
-            dims=["event"], values=DETECTORS, dtype=sc.dtype.int32
-        )
+        "detector_id":
+        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32)
     },
 )
 
-DETECTOR_ID = sc.Variable(
-    dims=["detector_id"], values=np.arange(1, 5), dtype=sc.dtype.int32
-)
+DETECTOR_ID = sc.Variable(dims=["detector_id"],
+                          values=np.arange(1, 5),
+                          dtype=sc.dtype.int32)
 BINNED = sc.bin(DATA, groups=[DETECTOR_ID])
 
 PIXELS = np.array([[1, 1, 1], [1, 2, 1], [2, 1, 1], [2, 2, 1]])
@@ -65,22 +64,17 @@ class TestData(unittest.TestCase):
         """
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(
-            isinstance(p.data.data, sc._scipp.core.VariableView), True
-        )
+        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
+                     True)
         assert_almost_equal(
-            sc.geometry.x(p.data.coords["position"]).values, X.values
-        )
+            sc.geometry.x(p.data.coords["position"]).values, X.values)
         assert_almost_equal(
-            sc.geometry.y(p.data.coords["position"]).values, Y.values
-        )
+            sc.geometry.y(p.data.coords["position"]).values, Y.values)
         assert_almost_equal(
-            sc.geometry.z(p.data.coords["position"]).values, Z.values
-        )
+            sc.geometry.z(p.data.coords["position"]).values, Z.values)
         assert_almost_equal(
             np.sort(
-                p.data.bins.constituents["data"].coords["detector_id"].values
-            ),
+                p.data.bins.constituents["data"].coords["detector_id"].values),
             np.sort(DETECTORS),
         )
         assert_almost_equal(
@@ -107,12 +101,11 @@ class TestData(unittest.TestCase):
     def test_refldata_event(self):
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.event, sc._scipp.core.DataArrayView), True)
-        assert_almost_equal(
-            np.sort(p.event.coords["detector_id"].values), np.sort(DETECTORS)
-        )
-        assert_almost_equal(
-            np.sort(p.event.values), np.sort(VALUES), decimal=5
-        )
+        assert_almost_equal(np.sort(p.event.coords["detector_id"].values),
+                            np.sort(DETECTORS))
+        assert_almost_equal(np.sort(p.event.values),
+                            np.sort(VALUES),
+                            decimal=5)
         assert_almost_equal(
             np.sort(p.event.variances),
             np.sort(np.ones_like(VALUES)),
@@ -136,9 +129,8 @@ class TestData(unittest.TestCase):
         bins = np.linspace(0, 11, 4)
         b = p.q_bin(bins)
         assert_almost_equal(b.coords["qz"].values, bins)
-        assert_almost_equal(
-            b.coords["sigma_qz_by_qz"].values, np.linspace(0.325, 1.0, 3)
-        )
+        assert_almost_equal(b.coords["sigma_qz_by_qz"].values,
+                            np.linspace(0.325, 1.0, 3))
         assert_almost_equal(b.bins.sum().data.values, [3.0, 3.0, 3])
         assert_almost_equal(b.bins.sum().data.variances, [3.0, 3.0, 3])
 
@@ -176,9 +168,8 @@ class TestData(unittest.TestCase):
         bins = np.linspace(0, 11, 4)
         b = p.q_bin(bins, unit=(1 / sc.units.m).unit)
         assert_almost_equal(b.coords["qz"].values, bins)
-        assert_almost_equal(
-            b.coords["sigma_qz_by_qz"].values, np.linspace(0.325, 1.0, 3)
-        )
+        assert_almost_equal(b.coords["sigma_qz_by_qz"].values,
+                            np.linspace(0.325, 1.0, 3))
         assert_almost_equal(b.bins.sum().data.values, [3.0, 3.0, 3])
         assert_almost_equal(b.bins.sum().data.variances, [3.0, 3.0, 3])
 
@@ -279,15 +270,13 @@ class TestData(unittest.TestCase):
 
     def test_tof_to_wavelength(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["tof"] = sc.Variable(
-            dims=["event"], values=DETECTORS, dtype=sc.dtype.float64
-        )
+        p.event.coords["tof"] = sc.Variable(dims=["event"],
+                                            values=DETECTORS,
+                                            dtype=sc.dtype.float64)
         p.data.attrs["source_position"] = sc.geometry.position(
-            0.0 * sc.units.m, 0.0 * sc.units.m, -15.0 * sc.units.m
-        )
+            0.0 * sc.units.m, 0.0 * sc.units.m, -15.0 * sc.units.m)
         p.data.attrs["sample_position"] = sc.geometry.position(
-            0.0 * sc.units.m, 0.0 * sc.units.m, 0.0 * sc.units.m
-        )
+            0.0 * sc.units.m, 0.0 * sc.units.m, 0.0 * sc.units.m)
         p.find_wavelength()
         assert_almost_equal(
             p.event.coords["wavelength"].values,
@@ -313,11 +302,9 @@ class TestData(unittest.TestCase):
             unit=sc.units.angstrom,
         )
         p.data.attrs["source_position"] = sc.geometry.position(
-            0.0 * sc.units.m, 0.0 * sc.units.m, -15.0 * sc.units.m
-        )
+            0.0 * sc.units.m, 0.0 * sc.units.m, -15.0 * sc.units.m)
         p.data.attrs["sample_position"] = sc.geometry.position(
-            0.0 * sc.units.m, 0.0 * sc.units.m, 0.0 * sc.units.m
-        )
+            0.0 * sc.units.m, 0.0 * sc.units.m, 0.0 * sc.units.m)
         p.find_theta()
         assert_almost_equal(
             p.event.coords["theta"].values,
@@ -386,9 +373,8 @@ class TestData(unittest.TestCase):
                 0.21914643,
             ],
         )
-        assert_almost_equal(
-            p.event.coords["sigma_qz_by_qz"].values, np.zeros(9)
-        )
+        assert_almost_equal(p.event.coords["sigma_qz_by_qz"].values,
+                            np.zeros(9))
 
     def test_find_qz_with_resolution(self):
         p = data.ReflData(BINNED.copy())
@@ -405,8 +391,7 @@ class TestData(unittest.TestCase):
             unit=sc.units.angstrom,
         )
         p.event.coords["sigma_theta_by_theta"] = sc.Variable(
-            dims=["event"], values=DETECTORS * 0.1, dtype=sc.dtype.float64
-        )
+            dims=["event"], values=DETECTORS * 0.1, dtype=sc.dtype.float64)
         p.data.coords["sigma_lambda_by_lamdba"] = sc.Variable(
             dims=["detector_id"],
             values=np.arange(1, 5) * 0.1,
@@ -469,8 +454,7 @@ class TestData(unittest.TestCase):
         )
         assert_almost_equal(
             p.event.data.values,
-            1
-            / np.array(
+            1 / np.array(
                 [
                     0.7549526,
                     0.9799233,
@@ -487,8 +471,7 @@ class TestData(unittest.TestCase):
         )
         assert_almost_equal(
             p.event.data.variances,
-            1
-            / np.array(
+            1 / np.array(
                 [
                     0.7549526,
                     0.9799233,
@@ -501,8 +484,7 @@ class TestData(unittest.TestCase):
                     0.9799233,
                 ],
                 dtype=np.float32,
-            )
-            ** 2,
+            )**2,
             decimal=6,
         )
 
@@ -551,9 +533,8 @@ class TestData(unittest.TestCase):
     def test_detector_masking_z_max(self):
         p = data.ReflData(BINNED.copy())
         p.detector_masking(z_max=1 * sc.units.m)
-        assert_equal(
-            p.data.masks["z_mask"].values, [False, False, False, False]
-        )
+        assert_equal(p.data.masks["z_mask"].values,
+                     [False, False, False, False])
         assert_equal(p.data.masks["y_mask"].values, [False] * 4)
         assert_equal(p.data.masks["x_mask"].values, [False] * 4)
 
@@ -658,11 +639,8 @@ class TestData(unittest.TestCase):
             dtype=sc.dtype.float64,
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
-        file_path = (
-            os.path.dirname(os.path.realpath(__file__))
-            + os.path.sep
-            + "test1.txt"
-        )
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "test1.txt")
         p.write(file_path)
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (4, 199))
@@ -682,11 +660,8 @@ class TestData(unittest.TestCase):
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = np.linspace(0, 11, 4)
-        file_path = (
-            os.path.dirname(os.path.realpath(__file__))
-            + os.path.sep
-            + "test2.txt"
-        )
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "test2.txt")
         p.write(file_path, {"bins": bins})
         written_data = np.loadtxt(file_path, unpack=True)
         assert_almost_equal(written_data[0], bins[:-1] + np.diff(bins))
