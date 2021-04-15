@@ -4,7 +4,7 @@ Some very simple plotting code for use in reflectometry reduction.
 import scipp as sc
 
 
-def Rq(data, labels=None, q_bin_kwargs=None):
+def plot(data, labels=None, q_bin_kwargs=None):
     """
     Plot intensity against q.
 
@@ -23,11 +23,11 @@ def Rq(data, labels=None, q_bin_kwargs=None):
     if q_bin_kwargs is None:
         q_bin_kwargs = {}
     if labels is None:
-        labels = [f'{i}' for i in range(len(data))]
+        labels = [f"{i}" for i in range(len(data))]
     plots = {}
-    for i, d in enumerate(data):
-        plots[labels[i]] = d.q_bin().bins.sum()
-    return sc.plot(plots, norm='log')
+    for i, datum in enumerate(data):
+        plots[labels[i]] = datum.q_bin().bins.sum()
+    return sc.plot(plots, norm="log")
 
 
 def wavelength_theta(data):

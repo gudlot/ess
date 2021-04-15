@@ -202,12 +202,25 @@ class ReflData:
             # Check if the beam size on the sample is overilluminating the
             # sample. Using the beam on sample size from the value of theta
             # where the neutrons scatter from a point
-            half_beam_on_sample = corrections.illumination_of_sample(self.beam_size, self.sample_size, theta) / 2.
+            half_beam_on_sample = (
+                corrections.illumination_of_sample(
+                    self.beam_size, self.sample_size, theta
+                )
+                / 2.0
+            )
             # Find the range of possible positions that the neutron could
             # strike, this range of theta values is taken to be the full
             # width half maximum for the theta distribution
-            self.data.bins.constituents["data"].attrs["offset_postive"] = resolution.z_offset(self.data.attrs["sample_position"], half_beam_on_sample)
-            self.data.bins.constituents["data"].attrs["offset_negative"] = resolution.z_offset(self.data.attrs["sample_position"], -half_beam_on_sample)
+            self.data.bins.constituents["data"].attrs[
+                "offset_postive"
+            ] = resolution.z_offset(
+                self.data.attrs["sample_position"], half_beam_on_sample
+            )
+            self.data.bins.constituents["data"].attrs[
+                "offset_negative"
+            ] = resolution.z_offset(
+                self.data.attrs["sample_position"], -half_beam_on_sample
+            )
             angle_max = corrections.angle_with_gravity(
                 self.data,
                 self.data.coords["position"],
@@ -227,7 +240,11 @@ class ReflData:
             # Then find the full width half maximum of the theta distribution
             # due to the detector's spatial resolution, which we will call
             # sigma_gamma
-            sigma_gamma = resolution.detector_resolution(self.detector_spatial_resolution, sc.geometry.z(self.data.coords["position"]), sc.geometry.z(self.data.attrs["sample_position"]))
+            sigma_gamma = resolution.detector_resolution(
+                self.detector_spatial_resolution,
+                sc.geometry.z(self.data.coords["position"]),
+                sc.geometry.z(self.data.attrs["sample_position"]),
+            )
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
                 (

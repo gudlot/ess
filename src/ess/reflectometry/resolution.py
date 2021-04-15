@@ -8,7 +8,9 @@ import numpy as np
 import scipp as sc
 
 
-def detector_resolution(spatial_resolution, z_pixel_position, z_sample_position):
+def detector_resolution(
+    spatial_resolution, z_pixel_position, z_sample_position
+):
     """
     Calculation the resolution function due to the spatial resolution of the detector.
 
@@ -20,7 +22,10 @@ def detector_resolution(spatial_resolution, z_pixel_position, z_sample_position)
     Returns:
         (`sc.Variable`): Standard deviation of detector resolution.
     """
-    fwhm = sc.to_unit(sc.atan(spatial_resolution / (z_pixel_position - z_sample_position)), 'deg')
+    fwhm = sc.to_unit(
+        sc.atan(spatial_resolution / (z_pixel_position - z_sample_position)),
+        "deg",
+    )
     return fwhm / (2 * np.sqrt(2 * np.log(2)))
 
 
@@ -35,4 +40,8 @@ def z_offset(position, offset_value):
     Returns:
         (`sc.Variable`): New position variables that has been offset.
     """
-    return sc.geometry.position(sc.geometry.x(position), sc.geometry.y(position), sc.geometry.z(position) + offset_value)
+    return sc.geometry.position(
+        sc.geometry.x(position),
+        sc.geometry.y(position),
+        sc.geometry.z(position) + offset_value,
+    )
