@@ -207,16 +207,20 @@ class ReflData:
                 self.data.attrs["sample_position"], half_beam_on_sample)
             offset_negative = resolution.z_offset(
                 self.data.attrs["sample_position"], half_beam_on_sample)
+            self.data.bins.constituents['data'].attrs['offset_positive'] = offset_positive
+            self.data.bins.constituents['data'].attrs['offset_negative'] = offset_negative
             angle_max = corrections.angle_with_gravity(
                 self.data,
                 self.data.coords["position"],
-                offset_positive,
+                self.data.bins.attrs['offset_positive'],
             )
             angle_min = corrections.angle_with_gravity(
                 self.data,
                 self.data.coords["position"],
-                offset_negative,
+                self.data.bins.attrs['offset_negative'],
             )
+            del self.data.bins.constituents['data'].attrs['offset_positive']
+            del self.data.bins.constituents['data'].attrs['offset_negative']
             sigma_theta_position = (angle_max - angle_min) / 2.354820045
             self.data.bins.constituents["data"].attrs[
                 "sigma_theta_position"] = sigma_theta_position
