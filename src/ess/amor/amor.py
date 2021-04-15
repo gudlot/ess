@@ -65,7 +65,7 @@ class AmorData(ReflData):
             "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
                 sc.geometry.z(self.data.coords["position"]) -
                 sc.geometry.z(self.data.attrs["source_position"]))
-        self.find_tof()
+        self.find_wavelength()
         self.find_theta()
         self.find_qz()
         self.illumination()
