@@ -4,10 +4,9 @@ Tests for corrections module
 
 # author: Andrew R. McCluskey (arm61)
 
-import os
 import unittest
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_almost_equal
 import scipp as sc
 from ess.reflectometry import corrections
 
@@ -143,7 +142,7 @@ class TestResolution(unittest.TestCase):
         )
         assert_almost_equal(actual_result.values, expected_result.values)
 
-    def test_illumination_of_sample_big_sample(self):
+    def test_illumination_of_sample_off_angle(self):
         beam_size = 1.0 * sc.units.m
         sample_size = 10.0 * sc.units.m
         theta = 30.0 * sc.units.deg

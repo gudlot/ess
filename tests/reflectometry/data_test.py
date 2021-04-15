@@ -193,7 +193,7 @@ class TestData(unittest.TestCase):
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = np.linspace(0, 11, 4)
         with self.assertRaises(sc.NotFoundError):
-            b = p.q_bin(bins)
+            _ = p.q_bin(bins)
 
     def test_q_bin_no_qzresolution(self):
         p = data.ReflData(BINNED.copy())
@@ -224,7 +224,7 @@ class TestData(unittest.TestCase):
         )
         bins = np.linspace(0, 11, 4)
         with self.assertRaises(sc.NotFoundError):
-            b = p.q_bin(bins)
+            _ = p.q_bin(bins)
 
     def test_wavelength_theta_bin(self):
         p = data.ReflData(BINNED.copy())
