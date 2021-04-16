@@ -24,7 +24,7 @@ class AmorData(ReflData):
         chopper_speed=20 / 3 * 1e-6 / sc.units.us,
         chopper_detector_distance=1.9e11 * sc.units.angstrom,
         chopper_chopper_distance=0.49 * sc.units.m,
-        chopper_phase=-8.0 * sc.units.dimensionless,
+        chopper_phase=-8.0 * sc.units.deg,
         wavelength_cut=2.4 * sc.units.angstrom,
     ):
         """
@@ -80,7 +80,7 @@ class AmorData(ReflData):
         tof.unit = sc.units.us
         del buf.coords["tof"]
         buf.coords["tof"] = tof
-        tof_offset = self.tau * self.chopper_phase / 180.0
+        tof_offset = self.tau * self.chopper_phase / (180.0 * sc.units.deg)
         tof_cut = self.wavelength_cut * self.chopper_detector_distance / HDM
         tof_e = (sc.Variable(
             values=np.remainder(
