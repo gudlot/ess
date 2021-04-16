@@ -60,8 +60,8 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     """
     velocity2 = velocity * velocity
     z_diff = z_measured - z_origin
-    return ((-sc.norm(G_ACC) * (z_diff) * (z_diff) /
-             (2 * velocity2)) - y_origin + y_measured) / (z_diff)
+    y_diff = y_measured - y_origin
+    return -0.5 * sc.norm(G_ACC) * z_diff / velocity2 + y_diff / z_diff
 
 
 def illumination_correction(beam_size, sample_size, theta):
