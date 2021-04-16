@@ -76,8 +76,9 @@ def illumination_correction(beam_size, sample_size, theta):
         (:py:attr:`array_like`): Correction factor.
     """
     beam_on_sample = beam_size / sc.sin(theta)
-    scale_factor = erf((sample_size / beam_on_sample * 2.35482).values)
-    return scale_factor
+    fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
+    scale_factor = erf((sample_size / beam_on_sample * fwhm_to_std).values)
+    return sc.Variable(values=scale_factor, dims=theta.dims)
 
 
 def illumination_of_sample(beam_size, sample_size, theta):

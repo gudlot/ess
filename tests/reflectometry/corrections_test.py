@@ -102,20 +102,20 @@ class TestCorrections(unittest.TestCase):
     def test_illumination_correction_no_spill(self):
         beam_size = 1.0 * sc.units.m
         sample_size = 10.0 * sc.units.m
-        theta = 30.0 * sc.units.deg
+        theta = sc.Variable(values=[30.0], unit=sc.units.deg, dims=['event'])
         expected_result = 1
         actual_result = corrections.illumination_correction(
             beam_size, sample_size, theta)
-        assert_almost_equal(actual_result, expected_result)
+        assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_correction_with_spill(self):
         beam_size = 1.0 * sc.units.m
         sample_size = 0.5 * sc.units.m
-        theta = 30.0 * sc.units.deg
+        theta = sc.Variable(values=[30.0], unit=sc.units.deg, dims=['event'])
         expected_result = 0.59490402718695351
         actual_result = corrections.illumination_correction(
             beam_size, sample_size, theta)
-        assert_almost_equal(actual_result, expected_result)
+        assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_of_sample_big_sample(self):
         beam_size = 1.0 * sc.units.m

@@ -282,14 +282,12 @@ class ReflData:
         """
         Perform illumination correction.
         """
-        self.event.coords["illumination"] = sc.Variable(
-            values=corrections.illumination_correction(
+        self.event.coords[
+            "illumination"] = corrections.illumination_correction(
                 self.beam_size,
                 self.sample_size,
                 self.event.coords["theta"],
-            ),
-            dims=["event"],
-        )
+            )
         self.data /= self.data.bins.coords["illumination"]
 
     def detector_masking(
