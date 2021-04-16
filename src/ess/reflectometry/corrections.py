@@ -39,12 +39,7 @@ def angle_with_gravity(data, pixel_position, sample_position):
     y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
     intercept = y_origin - y_dash * z_origin
     y_true = z_measured * y_dash + intercept
-    angle = sc.Variable(
-        values=np.degrees(
-            sc.atan(y_true / z_measured).bins.constituents["data"].values),
-        unit=sc.units.deg,
-        dims=["event"],
-    )
+    angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
     return angle
 
 
