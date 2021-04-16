@@ -26,7 +26,7 @@ def plot(data, labels=None, q_bin_kwargs=None):
         labels = [f"{i}" for i in range(len(data))]
     plots = {}
     for i, datum in enumerate(data):
-        plots[labels[i]] = datum.q_bin().bins.sum()
+        plots[labels[i]] = datum.q_bin(**q_bin_kwargs).bins.sum()
     return sc.plot(plots, norm="log")
 
 
@@ -40,7 +40,7 @@ def wavelength_theta(data):
     Returns:
         (`scipp.plotting.plot2d.SciPlot2d`): 2d histogram of wavelength against theta.
     """
-    return sc.plot(data.wavelength_theta_bin().bins.sum())
+    return sc.plot(data.wavelength_theta_bin())
 
 
 def wavelength_q(data):
@@ -53,7 +53,7 @@ def wavelength_q(data):
     Returns:
         (`scipp.plotting.plot2d.SciPlot2d`): 2d histogram of wavelength against q.
     """
-    return sc.plot(data.wavelength_q_bin().bins.sum())
+    return sc.plot(data.wavelength_q_bin())
 
 
 def q_theta(data):
@@ -66,4 +66,4 @@ def q_theta(data):
     Returns:
         (`scipp.plotting.plot2d.SciPlot2d`): 2d histogram of q against theta.
     """
-    return sc.plot(data.q_theta_bin().bins.sum())
+    return sc.plot(data.q_theta_bin())
