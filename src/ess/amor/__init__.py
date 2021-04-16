@@ -1,1 +1,1 @@
-from ess.amor.amor import AmorData
+from ess.amor.amor_data import AmorData
