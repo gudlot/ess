@@ -338,17 +338,22 @@ class ReflData:
             theta_max (`sc.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
         """
         if theta_min is None:
-            theta_min = 0 * sc.units.deg
+            theta_min = sc.min(self.event.coords["theta"])
         if theta_max is None:
-            theta_max = 180 * sc.units.deg
-        try:
-            self.data.masks["theta"] = (self.data.coords["theta"] <
-                                        theta_min) | (self.data.coords["theta"]
-                                                      > theta_max)
-        except sc.NotFoundError:
-            self.data.bins.masks["theta"] = (
-                self.data.bins.coords["theta"] <
-                theta_min) | (self.data.bins.coords["theta"] > theta_max)
+            theta_max = sc.max(self.event.coords["theta"])
+        theta_max = sc.to_unit(theta_max, self.event.coords['theta'].unit)
+        wavelength_min = sc.to_unit(theta_min, self.event.coords['theta'].unit)
+        range = [
+            sc.min(self.event.coords['theta']).value, theta_min.value,
+            theta_max.value,
+            sc.max(self.event.coords['theta']).value
+        ]
+        theta = sc.array(dims=['theta'],
+                         unit=self.event.coords['theta'].unit,
+                         values=range)
+        self.data = sc.bin(self.data, edges=[theta])
+        self.data.masks['theta'] = sc.array(dims=['theta'],
+                                            values=[True, False, True])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -364,7 +369,7 @@ class ReflData:
             wavelength_max = sc.max(self.event.coords["wavelength"])
         wavelength_max = sc.to_unit(wavelength_max,
                                     self.event.coords['wavelength'].unit)
-        wavelength_min = sc.to_unit(wavelength_max,
+        wavelength_min = sc.to_unit(wavelength_min,
                                     self.event.coords['wavelength'].unit)
         range = [
             sc.min(self.event.coords['wavelength']).value,

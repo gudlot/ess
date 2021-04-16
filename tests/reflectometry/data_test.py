@@ -539,8 +539,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_min=2 * sc.units.deg, theta_max=4 * sc.units.deg)
         assert_equal(
-            p.event.masks["theta"].values,
-            ~((DETECTORS >= 2) & (DETECTORS <= 4)),
+            p.data.masks["theta"].values,
+            [True, False, True],
         )
 
     def test_theta_masking_no_min(self):
@@ -553,8 +553,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_max=4 * sc.units.deg)
         assert_equal(
-            p.event.masks["theta"].values,
-            ~((DETECTORS >= 0) & (DETECTORS <= 4)),
+            p.data.masks["theta"].values,
+            [True, False, True],
         )
 
     def test_theta_masking_no_max(self):
@@ -567,8 +567,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_min=2 * sc.units.deg)
         assert_equal(
-            p.event.masks["theta"].values,
-            ~((DETECTORS >= 2) & (DETECTORS <= 180)),
+            p.data.masks["theta"].values,
+            [True, False, True],
         )
 
     def test_wavelength_masking(self):
