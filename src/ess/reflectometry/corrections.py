@@ -57,9 +57,9 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     Returns:
         (`scipp._scipp.core.VariableView` or `array_like`): The gradient of the trajectory of the neutron at the origin position.
     """
-    return ((-G_ACC * (z_measured - z_origin) * (z_measured - z_origin) /
-             (2 * velocity * velocity)) - y_origin +
-            y_measured) / (z_measured - z_origin)
+    velocity2 = velocity * velocity
+    z_diff = z_measured - z_origin
+    return ((-G_ACC * (z_diff) * (z_diff) / (2 * velocity2)) - y_origin + y_measured) / (z_diff)
 
 
 def illumination_correction(beam_size, sample_size, theta):
