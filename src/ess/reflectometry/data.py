@@ -103,8 +103,8 @@ class ReflData:
             wavelength = self.event.coords["wavelength"].values
             theta = self.event.coords["theta"].values
             bins = [
-                np.linspace(wavelength.min(), wavelength.max(), 100),
-                np.linspace(theta.min(), theta.max(), 100),
+                np.linspace(wavelength.min(), wavelength.max(), 50),
+                np.linspace(theta.min(), theta.max(), 50),
             ]
         wavelength_bins = sc.array(dims=["wavelength"],
                                    unit=units[0],
@@ -133,8 +133,8 @@ class ReflData:
             q_z_vector = self.event.coords["qz"].values
             theta = self.event.coords["theta"].values
             bins = [
-                np.linspace(q_z_vector.min(), q_z_vector.max(), 100),
-                np.linspace(theta.min(), theta.max(), 100),
+                np.linspace(q_z_vector.min(), q_z_vector.max(), 50),
+                np.linspace(theta.min(), theta.max(), 50),
             ]
         q_bins = sc.array(dims=["qz"], unit=units[0], values=bins[0])
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
@@ -161,8 +161,8 @@ class ReflData:
             wavelength = self.event.coords["wavelength"].values
             q_z_vector = self.event.coords["qz"].values
             bins = [
-                np.linspace(wavelength.min(), wavelength.max(), 100),
-                np.linspace(q_z_vector.min(), q_z_vector.max(), 100),
+                np.linspace(wavelength.min(), wavelength.max(), 50),
+                np.linspace(q_z_vector.min(), q_z_vector.max(), 50),
             ]
         wavelength_bins = sc.array(dims=["wavelength"],
                                    unit=units[0],
