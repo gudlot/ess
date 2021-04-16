@@ -2,7 +2,7 @@
 per-file-ignores =
     # line too long
     src/ess/amor/__init__.py: F401
-    src/ess/amor/amor.py: E501
+    src/ess/amor/amor_data.py: E501
     src/ess/reflectometry/data.py: E501
     src/ess/reflectometry/corrections.py: E501
     src/ess/reflectometry/plot.py: E501
