@@ -94,7 +94,7 @@ def illumination_of_sample(beam_size, sample_size, theta):
         (`sc.Variable`): The size of the beam, for each theta, on the sample.
     """
     beam_on_sample = beam_size / sc.sin(theta)
-    if ((sc.mean(beam_on_sample)) > sample_size).values:
+    if ((sc.mean(beam_on_sample)) > sample_size).value:
         beam_on_sample = sc.ones(shape=theta.shape,
                                  unit=sc.units.dimensionless,
                                  dims=theta.dims) * sample_size
