@@ -76,7 +76,7 @@ class AmorData(ReflData):
         """
         self.data.coords["position"].unit = sc.units.m
         buf = self.data.bins.constituents["data"]
-        tof = buf.coords["tof"].astype(sc.dtype.float64) * 1e-3
+        tof = sc.to_unit(buf.coords["tof"].astype(sc.dtype.float64), 'us')
         tof.unit = sc.units.us
         del buf.coords["tof"]
         buf.coords["tof"] = tof
