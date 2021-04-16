@@ -55,7 +55,7 @@ Z = sc.Variable(
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
 
 
-class TestResolution(unittest.TestCase):
+class TestCorrections(unittest.TestCase):
     def test_angle_with_gravity(self):
         BINNED.bins.constituents["data"].coords["wavelength"] = sc.Variable(
             dims=["event"],
