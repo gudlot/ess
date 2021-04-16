@@ -362,9 +362,21 @@ class ReflData:
             wavelength_min = sc.min(self.event.coords["wavelength"])
         if wavelength_max is None:
             wavelength_max = sc.max(self.event.coords["wavelength"])
-        self.data.bins.masks["wavelength"] = (
-            self.data.bins.coords["wavelength"] < wavelength_min) | (
-                self.data.bins.coords["wavelength"] > wavelength_max)
+        wavelength_max = sc.to_unit(wavelength_max,
+                                    self.event.coords['wavelength'].unit)
+        wavelength_min = sc.to_unit(wavelength_max,
+                                    self.event.coords['wavelength'].unit)
+        range = [
+            sc.min(self.event.coords['wavelength']).value,
+            wavelength_min.value, wavelength_max.value,
+            sc.max(self.event.coords['wavelength']).value
+        ]
+        wavelength = sc.array(dims=['wavelength'],
+                              unit=self.event.coords['wavelength'].unit,
+                              values=range)
+        self.data = sc.bin(self.data, edges=[wavelength])
+        self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
+                                                 values=[True, False, True])
 
     def write(self, filename, q_bin_kwargs=None):
         """

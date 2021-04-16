@@ -584,8 +584,8 @@ class TestData(unittest.TestCase):
             wavelength_max=4 * sc.units.angstrom,
         )
         assert_equal(
-            p.event.masks["wavelength"].values,
-            ~((DETECTORS >= 2) & (DETECTORS <= 4)),
+            p.data.masks["wavelength"].values,
+            [True, False, True],
         )
 
     def test_wavelength_masking_no_min(self):
@@ -598,8 +598,8 @@ class TestData(unittest.TestCase):
         )
         p.wavelength_masking(wavelength_max=4 * sc.units.angstrom)
         assert_equal(
-            p.event.masks["wavelength"].values,
-            ~((DETECTORS >= 1) & (DETECTORS <= 4)),
+            p.data.masks["wavelength"].values,
+            [True, False, True],
         )
 
     def test_wavelength_masking_no_max(self):
@@ -612,8 +612,8 @@ class TestData(unittest.TestCase):
         )
         p.wavelength_masking(wavelength_min=2 * sc.units.angstrom)
         assert_equal(
-            p.event.masks["wavelength"].values,
-            ~((DETECTORS >= 2) & (DETECTORS <= 5)),
+            p.data.masks["wavelength"].values,
+            [True, False, True],
         )
 
     def test_write(self):
