@@ -232,7 +232,7 @@ class TestData(unittest.TestCase):
             unit=sc.units.deg,
         )
         binned = p.wavelength_theta_bin()
-        assert_equal(binned.shape, [99, 99])
+        assert_equal(binned.shape, [49, 49])
 
     def test_q_theta_bin(self):
         p = data.ReflData(BINNED.copy())
@@ -249,7 +249,7 @@ class TestData(unittest.TestCase):
             unit=sc.units.deg,
         )
         binned = p.q_theta_bin()
-        assert_equal(binned.shape, [99, 99])
+        assert_equal(binned.shape, [49, 49])
 
     def test_wavelength_q_bin(self):
         p = data.ReflData(BINNED.copy())
@@ -266,7 +266,7 @@ class TestData(unittest.TestCase):
             unit=sc.units.angstrom,
         )
         binned = p.wavelength_q_bin()
-        assert_equal(binned.shape, [99, 99])
+        assert_equal(binned.shape, [49, 49])
 
     def test_tof_to_wavelength(self):
         p = data.ReflData(BINNED.copy())
@@ -306,17 +306,7 @@ class TestData(unittest.TestCase):
         p.find_theta()
         assert_almost_equal(
             p.event.coords["theta"].values,
-            [
-                45.0000359,
-                45.0001436,
-                63.4349524,
-                63.4349524,
-                63.4350063,
-                63.4349632,
-                63.4350063,
-                63.4349632,
-                63.4350063,
-            ],
+            [44.9999641, 44.9998564, 63.4349452, 63.4349452, 63.4348914, 63.4349345, 63.4348914, 63.4349345, 63.4348914],
         )
         assert_almost_equal(
             p.event.coords["sigma_theta_by_theta"].values,

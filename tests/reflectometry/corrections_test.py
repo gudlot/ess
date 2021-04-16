@@ -75,17 +75,7 @@ class TestCorrections(unittest.TestCase):
                                                        sample_position)
         assert_almost_equal(
             actual_result.values,
-            [
-                45.0000359,
-                45.0001436,
-                45.000009,
-                45.000009,
-                45.0001436,
-                45.0000359,
-                45.0001436,
-                45.0000359,
-                45.0001436,
-            ],
+            [44.9999641, 44.9998564, 44.999991 , 44.999991 , 44.9998564, 44.9999641, 44.9998564, 44.9999641, 44.9998564],
         )
 
     def test_y_dash0(self):
@@ -94,7 +84,7 @@ class TestCorrections(unittest.TestCase):
         z_origin = 0.0 * sc.units.m
         y_measured = 1.0 * sc.units.m
         y_origin = 0.0 * sc.units.m
-        expected_result = 1.04903325
+        expected_result = 0.9509667
         actual_result = corrections.y_dash0(velocity, z_origin, y_origin,
                                             z_measured, y_measured)
         assert_almost_equal(actual_result.values, expected_result)
