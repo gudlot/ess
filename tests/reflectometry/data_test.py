@@ -306,7 +306,10 @@ class TestData(unittest.TestCase):
         p.find_theta()
         assert_almost_equal(
             p.event.coords["theta"].values,
-            [44.9999641, 44.9998564, 63.4349452, 63.4349452, 63.4348914, 63.4349345, 63.4348914, 63.4349345, 63.4348914],
+            [
+                44.9999641, 44.9998564, 63.4349452, 63.4349452, 63.4348914,
+                63.4349345, 63.4348914, 63.4349345, 63.4348914
+            ],
         )
         assert_almost_equal(
             p.event.coords["sigma_theta_by_theta"].values,

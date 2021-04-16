@@ -39,7 +39,8 @@ def angle_with_gravity(data, pixel_position, sample_position):
     y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
     intercept = y_origin - y_dash * z_origin
     y_true = z_measured * y_dash + intercept
-    angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
+    angle = sc.to_unit(
+        sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
     return angle
 
 
@@ -59,7 +60,8 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     """
     velocity2 = velocity * velocity
     z_diff = z_measured - z_origin
-    return ((-sc.norm(G_ACC) * (z_diff) * (z_diff) / (2 * velocity2)) - y_origin + y_measured) / (z_diff)
+    return ((-sc.norm(G_ACC) * (z_diff) * (z_diff) /
+             (2 * velocity2)) - y_origin + y_measured) / (z_diff)
 
 
 def illumination_correction(beam_size, sample_size, theta):
@@ -95,7 +97,9 @@ def illumination_of_sample(beam_size, sample_size, theta):
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:
-        beam_on_sample = sc.broadcast(sample_size, shape=theta.shape, dims=theta.dims)
+        beam_on_sample = sc.broadcast(sample_size,
+                                      shape=theta.shape,
+                                      dims=theta.dims)
         # beam_on_sample = sc.ones(shape=theta.shape,
         #                          unit=sc.units.dimensionless,
         #                          dims=theta.dims) * sample_size
