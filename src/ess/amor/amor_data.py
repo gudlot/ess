@@ -106,6 +106,21 @@ class AmorData(ReflData):
         if wavelength_max is None:
             wavelength_max = wavelength_min + self.tau * (
                 HDM / self.chopper_detector_distance)
-        self.data.bins.masks["wavelength"] = (
-            self.data.bins.coords["wavelength"] < wavelength_min) | (
-                self.data.bins.coords["wavelength"] > wavelength_max)
+            if (wavelength_max > sc.max(
+                    self.event.coords["wavelength"])).value:
+                wavelength_max = sc.max(self.event.coords["wavelength"])
+        wavelength_max = sc.to_unit(wavelength_max,
+                                    self.event.coords['wavelength'].unit)
+        wavelength_min = sc.to_unit(wavelength_min,
+                                    self.event.coords['wavelength'].unit)
+        range = [
+            sc.min(self.event.coords['wavelength']).value,
+            wavelength_min.value, wavelength_max.value,
+            sc.max(self.event.coords['wavelength']).value
+        ]
+        wavelength = sc.array(dims=['wavelength'],
+                              unit=self.event.coords['wavelength'].unit,
+                              values=range)
+        self.data = sc.bin(self.data, edges=[wavelength])
+        self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
+                                                 values=[True, False, True])

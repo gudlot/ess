@@ -65,13 +65,12 @@ class ReflData:
             (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
         if "qz" in self.event.coords and "tof" in self.event.coords:
+            erase = ['tof'] + self.data.dims
             if bins is None:
                 q_z_vector = self.event.coords["qz"].values
                 bins = np.linspace(q_z_vector.min(), q_z_vector.max(), 200)
             edges = sc.array(dims=["qz"], unit=unit, values=bins)
-            binned = sc.bin(self.data,
-                            erase=["detector_id", "tof"],
-                            edges=[edges])
+            binned = sc.bin(self.data, erase=erase, edges=[edges])
             if "sigma_qz_by_qz" in self.event.coords:
                 qzr = []
                 for i in binned.data.values:
