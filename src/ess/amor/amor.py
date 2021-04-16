@@ -81,11 +81,10 @@ class AmorData(ReflData):
         del buf.coords["tof"]
         buf.coords["tof"] = tof
         tof_offset = self.tau * self.chopper_phase / 180.0
-        tof_e = self.data.bins.constituents["data"].coords["tof"]
         tof_cut = self.wavelength_cut * self.chopper_detector_distance / HDM
         tof_e = (sc.Variable(
             values=np.remainder(
-                (tof_e - tof_cut + self.tau).values, self.tau.values),
+                (tof - tof_cut + self.tau).values, self.tau.values),
             unit=sc.units.us,
             dims=["event"],
         ) + tof_cut + tof_offset)
