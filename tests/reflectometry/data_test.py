@@ -131,8 +131,10 @@ class TestData(unittest.TestCase):
         assert_almost_equal(b.coords["qz"].values, bins)
         assert_almost_equal(b.coords["sigma_qz_by_qz"].values,
                             np.linspace(0.325, 1.0, 3))
-        assert_almost_equal(b.bins.sum().data.values, [3.0, 3.0, 3])
-        assert_almost_equal(b.bins.sum().data.variances, [3.0, 3.0, 3])
+        assert_almost_equal(b.bins.sum().data.values,
+                            np.array([3.0, 3.0, 3.]) / 9.)
+        assert_almost_equal(b.bins.sum().data.variances,
+                            np.array([3.0, 3.0, 3.]) / 81.)
 
     def test_q_bin_None(self):
         p = data.ReflData(BINNED.copy())
@@ -170,8 +172,10 @@ class TestData(unittest.TestCase):
         assert_almost_equal(b.coords["qz"].values, bins)
         assert_almost_equal(b.coords["sigma_qz_by_qz"].values,
                             np.linspace(0.325, 1.0, 3))
-        assert_almost_equal(b.bins.sum().data.values, [3.0, 3.0, 3])
-        assert_almost_equal(b.bins.sum().data.variances, [3.0, 3.0, 3])
+        assert_almost_equal(b.bins.sum().data.values,
+                            np.array([3.0, 3.0, 3.]) / 9.)
+        assert_almost_equal(b.bins.sum().data.variances,
+                            np.array([3.0, 3.0, 3.]) / 81.)
 
     def test_q_bin_no_qz(self):
         p = data.ReflData(BINNED.copy())
@@ -197,8 +201,10 @@ class TestData(unittest.TestCase):
         bins = np.linspace(0, 11, 4)
         b = p.q_bin(bins)
         assert_almost_equal(b.coords["qz"].values, bins)
-        assert_almost_equal(b.bins.sum().data.values, [3.0, 3.0, 3])
-        assert_almost_equal(b.bins.sum().data.variances, [3.0, 3.0, 3])
+        assert_almost_equal(b.bins.sum().data.values,
+                            np.array([3.0, 3.0, 3.]) / 9.)
+        assert_almost_equal(b.bins.sum().data.variances,
+                            np.array([3.0, 3.0, 3.]) / 81.)
 
     def test_q_bin_no_tof(self):
         p = data.ReflData(BINNED.copy())
@@ -539,8 +545,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_min=2 * sc.units.deg, theta_max=4 * sc.units.deg)
         assert_equal(
-            p.data.masks["theta"].values,
-            [True, False, True],
+            p.event.masks["theta"].values,
+            ~((DETECTORS >= 2) & (DETECTORS <= 4)),
         )
 
     def test_theta_masking_no_min(self):
@@ -553,8 +559,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_max=4 * sc.units.deg)
         assert_equal(
-            p.data.masks["theta"].values,
-            [True, False, True],
+            p.event.masks["theta"].values,
+            ~((DETECTORS >= 0) & (DETECTORS <= 4)),
         )
 
     def test_theta_masking_no_max(self):
@@ -567,8 +573,8 @@ class TestData(unittest.TestCase):
         )
         p.theta_masking(theta_min=2 * sc.units.deg)
         assert_equal(
-            p.data.masks["theta"].values,
-            [True, False, True],
+            p.event.masks["theta"].values,
+            ~((DETECTORS >= 2) & (DETECTORS <= 180)),
         )
 
     def test_wavelength_masking(self):
@@ -584,8 +590,8 @@ class TestData(unittest.TestCase):
             wavelength_max=4 * sc.units.angstrom,
         )
         assert_equal(
-            p.data.masks["wavelength"].values,
-            [True, False, True],
+            p.event.masks["wavelength"].values,
+            ~((DETECTORS >= 2) & (DETECTORS <= 4)),
         )
 
     def test_wavelength_masking_no_min(self):
@@ -598,8 +604,8 @@ class TestData(unittest.TestCase):
         )
         p.wavelength_masking(wavelength_max=4 * sc.units.angstrom)
         assert_equal(
-            p.data.masks["wavelength"].values,
-            [True, False, True],
+            p.event.masks["wavelength"].values,
+            ~((DETECTORS >= 1) & (DETECTORS <= 4)),
         )
 
     def test_wavelength_masking_no_max(self):
@@ -612,8 +618,8 @@ class TestData(unittest.TestCase):
         )
         p.wavelength_masking(wavelength_min=2 * sc.units.angstrom)
         assert_equal(
-            p.data.masks["wavelength"].values,
-            [True, False, True],
+            p.event.masks["wavelength"].values,
+            ~((DETECTORS >= 2) & (DETECTORS <= 5)),
         )
 
     def test_write(self):
@@ -656,6 +662,6 @@ class TestData(unittest.TestCase):
         p.write(file_path, {"bins": bins})
         written_data = np.loadtxt(file_path, unpack=True)
         assert_almost_equal(written_data[0], bins[:-1] + np.diff(bins))
-        assert_almost_equal(written_data[1], np.array([3, 3, 3]))
-        assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3])))
+        assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
+        assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
         assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))

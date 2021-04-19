@@ -113,7 +113,7 @@ class ReflData:
             self.data,
             erase=['tof', 'detector_id'],
             edges=[theta_bins, wavelength_bins],
-        )  / (self.event.shape[0] * sc.units.dimensionless)
+        ) / (self.event.shape[0] * sc.units.dimensionless)
 
     def q_theta_bin(self,
                     bins=None,
@@ -139,7 +139,8 @@ class ReflData:
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
         return sc.bin(self.data,
                       erase=['tof', 'detector_id', 'wavelength'],
-                      edges=[theta_bins, q_bins])  / (self.event.shape[0] * sc.units.dimensionless)
+                      edges=[theta_bins, q_bins]) / (self.event.shape[0] *
+                                                     sc.units.dimensionless)
 
     def wavelength_q_bin(
             self,
@@ -171,7 +172,7 @@ class ReflData:
             self.data,
             erase=['tof', 'detector_id', 'theta'],
             edges=[q_bins, wavelength_bins],
-        )  / (self.event.shape[0] * sc.units.dimensionless)
+        ) / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
@@ -342,18 +343,10 @@ class ReflData:
         if theta_max is None:
             theta_max = sc.max(self.event.coords["theta"])
         theta_max = sc.to_unit(theta_max, self.event.coords['theta'].unit)
-        wavelength_min = sc.to_unit(theta_min, self.event.coords['theta'].unit)
-        range = [
-            sc.min(self.event.coords['theta']).value, theta_min.value,
-            theta_max.value,
-            sc.max(self.event.coords['theta']).value
-        ]
-        theta = sc.array(dims=['theta'],
-                         unit=self.event.coords['theta'].unit,
-                         values=range)
-        self.data = sc.bin(self.data, edges=[theta])
-        self.data.masks['theta'] = sc.array(dims=['theta'],
-                                            values=[True, False, True])
+        theta_min = sc.to_unit(theta_min, self.event.coords['theta'].unit)
+        self.data.bins.masks["theta"] = (
+            self.data.bins.coords["theta"] <
+            theta_min) | (self.data.bins.coords["theta"] > theta_max)
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -371,17 +364,9 @@ class ReflData:
                                     self.event.coords['wavelength'].unit)
         wavelength_min = sc.to_unit(wavelength_min,
                                     self.event.coords['wavelength'].unit)
-        range = [
-            sc.min(self.event.coords['wavelength']).value,
-            wavelength_min.value, wavelength_max.value,
-            sc.max(self.event.coords['wavelength']).value
-        ]
-        wavelength = sc.array(dims=['wavelength'],
-                              unit=self.event.coords['wavelength'].unit,
-                              values=range)
-        self.data = sc.bin(self.data, edges=[wavelength])
-        self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
-                                                 values=[True, False, True])
+        self.data.bins.masks["wavelength"] = (
+            self.data.bins.coords["wavelength"] < wavelength_min) | (
+                self.data.bins.coords["wavelength"] > wavelength_max)
 
     def write(self, filename, q_bin_kwargs=None):
         """
