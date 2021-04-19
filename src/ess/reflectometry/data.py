@@ -83,7 +83,7 @@ class ReflData:
                                                               dims=["qz"])
         else:
             raise sc.NotFoundError("qz, or tof coordinate cannot be found.")
-        return binned
+        return binned / (self.event.shape[0] * sc.units.dimensionless)
 
     def wavelength_theta_bin(self,
                              bins=None,
@@ -111,9 +111,9 @@ class ReflData:
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
         return sc.bin(
             self.data,
-            erase=["detector_id", "tof"],
+            erase=['tof', 'detector_id'],
             edges=[theta_bins, wavelength_bins],
-        )
+        )  / (self.event.shape[0] * sc.units.dimensionless)
 
     def q_theta_bin(self,
                     bins=None,
@@ -138,8 +138,8 @@ class ReflData:
         q_bins = sc.array(dims=["qz"], unit=units[0], values=bins[0])
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
         return sc.bin(self.data,
-                      erase=["detector_id", "tof"],
-                      edges=[theta_bins, q_bins])
+                      erase=['tof', 'detector_id', 'wavelength'],
+                      edges=[theta_bins, q_bins])  / (self.event.shape[0] * sc.units.dimensionless)
 
     def wavelength_q_bin(
             self,
@@ -169,9 +169,9 @@ class ReflData:
         q_bins = sc.array(dims=["qz"], unit=units[1], values=bins[1])
         return sc.bin(
             self.data,
-            erase=["detector_id", "tof"],
+            erase=['tof', 'detector_id', 'theta'],
             edges=[q_bins, wavelength_bins],
-        )
+        )  / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
@@ -222,7 +222,8 @@ class ReflData:
             )
             del self.data.bins.constituents['data'].attrs['offset_positive']
             del self.data.bins.constituents['data'].attrs['offset_negative']
-            sigma_theta_position = (angle_max - angle_min) / 2.354820045
+            fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
+            sigma_theta_position = (angle_max - angle_min) / fwhm_to_std
             self.data.bins.constituents["data"].attrs[
                 "sigma_theta_position"] = sigma_theta_position
             # Then find the full width half maximum of the theta distribution
