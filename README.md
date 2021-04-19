@@ -6,7 +6,9 @@ European Spallation Source facility bespoke, neutron scattering tools based on [
 
 This supersedes scripts in [ess-legacy](https://github.com/scipp/ess-legacy)
 
-This will be complemented by technique specific support available in [scipp-neutron](https://github.com/scipp/scipp-neutron)
+This is built on and complemented by neutron and technique specific support available in [scippneutron](https://github.com/scipp/scippneutron)
+
+Please read the [contribution](contributing.md) guidelines before making additions
 
 # Branch organisation
 
