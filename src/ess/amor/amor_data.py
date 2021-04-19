@@ -245,7 +245,11 @@ class Normalisation:
         """
         Perform wavelength/theta-binned normalisation.
 
+        Args:
+            bins (`tuple` of `array_like`): wavelength and theta edges.
 
+        Returns:
+            (`scipp._scipp.core.DataArray`): Normalised data array binned into wavelength and theta.
         """
         return self.sample.wavelength_theta_bin(bins).bins.sum(
         ) / self.reference.wavelength_theta_bin(bins).bins.sum()
