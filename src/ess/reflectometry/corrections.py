@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 """
 Corrections to be used for neutron reflectometry reduction processes.
 """

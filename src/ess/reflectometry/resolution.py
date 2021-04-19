@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 """
 Code for the quantification of resolution effects in reflectometry measurements.
 """

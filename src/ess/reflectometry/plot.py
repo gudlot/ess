@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 """
 Some very simple plotting code for use in reflectometry reduction.
 """

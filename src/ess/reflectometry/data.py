@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 """
 This is the super-class for raw reflectometry data for reduction.
 From this super-class, instrument specfic sub-classes may be created (see for example the `AmorData` class)>

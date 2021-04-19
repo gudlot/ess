@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 """
 This is the class for data reduction from the Amor instrument, which is a subclass of the broader `ReflData` class.
 Features of this class included correcting for the time-of-flight measurement at Amor.
