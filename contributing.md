@@ -8,7 +8,7 @@ Once a PR has been submitted, we conduct a review, so please anticipate some dis
 ### Layout
 
 This repository is ess instrument centric and we therefore strongly prefer having all code organised into `src/ess/{instrument}` directories.
-If your code is specific to the ess facility, but is intended to be ubiquitous across a class of instruments, you may put it into a technique specfic directory `src/ess/{technique}` i.e `src/ess/reflectometry`.
+If your code is specific to the ess facility, but is intended to be ubiquitous across a class of instruments, you may put it into a technique specific directory `src/ess/{technique}` i.e `src/ess/reflectometry`.
 Code that is technique specific, but free from ess facility considerations may be considered to go in [scippneutron](https://github.com/scipp/scippneutron)
 
 ### Testing
