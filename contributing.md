@@ -14,4 +14,4 @@ To ensure that the package is robust we are very keen that authors provide unit 
 
 ## Documentation
 
-Please provide and update documentation. Put python docstrings on your user facing functions, provide code comments and consider other explanations you need to provide to desribe how your functions work. We will build and publish sphinx documentation located [here](https://github.com/scipp/ess/tree/main/docs).
+Please provide and update documentation. Put python docstrings on your user facing functions, provide code comments and consider other explanations you need to include to describe how your functions work. We will build and publish sphinx documentation located [here](https://github.com/scipp/ess/tree/main/docs).
