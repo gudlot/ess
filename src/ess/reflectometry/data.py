@@ -9,7 +9,7 @@ From this super-class, instrument specfic sub-classes may be created (see for ex
 import numpy as np
 import scipp as sc
 import scippneutron as scn
-from ess.reflectometry import corrections, resolution
+from ess.reflectometry import corrections, resolution, binning
 
 
 class ReflData:
@@ -65,26 +65,7 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        if "qz" in self.event.coords and "tof" in self.event.coords:
-            erase = ['tof'] + self.data.dims
-            if bins is None:
-                q_z_vector = self.event.coords["qz"].values
-                bins = np.linspace(q_z_vector.min(), q_z_vector.max(), 200)
-            edges = sc.array(dims=["qz"], unit=unit, values=bins)
-            binned = sc.bin(self.data, erase=erase, edges=[edges])
-            if "sigma_qz_by_qz" in self.event.coords:
-                qzr = []
-                for i in binned.data.values:
-                    try:
-                        qzr.append(i.coords["sigma_qz_by_qz"].values.max())
-                    except ValueError:
-                        qzr.append(0)
-                qzr = np.array(qzr)
-                binned.coords["sigma_qz_by_qz"] = sc.Variable(values=qzr,
-                                                              dims=["qz"])
-        else:
-            raise sc.NotFoundError("qz, or tof coordinate cannot be found.")
-        return binned / (self.event.shape[0] * sc.units.dimensionless)
+        return binning._q_bin(self, bins, unit)
 
     def wavelength_theta_bin(self,
                              bins=None,
@@ -386,7 +367,11 @@ class ReflData:
         dq_z_vector = binned.coords["sigma_qz_by_qz"].values
         intensity = binned.data.values
         dintensity = np.sqrt(binned.data.variances)
-        np.savetxt(
-            filename,
-            np.array([q_z_vector, intensity, dintensity, dq_z_vector]).T,
-        )
+        try:
+            header = self.orso
+        except AttributeError:
+            header = ''
+        np.savetxt(filename,
+                   np.array([q_z_vector, intensity, dintensity,
+                             dq_z_vector]).T,
+                   header=header)

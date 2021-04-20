@@ -3,15 +3,18 @@
 Some very simple plotting code for use in reflectometry reduction.
 """
 import scipp as sc
+from ess.reflectometry import binning
 
 
-def plot(data, labels=None, q_bin_kwargs=None):
+def log_R(data, labels=None, ymin=1e-6, ymax=1, q_bin_kwargs=None):
     """
     Plot intensity against q.
 
     Args:
         data (`list` of `ReflData`): A list of ReflData objects for plotting.
         labels (`list` of `str`): Labels for each of the ReflData objects.
+        ymin (`float`): Minimum value of y to plot.
+        ymax (`float`): Maximum value of y to plot.
         q_bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
 
     Returns:
@@ -27,8 +30,10 @@ def plot(data, labels=None, q_bin_kwargs=None):
         labels = [f"{i}" for i in range(len(data))]
     plots = {}
     for i, datum in enumerate(data):
-        plots[labels[i]] = datum.q_bin(**q_bin_kwargs).bins.sum()
-    return sc.plot(plots, norm="log")
+        plots[labels[i]] = datum.q_bin(**q_bin_kwargs)
+    fig = sc.plot(plots, norm="log")
+    fig.ax.set_ylim((ymin, ymax))
+    return fig
 
 
 def wavelength_theta(data):
