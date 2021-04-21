@@ -45,6 +45,3 @@ def _q_bin(data, bins=None, unit=(1 / sc.units.angstrom).unit):
     else:
         raise sc.NotFoundError("qz or tof coordinate cannot be found.")
     return binned / (data.event.shape[0] * sc.units.dimensionless)
-
-
-#def two_dimensional_bin(data, dimensions, bins=None, units=[None, None])
