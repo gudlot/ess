@@ -3,6 +3,7 @@
 This is the class for data reduction from the Amor instrument, which is a subclass of the broader `ReflData` class.
 Features of this class included correcting for the time-of-flight measurement at Amor.
 """
+import copy
 import scipp as sc
 import scippneutron as scn
 import numpy as np
@@ -348,3 +349,30 @@ class Normalisation:
                              dq_z_vector]).T,
                    fmt='%.16e',
                    header=header)
+
+    def write_wavelength_theta(self, filename, bins):
+        """
+        Write the reflectometry intensity data as a function of wavelength-theta to a file.
+
+        Args:
+            filename (`str`): The file path for the file to be saved to.
+            bins (`tuple` of `array_like`): wavelength and theta edges.
+        """
+        binned = self.sample.wavelength_theta_bin(bins).bins.sum(
+        ) / self.reference.wavelength_theta_bin(bins).bins.sum()
+        theta_c = binned.coords['theta'].values[:-1] + np.diff(
+            binned.coords['theta'].values)
+        wavelength_c = binned.coords['wavelength'].values[:-1] + np.diff(
+            binned.coords['wavelength'].values)
+        new_orso = copy.copy(self.sample.orso)
+        c1 = orso.Column('wavelength', str(binned.coords['wavelength'].unit))
+        c2 = orso.Column('theta', str(binned.coords['theta'].unit))
+        c3 = orso.Column(
+            'Reflectivity', 'dimensionless',
+            'A 2D map with theta in horizontal and wavelength in vertical')
+        new_orso.columns = [c1, c2, c3]
+        out_array = np.zeros((binned.shape[0] + 2, binned.shape[1]))
+        out_array[0] = wavelength_c
+        out_array[1] = theta_c
+        out_array[2:] = binned.values
+        np.savetxt(filename, out_array.T, fmt='%.16e', header=str(new_orso))

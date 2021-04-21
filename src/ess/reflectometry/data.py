@@ -67,7 +67,7 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        return binning._q_bin(self, bins, unit)
+        return binning._q_bin(self, bins, unit).bins.sum()
 
     def wavelength_theta_bin(self,
                              bins=None,
@@ -93,11 +93,9 @@ class ReflData:
                                    unit=units[0],
                                    values=bins[0])
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
-        return sc.bin(
-            self.data,
-            erase=['tof', 'detector_id'],
-            edges=[theta_bins, wavelength_bins],
-        ) / (self.event.shape[0] * sc.units.dimensionless)
+        return sc.bin(self.data.bins.concatenate('detector_id'),
+                      edges=[wavelength_bins, theta_bins]) / (
+                          self.event.shape[0] * sc.units.dimensionless)
 
     def q_theta_bin(self,
                     bins=None,
@@ -121,8 +119,7 @@ class ReflData:
             ]
         q_bins = sc.array(dims=["qz"], unit=units[0], values=bins[0])
         theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
-        return sc.bin(self.data,
-                      erase=['tof', 'detector_id', 'wavelength'],
+        return sc.bin(self.data.bins.concatenate('detector_id'),
                       edges=[theta_bins, q_bins]) / (self.event.shape[0] *
                                                      sc.units.dimensionless)
 
@@ -152,11 +149,9 @@ class ReflData:
                                    unit=units[0],
                                    values=bins[0])
         q_bins = sc.array(dims=["qz"], unit=units[1], values=bins[1])
-        return sc.bin(
-            self.data,
-            erase=['tof', 'detector_id', 'theta'],
-            edges=[q_bins, wavelength_bins],
-        ) / (self.event.shape[0] * sc.units.dimensionless)
+        return sc.bin(self.data.bins.concatenate('detector_id'),
+                      edges=[wavelength_bins, q_bins]) / (
+                          self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
@@ -317,42 +312,69 @@ class ReflData:
     def theta_masking(self, theta_min=None, theta_max=None):
         """
         Masking data based on reflected angle.
-
         Args:
             theta_min (`sc.Variable`, optional): Minimum theta to be used. Optional, default no minimum mask.
             theta_max (`sc.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
         """
         if theta_min is None:
-            theta_min = sc.min(self.event.coords["theta"])
+            theta_min = sc.min(
+                self.data.bins.constituents['data'].coords["theta"])
         if theta_max is None:
-            theta_max = sc.max(self.event.coords["theta"])
-        theta_max = sc.to_unit(theta_max, self.event.coords['theta'].unit)
-        theta_min = sc.to_unit(theta_min, self.event.coords['theta'].unit)
-        self.data.bins.masks["theta"] = (
-            self.data.bins.coords["theta"] <
-            theta_min) | (self.data.bins.coords["theta"] > theta_max)
+            theta_max = sc.max(
+                self.data.bins.constituents['data'].coords["theta"])
+        theta_max = sc.to_unit(
+            theta_max,
+            self.data.bins.constituents['data'].coords['theta'].unit)
+        wavelength_min = sc.to_unit(
+            theta_min,
+            self.data.bins.constituents['data'].coords['theta'].unit)
+        range = [
+            sc.min(self.data.bins.constituents['data'].coords['theta']).value,
+            theta_min.value, theta_max.value,
+            sc.max(self.data.bins.constituents['data'].coords['theta']).value
+        ]
+        theta = sc.array(
+            dims=['theta'],
+            unit=self.data.bins.constituents['data'].coords['theta'].unit,
+            values=range)
+        self.data = sc.bin(self.data, edges=[theta])
+        self.data.masks['theta'] = sc.array(dims=['theta'],
+                                            values=[True, False, True])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
         Masking data based on wavelength.
-
         Args:
             wavelength_min (`sc.Variable`, optional): Minimum wavelength to be used. Optional, default no minimum mask.
             wavelength_max (`sc.Variable`, optional): Maximum wavelength to be used. Optional, default no maximum mask.
         """
         if wavelength_min is None:
-            wavelength_min = sc.min(self.event.coords["wavelength"])
+            wavelength_min = sc.min(
+                self.data.bins.constituents['data'].coords["wavelength"])
         if wavelength_max is None:
-            wavelength_max = sc.max(self.event.coords["wavelength"])
-        wavelength_max = sc.to_unit(wavelength_max,
-                                    self.event.coords['wavelength'].unit)
-        wavelength_min = sc.to_unit(wavelength_min,
-                                    self.event.coords['wavelength'].unit)
-        self.data.bins.masks["wavelength"] = (
-            self.data.bins.coords["wavelength"] < wavelength_min) | (
-                self.data.bins.coords["wavelength"] > wavelength_max)
+            wavelength_max = sc.max(
+                self.data.bins.constituents['data'].coords["wavelength"])
+        wavelength_max = sc.to_unit(
+            wavelength_max,
+            self.data.bins.constituents['data'].coords['wavelength'].unit)
+        wavelength_min = sc.to_unit(
+            wavelength_min,
+            self.data.bins.constituents['data'].coords['wavelength'].unit)
+        range = [
+            sc.min(self.data.bins.constituents['data'].coords['wavelength']).
+            value, wavelength_min.value, wavelength_max.value,
+            sc.max(
+                self.data.bins.constituents['data'].coords['wavelength']).value
+        ]
+        wavelength = sc.array(
+            dims=['wavelength'],
+            unit=self.data.bins.constituents['data'].coords['wavelength'].unit,
+            values=range)
+        self.data = sc.bin(self.data, edges=[wavelength])
+        self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
+                                                 values=[True, False, True])
 
-    def write(self, filename, q_bin_kwargs=None):
+    def write(self, filename, q_bin_kwargs=None, header=None):
         """
         Write the reflectometry intensity data to a file.
 
@@ -361,19 +383,18 @@ class ReflData:
             q_bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
         """
         if q_bin_kwargs is None:
-            binned = self.q_bin().bins.sum()
+            binned = self.q_bin()
         else:
-            binned = self.q_bin(**q_bin_kwargs).bins.sum()
+            binned = self.q_bin(**q_bin_kwargs)
         q_z_edges = binned.coords["qz"].values
         q_z_vector = q_z_edges[:-1] + np.diff(q_z_edges)
         dq_z_vector = binned.coords["sigma_qz_by_qz"].values
         intensity = binned.data.values
         dintensity = np.sqrt(binned.data.variances)
-        try:
+        if header is None:
             header = str(self.orso)
-        except AttributeError:
-            header = ''
         np.savetxt(filename,
                    np.array([q_z_vector, intensity, dintensity,
                              dq_z_vector]).T,
+                   fmt='%.16e',
                    header=header)
