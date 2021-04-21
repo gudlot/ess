@@ -9,7 +9,7 @@ From this super-class, instrument specfic sub-classes may be created (see for ex
 import numpy as np
 import scipp as sc
 import scippneutron as scn
-from ess.reflectometry import corrections, resolution, binning, orso
+from ess.reflectometry import corrections, resolution, binning, orso, write
 
 
 class ReflData:
@@ -384,27 +384,23 @@ class ReflData:
         self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
                                                  values=[True, False, True])
 
-    def write(self, filename, q_bin_kwargs=None, header=None):
+    def write_reflectometry(self, filename, bin_kwargs=None, header=None):
         """
         Write the reflectometry intensity data to a file.
 
         Args:
             filename (`str`): The file path for the file to be saved to.
-            q_bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
+            bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
+            header (`ess.reflectometry.Orso`): ORSO-compatible header object.
         """
-        if q_bin_kwargs is None:
-            binned = self.q_bin()
-        else:
-            binned = self.q_bin(**q_bin_kwargs)
-        q_z_edges = binned.coords["qz"].values
-        q_z_vector = q_z_edges[:-1] + np.diff(q_z_edges)
-        dq_z_vector = binned.coords["sigma_qz_by_qz"].values
-        intensity = binned.data.values
-        dintensity = np.sqrt(binned.data.variances)
-        if header is None:
-            header = str(self.orso)
-        np.savetxt(filename,
-                   np.array([q_z_vector, intensity, dintensity,
-                             dq_z_vector]).T,
-                   fmt='%.16e',
-                   header=header)
+        write.reflectometry(self, filename, bin_kwargs, header)
+
+    def write_wavelength_theta(self, filename, bins, header=None):
+        """
+        Write the reflectometry intensity data as a function of wavelength-theta to a file.
+
+        Args:
+            filename (`str`): The file path for the file to be saved to.
+            bins (`tuple` of `array_like`): wavelength and theta edges.
+        """
+        write.wavelength_theta(self, filename, bins)

@@ -60,6 +60,7 @@ BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
 BINNED.attrs['instrument_name'] = sc.scalar(value='AMOR')
 BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 
+
 class TestData(unittest.TestCase):
     def test_refldata_init(self):
         """
@@ -635,7 +636,7 @@ class TestData(unittest.TestCase):
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         file_path = (os.path.dirname(os.path.realpath(__file__)) +
                      os.path.sep + "test1.txt")
-        p.write(file_path)
+        p.write_reflectometry(file_path)
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (4, 199))
 
@@ -656,7 +657,7 @@ class TestData(unittest.TestCase):
         bins = np.linspace(0, 11, 4)
         file_path = (os.path.dirname(os.path.realpath(__file__)) +
                      os.path.sep + "test2.txt")
-        p.write(file_path, {"bins": bins})
+        p.write_reflectometry(file_path, {"bins": bins})
         written_data = np.loadtxt(file_path, unpack=True)
         assert_almost_equal(written_data[0], bins[:-1] + np.diff(bins))
         assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
