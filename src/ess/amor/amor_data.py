@@ -23,7 +23,7 @@ class AmorData(ReflData):
         experiment_id=None,
         experiment_date=None,
         sample_description=None,
-        notebook_file=None,
+        reduction_file=None,
         data_file=None,
         reduction_creator_affiliation=None,
         sample_angle_offset=0 * sc.units.deg,
@@ -40,7 +40,14 @@ class AmorData(ReflData):
     ):
         """
         Args:
-            data (`scipp._scipp.core.DataArray`): The data to be reduced.
+            data (`scipp._scipp.core.DataArray` or `str`): The data to be reduced or the path to the file to be reduced.
+            reduction_creator (`str`): The name of the creator of the reduction. Optional, default `None`.
+            data_owner (`str`): The name of the owner of the data. Optional, default `None`.
+            experiment_id (`str`): The experimental identifier. Optional, default `None`.
+            experiment_date (`str`): The date or date range for the experiment. Optional, default `None`.
+            sample_description (`str`): A short description of the sample. Optional, default `None`.
+            reduction_file (`str`): The name of the file used for reduction (.py script or .ipynb notebook). Optional, default `None`.
+            data_file (`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
             sample_angle_offset (`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
             gravity (`bool`, optional): Should gravity be accounted for. Optional, default `True`.
             beam_size (`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
@@ -56,11 +63,6 @@ class AmorData(ReflData):
         Attributes:
             tau (`sc.Variable`): Half of the inverse of the chopper speed.
         """
-        if not isinstance(data, sc._scipp.core.DataArray):
-            self.data_file = data
-            data = scn.load_nexus(self.data_file)
-        else:
-            self.data_file = data_file
         super().__init__(
             data,
             sample_angle_offset=sample_angle_offset,
@@ -68,15 +70,21 @@ class AmorData(ReflData):
             beam_size=beam_size,
             sample_size=sample_size,
             detector_spatial_resolution=detector_spatial_resolution,
+            data_file=data_file,
         )
+        # These are Amor specific parameters
         self.tau = 1 / (2 * chopper_speed)
         self.chopper_detector_distance = chopper_detector_distance
         self.chopper_chopper_distance = chopper_chopper_distance
         self.chopper_phase = chopper_phase
         self.wavelength_cut = wavelength_cut
+        # The source position is not the true source position due to the
+        # use of choppers to define the pulse.
         self.data.attrs["source_position"] = sc.geometry.position(
             0.0 * sc.units.m, 0.0 * sc.units.m, -chopper_sample_distance)
         self.tof_correction()
+        # The wavelength contribution to the resolution function, defined
+        # by the distance between the two choppers.
         self.data.coords[
             "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
                 sc.geometry.z(self.data.coords["position"]) -
@@ -84,18 +92,14 @@ class AmorData(ReflData):
         self.find_wavelength()
         self.find_theta()
         self.illumination()
-        self.binned = self.wavelength_theta_bin()
         self.find_qz()
         self._setup_orso(reduction_creator, reduction_creator_affiliation,
                          sample_description, data_owner, experiment_id,
-                         experiment_date, notebook_file)
+                         experiment_date, reduction_file)
 
     def _setup_orso(self, reduction_creator, reduction_creator_affiliation,
                     sample_description, data_owner, experiment_id,
-                    experiment_date, notebook_file):
-        experiment = orso.Experiment(self.data.attrs['instrument_name'].value,
-                                     'neutron')
-        self.orso.data_source.experiment = experiment
+                    experiment_date, reduction_file):
         measurement = orso.Measurement(
             'energy-dispersive',
             orso.ValueScalar(
@@ -128,8 +132,8 @@ class AmorData(ReflData):
             self.orso.data_source.experiment_id = experiment_id
         if experiment_date is not None:
             self.orso.data_source.experiment_date = experiment_date
-        if notebook_file is not None:
-            self.orso.reduction.script = notebook_file
+        if reduction_file is not None:
+            self.orso.reduction.script = reduction_file
         try:
             self.orso.reduction.input_files = orso.Files(
                 [orso.File(self.data_file)], [None])
@@ -187,7 +191,7 @@ class AmorData(ReflData):
 
 class AmorReference(AmorData):
     """
-    Additional functionality of the reference datasets
+    Additional functionality of the reference datasets.
     """
     def __init__(self,
                  data,
@@ -206,7 +210,7 @@ class AmorReference(AmorData):
                  data_file=None):
         """
         Args:
-            data (`scipp._scipp.core.DataArray`): The data to be reduced.
+            data (`scipp._scipp.core.DataArray` or `str`): The data to be reduced or the path to the file to be reduced.
             sample_angle_offset (`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
             gravity (`bool`, optional): Should gravity be accounted for. Optional, default `True`.
             beam_size (`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
@@ -219,6 +223,7 @@ class AmorReference(AmorData):
             chopper_phase (`sc.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
             wavelength_cut (`sc.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
             m_value (`sc.Variable`, optional): m-value of supermirror for reference. Optional, default `5`.
+            data_file (`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
 
         Attributes:
             tau (`sc.Variable`): Half of the inverse of the chopper speed.
@@ -236,6 +241,7 @@ class AmorReference(AmorData):
             chopper_chopper_distance=chopper_chopper_distance,
             chopper_phase=chopper_phase,
             wavelength_cut=wavelength_cut,
+            data_file=data_file,
         )
         self.m_value = m_value
         supermirror_min_q = ((0.022) * self.event.coords['qz'].unit)
@@ -271,7 +277,7 @@ class Normalisation:
         self.sample = sample
         self.reference = reference
         if self.reference.data_file is None:
-            self.sample.orso.reduction.comment += 'live reduction'
+            self.sample.orso.reduction.comment += 'Live reduction'
         else:
             self.sample.orso.reduction.input_files.reference_files = [
                 orso.File(self.reference.data_file)

@@ -25,17 +25,24 @@ class ReflData:
         beam_size=0.001 * sc.units.m,
         sample_size=0.01 * sc.units.m,
         detector_spatial_resolution=0.0025 * sc.units.m,
+        data_file=None,
     ):
         """
         Args:
-            data (`scipp._scipp.core.DataArray`): The data to be reduced.
+            data (`scipp._scipp.core.DataArray` or `str`): The data to be reduced or the path to the file to be reduced.
             sample_angle_offset (`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
             gravity (`bool`, optional): Should gravity be accounted for. Optional, default `True`.
             beam_size (`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
             sample_size (`sc.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-            detector_spatial_resolution (`sc.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
+            detector_spatial_resolution (`sc.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`.
+            data_file (`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
         """
-        self.data = data
+        if isinstance(data, str):
+            self.data_file = data
+            self.data = scn.load_nexus(self.data_file)
+        else:
+            self.data_file = data_file
+            self.data = data
         self.data.bins.constituents["data"].variances = np.ones_like(
             self.data.bins.constituents["data"].values)
         self.sample_angle_offset = sample_angle_offset
@@ -45,6 +52,9 @@ class ReflData:
         self.detector_spatial_resolution = detector_spatial_resolution
         self.orso = orso.Orso(orso.Creator(), orso.DataSource(),
                               orso.Reduction(), [])
+        experiment = orso.Experiment(self.data.attrs['instrument_name'].value,
+                                     'neutron')
+        self.orso.data_source.experiment = experiment
 
     @property
     def event(self):

@@ -107,7 +107,7 @@ class TestAmorData(unittest.TestCase):
                                experiment_id='1234',
                                experiment_date='2021-04-21',
                                sample_description='my sample',
-                               notebook_file='my_notebook.ipynb',
+                               reduction_file='my_notebook.ipynb',
                                chopper_phase=-5 * sc.units.deg,
                                chopper_chopper_distance=0.3 * sc.units.m,
                                chopper_detector_distance=18e10 *

@@ -57,6 +57,8 @@ Z = sc.Variable(
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
 
+BINNED.attrs['instrument_name'] = sc.scalar(value='AMOR')
+BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 
 class TestData(unittest.TestCase):
     def test_refldata_init(self):
