@@ -277,7 +277,7 @@ class Normalisation:
         self.sample = sample
         self.reference = reference
         if self.reference.data_file is None:
-            self.sample.orso.reduction.comment += 'Live reduction'
+            self.sample.orso.reduction.comment = 'Live reduction'
         else:
             self.sample.orso.reduction.input_files.reference_files = [
                 orso.File(self.reference.data_file)
@@ -288,8 +288,8 @@ class Normalisation:
         Perform q-binned normalisation.
 
         Args:
-            bins (`array_like`, optional): q-bin edges. Defaults to the minimum q-range available with 100 bins.
-            unit (`scipp._scipp.core.Unit`, optional): Unit for q. Defaults to 1/Å.
+            bins (`array_like`, optional): q-bin edges. Optional, defaults to the minimum q-range available with 100 bins.
+            unit (`scipp._scipp.core.Unit`, optional): Unit for q. Optional, defaults to 1/Å.
 
         Returns:
             (`scipp._scipp.core.DataArray`): Normalised data array binned into qz with resolution.
@@ -314,7 +314,7 @@ class Normalisation:
             del binned_reference.coords['sigma_qz_by_qz']
         else:
             raise sc.NotFoundError("qz coordinate cannot be found.")
-        return binned_sample.bins.sum() / binned_reference.bins.sum()
+        return binned_sample / binned_reference
 
     def wavelength_theta_bin(self, bins):
         """

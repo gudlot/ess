@@ -104,6 +104,7 @@ class TestAmorData(unittest.TestCase):
         p = amor_data.AmorData(BINNED.copy(),
                                reduction_creator='andrew',
                                data_owner='andrew',
+                               reduction_creator_affiliation='ess',
                                experiment_id='1234',
                                experiment_date='2021-04-21',
                                sample_description='my sample',
@@ -136,6 +137,7 @@ class TestAmorData(unittest.TestCase):
         assert_almost_equal(p.chopper_phase.value, -5)
         assert_almost_equal(p.wavelength_cut.value, 2.)
         assert_equal(p.orso.creator.name, 'andrew')
+        assert_equal(p.orso.creator.affiliation, 'ess')
         assert_equal(p.orso.data_source.owner, 'andrew')
         assert_equal(p.orso.data_source.experiment_id, '1234')
         assert_equal(p.orso.data_source.experiment_date, '2021-04-21')
@@ -219,3 +221,106 @@ class TestNormalisation(unittest.TestCase):
         z = amor_data.Normalisation(p, q)
         assert_almost_equal(z.sample.data.bins.constituents['data'].values,
                             p.data.data.bins.constituents['data'].values)
+
+    def test_normalisation_data_file(self):
+        p = amor_data.AmorData(BINNED.copy())
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "reference.nxs")
+        q = amor_data.AmorReference(BINNED.copy(), data_file=file_path)
+        z = amor_data.Normalisation(p, q)
+        assert_equal(
+            z.sample.orso.reduction.input_files.reference_files[0].file,
+            file_path)
+
+    def test_q_bin_norm(self):
+        p = amor_data.AmorData(BINNED.copy())
+        p.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        p.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        q = amor_data.AmorData(BINNED.copy())
+        q.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        q.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        z = amor_data.Normalisation(p, q)
+        del z.sample.event.coords['qz']
+        with self.assertRaises(sc.NotFoundError):
+            z.q_bin()
+
+    def test_write_reflectometry_norm(self):
+        p = amor_data.AmorData(BINNED.copy())
+        p.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        p.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        q = amor_data.AmorData(BINNED.copy())
+        q.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        q.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        z = amor_data.Normalisation(p, q)
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "test1.txt")
+        z.write_reflectometry(file_path)
+        written_data = np.loadtxt(file_path, unpack=True)
+        assert_equal(written_data.shape, (4, 199))
+
+    def test_binwavelength_theta_norm(self):
+        p = amor_data.AmorData(BINNED.copy())
+        p.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        p.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        q = amor_data.AmorData(BINNED.copy())
+        q.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        q.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        z = amor_data.Normalisation(p, q)
+        bins = np.linspace(0, 100, 10)
+        k = z.wavelength_theta_bin((bins, bins))
+        assert_equal(k.shape, (9, 9))
+
+    def test_write_wavelength_theta_norm(self):
+        p = amor_data.AmorData(BINNED.copy())
+        p.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        p.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        q = amor_data.AmorData(BINNED.copy())
+        q.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        q.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        z = amor_data.Normalisation(p, q)
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "test1.txt")
+        bins = np.linspace(0, 100, 10)
+        z.write_wavelength_theta(file_path, (bins, bins))
+        written_data = np.loadtxt(file_path, unpack=True)
+        assert_equal(written_data.shape, (11, 9))

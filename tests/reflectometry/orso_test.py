@@ -59,6 +59,10 @@ class TestOrso(unittest.TestCase):
         assert_almost_equal(c.magnitude, 1)
         assert_equal(c.unit, 'm')
 
+    def test_value_scalar_repr(self):
+        c = orso.ValueScalar(1., 'm')
+        assert_equal(c.__repr__(), 'magnitude: 1.0\nunit: m\n')
+
     def test_value_scalar_angstrom(self):
         c = orso.ValueScalar(1., '\xC5')
         assert_almost_equal(c.magnitude, 1)

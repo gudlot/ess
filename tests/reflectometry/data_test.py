@@ -62,6 +62,13 @@ BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 
 
 class TestData(unittest.TestCase):
+    def test_refldata_file(self):
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "sample.nxs")
+        p = data.ReflData(file_path)
+        assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
+        assert_equal(p.data_file, file_path)
+
     def test_refldata_init(self):
         """
         Testing the default initialisation of the ReflData objects.
@@ -663,3 +670,19 @@ class TestData(unittest.TestCase):
         assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
         assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
         assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
+
+    def test_write_wavelength_theta(self):
+        p = data.ReflData(BINNED.copy())
+        p.event.coords["wavelength"] = sc.Variable(
+            dims=["event"],
+            values=DETECTORS.astype(float),
+            unit=sc.units.angstrom)
+        p.event.coords["theta"] = sc.Variable(dims=["event"],
+                                              values=DETECTORS.astype(float),
+                                              unit=sc.units.deg)
+        file_path = (os.path.dirname(os.path.realpath(__file__)) +
+                     os.path.sep + "test1.txt")
+        bins = np.linspace(0, 100, 10)
+        p.write_wavelength_theta(file_path, (bins, bins))
+        written_data = np.loadtxt(file_path, unpack=True)
+        assert_equal(written_data.shape, (11, 9))

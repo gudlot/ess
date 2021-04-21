@@ -403,4 +403,4 @@ class ReflData:
             filename (`str`): The file path for the file to be saved to.
             bins (`tuple` of `array_like`): wavelength and theta edges.
         """
-        write.wavelength_theta(self, filename, bins)
+        write.wavelength_theta(self, filename, bins, header)

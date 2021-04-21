@@ -5,7 +5,10 @@ Functions for file writing
 
 # author: Andrew R. McCluskey (arm61)
 
+import copy
 import numpy as np
+from ess.amor import amor_data
+from ess.reflectometry import orso
 
 
 def reflectometry(data, filename, bin_kwargs=None, header=None):
@@ -31,7 +34,7 @@ def reflectometry(data, filename, bin_kwargs=None, header=None):
     np.savetxt(filename,
                np.array([q_z_vector, intensity, dintensity, dq_z_vector]).T,
                fmt='%.16e',
-               header=header)
+               header=str(header))
 
 
 def wavelength_theta(data, filename, bins, header=None):
@@ -41,15 +44,21 @@ def wavelength_theta(data, filename, bins, header=None):
     Args:
         filename (`str`): The file path for the file to be saved to.
         bins (`tuple` of `array_like`): wavelength and theta edges.
+        header (`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
-    binned = data.sample.wavelength_theta_bin(bins).bins.sum(
-    ) / data.reference.wavelength_theta_bin(bins).bins.sum()
+    if isinstance(data, amor_data.Normalisation):
+        binned = data.sample.wavelength_theta_bin(bins).bins.sum(
+        ) / data.reference.wavelength_theta_bin(bins).bins.sum()
+    else:
+        binned = data.wavelength_theta_bin(bins).bins.sum()
     theta_c = binned.coords['theta'].values[:-1] + np.diff(
         binned.coords['theta'].values)
     wavelength_c = binned.coords['wavelength'].values[:-1] + np.diff(
         binned.coords['wavelength'].values)
     if header is None:
         new_orso = copy.copy(data.orso)
+    else:
+        new_orso = copy.copy(header)
     c1 = orso.Column('wavelength', str(binned.coords['wavelength'].unit))
     c2 = orso.Column('theta', str(binned.coords['theta'].unit))
     c3 = orso.Column(
