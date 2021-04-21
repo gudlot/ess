@@ -9,7 +9,7 @@ From this super-class, instrument specfic sub-classes may be created (see for ex
 import numpy as np
 import scipp as sc
 import scippneutron as scn
-from ess.reflectometry import corrections, resolution, binning
+from ess.reflectometry import corrections, resolution, binning, orso
 
 
 class ReflData:
@@ -43,6 +43,8 @@ class ReflData:
         self.beam_size = beam_size
         self.sample_size = sample_size
         self.detector_spatial_resolution = detector_spatial_resolution
+        self.orso = orso.Orso(orso.Creator(), orso.DataSource(),
+                              orso.Reduction(), [])
 
     @property
     def event(self):
@@ -368,7 +370,7 @@ class ReflData:
         intensity = binned.data.values
         dintensity = np.sqrt(binned.data.variances)
         try:
-            header = self.orso
+            header = str(self.orso)
         except AttributeError:
             header = ''
         np.savetxt(filename,

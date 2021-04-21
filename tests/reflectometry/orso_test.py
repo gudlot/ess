@@ -189,10 +189,7 @@ class TestOrso(unittest.TestCase):
         assert_equal(
             c.input_files.reference_files[0].file,
             os.path.dirname(__file__) + os.sep + 'corrections_test.py')
-        assert_equal(
-            c.comment,
-            'No script is defined, a Jupyter notebook was used for reduction.hi'
-        )
+        assert_equal(c.comment, 'hi')
 
     def test_column(self):
         c = orso.Column('Qz', '1/angstrom')

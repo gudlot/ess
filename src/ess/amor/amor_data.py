@@ -4,6 +4,7 @@ This is the class for data reduction from the Amor instrument, which is a subcla
 Features of this class included correcting for the time-of-flight measurement at Amor.
 """
 import scipp as sc
+import scippneutron as scn
 import numpy as np
 from ess.reflectometry import HDM, orso
 from ess.reflectometry.data import ReflData
@@ -54,6 +55,11 @@ class AmorData(ReflData):
         Attributes:
             tau (`sc.Variable`): Half of the inverse of the chopper speed.
         """
+        if not isinstance(data, sc._scipp.core.DataArray):
+            self.data_file = data
+            data = scn.load_nexus(self.data_file)
+        else:
+            self.data_file = data_file
         super().__init__(
             data,
             sample_angle_offset=sample_angle_offset,
@@ -79,11 +85,16 @@ class AmorData(ReflData):
         self.illumination()
         self.binned = self.wavelength_theta_bin()
         self.find_qz()
-        creator = orso.Creator(reduction_creator,
-                               reduction_creator_affiliation)
+        self._setup_orso(reduction_creator, reduction_creator_affiliation,
+                         sample_description, data_owner, experiment_id,
+                         experiment_date, notebook_file)
+
+    def _setup_orso(self, reduction_creator, reduction_creator_affiliation,
+                    sample_description, data_owner, experiment_id,
+                    experiment_date, notebook_file):
         experiment = orso.Experiment(self.data.attrs['instrument_name'].value,
-                                     'neutron',
-                                     orso.Sample(sample_description))
+                                     'neutron')
+        self.orso.data_source.experiment = experiment
         measurement = orso.Measurement(
             'energy-dispersive',
             orso.ValueScalar(
@@ -93,23 +104,37 @@ class AmorData(ReflData):
                 sc.min(self.event.coords['wavelength']).value,
                 sc.max(self.event.coords['wavelength']).value,
                 str(self.event.coords['wavelength'].unit)))
-        data_source = orso.DataSource(
-            data_owner, 'Paul Scherrer Institut, SINQ', experiment_id,
-            experiment_date, self.data.attrs['experiment_title'].value,
-            experiment, measurement)
-        if data_file is not None:
-            files = orso.Files([orso.File(data_file)], [None])
-            reduction = orso.Reduction(notebook_file, files)
-        else:
-            files = orso.Files([None], [None])
-            reduction = orso.Reduction(notebook_file, files, 'live reduction')
-        c1 = orso.Column('Qz', '1/angstrom')
-        c2 = orso.Column('RQz', 'dimensionless')
-        c3 = orso.Column('sR', 'dimensionless')
-        c4 = orso.Column('sQ', '1/angstrom',
-                         'sigma of Gaussian resolution function')
-        self.orso = orso.ORSO(creator, data_source, reduction,
-                              [c1, c2, c3, c4])
+        self.orso.data_source.measurement = measurement
+        self.orso.data_source.facility = 'Paul Scherrer Institut, SINQ'
+        self.orso.columns.append(orso.Column('Qz', '1/angstrom'))
+        self.orso.columns.append(orso.Column('RQz', 'dimensionless'))
+        self.orso.columns.append(orso.Column('sR', 'dimensionless'))
+        self.orso.columns.append(
+            orso.Column(
+                'sQ/Qz', 'dimensionless',
+                'fractional description of sigma from Gaussian resolution function'
+            ))
+        if reduction_creator is not None:
+            self.orso.creator.name = reduction_creator
+        if reduction_creator_affiliation is not None:
+            self.orso.creator.affiliation = reduction_creator_affiliation
+        if sample_description is not None:
+            self.orso.data_source.experiment.sample = orso.Sample(
+                sample_description)
+        if data_owner is not None:
+            self.orso.data_source.owner = data_owner
+        if experiment_id is not None:
+            self.orso.data_source.experiment_id = experiment_id
+        if experiment_date is not None:
+            self.orso.data_source.experiment_date = experiment_date
+        if notebook_file is not None:
+            self.orso.reduction.script = notebook_file
+        try:
+            self.orso.reduction.input_files = orso.Files(
+                [orso.File(self.data_file)], [None])
+        except TypeError:
+            self.orso.reduction.input_files = orso.Files([None], [None])
+            self.orso.reduction.comment = 'Live reduction'
 
     def tof_correction(self):
         """
@@ -211,7 +236,6 @@ class AmorReference(AmorData):
             chopper_phase=chopper_phase,
             wavelength_cut=wavelength_cut,
         )
-        self.data_file = data_file
         self.m_value = m_value
         supermirror_min_q = ((0.022) * self.event.coords['qz'].unit)
         supermirror_max_q = self.m_value * supermirror_min_q

@@ -102,6 +102,12 @@ class TestAmorData(unittest.TestCase):
         Testing the default initialisation of the AmorData objects.
         """
         p = amor_data.AmorData(BINNED.copy(),
+                               reduction_creator='andrew',
+                               data_owner='andrew',
+                               experiment_id='1234',
+                               experiment_date='2021-04-21',
+                               sample_description='my sample',
+                               notebook_file='my_notebook.ipynb',
                                chopper_phase=-5 * sc.units.deg,
                                chopper_chopper_distance=0.3 * sc.units.m,
                                chopper_detector_distance=18e10 *
@@ -129,6 +135,11 @@ class TestAmorData(unittest.TestCase):
         assert_almost_equal(p.chopper_chopper_distance.value, 0.3)
         assert_almost_equal(p.chopper_phase.value, -5)
         assert_almost_equal(p.wavelength_cut.value, 2.)
+        assert_equal(p.orso.creator.name, 'andrew')
+        assert_equal(p.orso.data_source.owner, 'andrew')
+        assert_equal(p.orso.data_source.experiment_id, '1234')
+        assert_equal(p.orso.data_source.experiment_date, '2021-04-21')
+        assert_equal(p.orso.reduction.script, 'my_notebook.ipynb')
 
     def test_wavelength_masking(self):
         p = amor_data.AmorData(BINNED.copy())
@@ -203,9 +214,6 @@ class TestAmorReference(unittest.TestCase):
 
 class TestNormalisation(unittest.TestCase):
     def test_normalisation_init(self):
-        """
-        Testing the default initialisation of the AmorReference objects.
-        """
         p = amor_data.AmorData(BINNED.copy())
         q = amor_data.AmorReference(BINNED.copy())
         z = amor_data.Normalisation(p, q)
