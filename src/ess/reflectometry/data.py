@@ -15,16 +15,16 @@ from ess.reflectometry import corrections, resolution, binning, orso, write
 class ReflData:
     """
     The general reflectometry data class.
-    This will be used by the instrument specific sub-class for data storage, and in essence define the data present reduced data.
+    This will be used by the instrument specific sub-class for data storage and reduction.
 
     Args:
         data (:py:class:`scipp._scipp.core.DataArray` or :py:attr:`str`): The data to be reduced or the path to the file to be reduced.
-        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
-        gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`.
-        data_file (:py:attr:`str`): If a :py:class:`scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
+        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default :code:`0 degrees of arc`.
+        gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default :code:`True`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default :code:`0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default :code:`0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default :code:`2.5 mm`.
+        data_file (:py:attr:`str`): If a :py:class:`scipp._scipp.core.DataArray` is given as the :py:attr:`data`, a :py:attr:`data_file` should be defined for output in the file. Optional, default :code:`None`.
 
     """
     def __init__(
@@ -87,7 +87,7 @@ class ReflData:
 
         Args:
             bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`(Å, deg)`.
 
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
@@ -104,7 +104,7 @@ class ReflData:
 
         Args:
             bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å^{-1}, deg]`.
 
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
@@ -123,7 +123,7 @@ class ReflData:
 
         Args:
             bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å, Å^{-1}]`.
 
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.

@@ -13,29 +13,29 @@ from ess.reflectometry.data import ReflData
 
 class AmorData(ReflData):
     """
-    Reduction of AMOR data.
+    Reduction of a single Amor dataset.
 
     Args:
         data (:py:class:`scipp._scipp.core.DataArray` or :py:attr:`str`): The data to be reduced or the path to the file to be reduced.
-        reduction_creator (:py:attr:`str`, optional): The name of the creator of the reduction. Optional, default `None`.
-        data_owner (:py:attr:`str`, optional): The name of the owner of the data. Optional, default `None`.
-        experiment_id (:py:attr:`str`, optional): The experimental identifier. Optional, default `None`.
-        experiment_date (:py:attr:`str`, optional): The date or date range for the experiment. Optional, default `None`.
-        sample_description (:py:attr:`str`, optional): A short description of the sample. Optional, default `None`.
-        reduction_file (:py:attr:`str`, optional): The name of the file used for reduction (.py script or .ipynb notebook). Optional, default `None`.
-        data_file (:py:attr:`str`, optional): If a py:class:`scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
-        reduction_creator_affiliation (:py:attr:`str`, optional): The affiliation of the reduction owner. Optional, defaults to `None`.
-        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
+        reduction_creator (:py:attr:`str`, optional): The name of the creator of the reduction. Optional, default :code:`None`.
+        data_owner (:py:attr:`str`, optional): The name of the owner of the data. Optional, default :code:`None`.
+        experiment_id (:py:attr:`str`, optional): The experimental identifier. Optional, default :code:`None`.
+        experiment_date (:py:attr:`str`, optional): The date or date range for the experiment. Optional, default :code:`None`.
+        sample_description (:py:attr:`str`, optional): A short description of the sample. Optional, default :code:`None`.
+        reduction_file (:py:attr:`str`, optional): The name of the file used for reduction (:code:`.py` script or :code:`.ipynb` notebook). Optional, default :code:`None`.
+        data_file (:py:attr:`str`, optional): If a :py:class:`scipp._scipp.core.DataArray` is given as the :py:attr:`data`, a :py:attr:`data_file` should be defined for output in the file. Optional, default :code:`None`.
+        reduction_creator_affiliation (:py:attr:`str`, optional): The affiliation of the reduction owner. Optional, defaults to :code:`None`.
+        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default :code:`0 degrees of arc`.
         gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
-        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default `15. m`
-        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
-        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
-        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
-        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
-        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default :code:`0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default :code:`0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default :code:`2.5 mm`
+        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default :code:`15. m`
+        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default :code:`6.6666... e-6 µs^{-1}`.
+        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default :code:`19 m`.
+        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default :code:`0.49 m`
+        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default :code:`-8. degrees of arc`.
+        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default :code:`2.4 Å`.
 
     Attributes:
         tau (:py:class:`scipp._scipp.core.Variable`): Half of the inverse of the chopper speed.
@@ -104,13 +104,13 @@ class AmorData(ReflData):
         Setup the ORSO header object.
 
         Args:
-            reduction_creator (:py:attr:`str`, optional): The name of the creator of the reduction. Optional, default `None`.
-            reduction_creator_affiliation (:py:attr:`str`, optional): The affiliation of the reduction owner. Optional, defaults to `None`.
-            data_owner (:py:attr:`str`, optional): The name of the owner of the data. Optional, default `None`.
-            experiment_id (:py:attr:`str`, optional): The experimental identifier. Optional, default `None`.
-            experiment_date (:py:attr:`str`, optional): The date or date range for the experiment. Optional, default `None`.
-            sample_description (:py:attr:`str`, optional): A short description of the sample. Optional, default `None`.
-            reduction_file (:py:attr:`str`, optional): The name of the file used for reduction (.py script or .ipynb notebook). Optional, default `None`.
+            reduction_creator (:py:attr:`str`, optional): The name of the creator of the reduction. Optional, default :code:`None`.
+            reduction_creator_affiliation (:py:attr:`str`, optional): The affiliation of the reduction owner. Optional, defaults to :code:`None`.
+            data_owner (:py:attr:`str`, optional): The name of the owner of the data. Optional, default :code:`None`.
+            experiment_id (:py:attr:`str`, optional): The experimental identifier. Optional, default :code:`None`.
+            experiment_date (:py:attr:`str`, optional): The date or date range for the experiment. Optional, default :code:`None`.
+            sample_description (:py:attr:`str`, optional): A short description of the sample. Optional, default :code:`None`.
+            reduction_file (:py:attr:`str`, optional): The name of the file used for reduction (:code:`.py` script or :code:`.ipynb` notebook). Optional, default :code:`None`.
         """
         measurement = orso.Measurement(
             'energy-dispersive',
@@ -155,7 +155,7 @@ class AmorData(ReflData):
 
     def tof_correction(self):
         """
-        Here we correct for the presence of the chopper with respect to the "true" ToF.
+        A correction for the presense of the chopper with respect to the "true" ToF.
         """
         self.data.coords["position"].unit = sc.units.m
         buf = self.data.bins.constituents["data"]
@@ -178,11 +178,11 @@ class AmorData(ReflData):
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
-        Overwriting the :py:class:`ReflData` wavelength masking functionality.
+        Overwriting the :py:class:`ess.reflectometry.data.ReflData` wavelength masking functionality.
 
         Args:
-            wavelength_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum wavelength to be used. Optional, default to `wavelength_cut` value.
-            wavelength_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum wavelength to be used. Optional, default to `wavelength_min + tau * (HDM / chopper_detector_distance)`.
+            wavelength_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum wavelength to be used. Optional, default to :code:`wavelength_cut` value.
+            wavelength_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum wavelength to be used. Optional, default to :code:`wavelength_min + tau * (ess.reflectometry.HDM / chopper_detector_distance)`.
         """
         if wavelength_min is None:
             wavelength_min = self.wavelength_cut
@@ -203,29 +203,28 @@ class AmorData(ReflData):
 
 class AmorReference(AmorData):
     """
-    Additional functionality of the reference datasets.
+    Additional functionality over the :py:class:`ess.amor.AmorData` class for use with reference supermirror measurements.
 
     Args:
         data (:py:class:`scipp._scipp.core.DataArray` or :py:attr:`str`): The data to be reduced or the path to the file to be reduced.
-        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
-        gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
-        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default `15. m,`
-        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
-        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
-        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
-        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
-        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
-        m_value (:py:class:`scipp._scipp.core.Variable`, optional): m-value of supermirror for reference. Optional, default `5`.
-        data_file (:py:attr:`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
-        supermirror_critical_edge (:py:class:`scipp._scipp.core.Variable`, optional): The q-value at the critial edge for the supermirror. Optional, defaults to 0.022 Å.
-        supermirror_alpha (:py:attr:`float`): The alpha value for the supermirror. Optional, defaults to `2,841`.
+        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default :code:`0 degrees of arc`.
+        gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default :code:`True`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default :code:`0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default :code:`0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default :code:`2.5 mm`
+        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default :code:`15. m,`
+        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default :code:`6.6666... e-6 µs^{-1}`.
+        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default :code:`19 m`.
+        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default :code:`0.49 m`
+        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default :code:`-8. degrees of arc`.
+        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default :code:`2.4 Å`.
+        m_value (:py:class:`scipp._scipp.core.Variable`, optional): m-value of supermirror for reference. Optional, default :code:`5`.
+        data_file (:py:attr:`str`, optional): If a :py:class:`scipp._scipp.core.DataArray` is given as the :py:attr:`data`, a :py:attr:`data_file` should be defined for output in the file. Optional, default :code:`None`.
+        supermirror_critical_edge (:py:class:`scipp._scipp.core.Variable`, optional): The q-value at the critial edge for the supermirror. Optional, defaults to :code:`0.022 Å``.
+        supermirror_alpha (:py:attr:`float`): The alpha value for the supermirror. Optional, defaults to :code:`2.841 Å`.
 
     Attributes:
         tau (:py:class:`scipp._scipp.core.Variable`): Half of the inverse of the chopper speed.
-
     """
     def __init__(self,
                  data,
@@ -262,7 +261,6 @@ class AmorReference(AmorData):
         self.m_value = m_value
         # The normalisation between the min and max of the supermirror is
         # normalised based on the characteristic of the supermirror at Amor
-        # Currently this is hard coded.
         supermirror_max_q = self.m_value * supermirror_critical_edge
         self.event.coords['normalisation'] = sc.ones(
             dims=['event'], shape=self.event.data.shape)
@@ -286,7 +284,7 @@ class AmorReference(AmorData):
 
 class Normalisation:
     """
-    Perform normalisation between a sample and a reference measurement.
+    Normalisation between a sample and a reference measurement.
 
     Args:
         sample (:py:class:`ess.reflectometry.ReflData` or :py:class:`ess.reflectometry.AmorData`): The sample to be normalised.

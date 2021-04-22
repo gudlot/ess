@@ -64,7 +64,7 @@ class Orso:
 
     def __repr__(self):
         """
-        To ensure the prescence of the ORSO top line, the `orso.Orso` class has a slightly different __repr__.
+        To ensure the prescence of the ORSO top line, the `orso.Orso` class has a slightly different :code:`__repr__`.
         """
         return f'# ORSO reflectivity data file | {OSRO_VERSION:.1f} standard | YAML encoding | https://reflectometry.org\n' + _repr(
             self)
@@ -76,8 +76,8 @@ class Creator(Header):
 
     Args:
         name (:py:attr:`str`, optional): The name of the person that performed the reduction, can also include an email address. Optional, defaults to the machine username.
-        affiliation (:py:attr:`str`, optional): The affiliation of the person that performed the reduction. Optional, defaults to `None`.
-        time (:py:attr:`str`, optional): The time that the reduction was performed, in the format `"%Y-%m-%dT%H:%M:%S"`. Optional, defaults to the current time.
+        affiliation (:py:attr:`str`, optional): The affiliation of the person that performed the reduction. Optional, defaults to :code:`None`.
+        time (:py:attr:`str`, optional): The time that the reduction was performed, in the format :code:`"%Y-%m-%dT%H:%M:%S"`. Optional, defaults to the current time.
         system (:py:attr:`str`, optional): The machine that the reduction was performed on. Optional, defaults to the machine's host name.
     """
     def __init__(self, name=None, affiliation=None, time=None, system=None):
@@ -99,7 +99,7 @@ class Sample(Header):
     Sample information.
 
     Args:
-        name (:py:attr:`str`, optional): A identifiable description for the sample. Optional, defaults to `'Sample'`.
+        name (:py:attr:`str`, optional): A identifiable description for the sample. Optional, defaults to :code:`'Sample'`.
     """
     def __init__(self, name='Sample'):
         self.name = name
@@ -111,7 +111,7 @@ class ValueScalar(Header):
 
     Args:
         magnitude (:py:attr:`float`): The value.
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to `'dimensionless'`.
+        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
     """
     def __init__(self, magnitude, unit='dimensionless'):
         self.magnitude = magnitude
@@ -127,7 +127,7 @@ class ValueRange(Header):
     Args:
         min (:py:attr:`float`): The minimum value.
         max (:py:attr:`float`): The maximum value.
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to `'dimensionless'`.
+        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
     """
     def __init__(self, min, max, unit='dimensionless'):
         self.min = min
@@ -142,10 +142,10 @@ class Measurement(Header):
     Details of the measurement that is performed.
 
     Args:
-        scheme (:py:attr:`str`, optional): The measurement scheme (ie. `'energy-dispersive'`). Optional, defaults to `'None'`.
-        omega (:py:class:`orso.ValueScalar` or :py:class:`orso.ValueRange`, optional): The incident angle value or range. Optional, defaults to `'None'`.
-        wavelength (:py:class:`orso.ValueScalar` or :py:class:`orso.ValueRange`, optional): The measured wavelength value or range. Optional, defaults to `'None'`.
-        polarisation (:py:attr:`str`, optional): The polarisation present, typically as a `'+'` or `'-'` or combination. Optional, defaults to `'None'`.
+        scheme (:py:attr:`str`, optional): The measurement scheme (ie. :code:`'energy-dispersive'`). Optional, defaults to :code:`'None'`.
+        omega (:py:class:`orso.ValueScalar` or :py:class:`orso.ValueRange`, optional): The incident angle value or range. Optional, defaults to :code:`'None'`.
+        wavelength (:py:class:`orso.ValueScalar` or :py:class:`orso.ValueRange`, optional): The measured wavelength value or range. Optional, defaults to :code:`'None'`.
+        polarisation (:py:attr:`str`, optional): The polarisation present, typically as a :code:`'+'` or :code:`'-'` or combination. Optional, defaults to :code:`'None'`.
     """
     def __init__(self,
                  scheme=None,
@@ -167,9 +167,9 @@ class Experiment(Header):
     Experimental details.
 
     Args:
-        instrument (:py:attr:`str`, optional): The name of the instrument. Optional, defaults to `'None'`.
-        probe (:py:attr:`str`, optional): The name of the probing radiation. Optional, defaults to `'None'`.
-        sample (:py:class:`orso.Sample`, optional): A description of the sample. Optional, defaults to `'None'`.
+        instrument (:py:attr:`str`, optional): The name of the instrument. Optional, defaults to :code:`'None'`.
+        probe (:py:attr:`str`, optional): The name of the probing radiation. Optional, defaults to :code:`'None'`.
+        sample (:py:class:`orso.Sample`, optional): A description of the sample. Optional, defaults to :code:`'None'`.
     """
     def __init__(self, instrument=None, probe=None, sample=None):
         if instrument is not None:
@@ -185,13 +185,13 @@ class DataSource(Header):
     Details of where and who the data came from.
 
     Args:
-        owner (:py:attr:`str`, optional): The name (and affiliation/email address) of the owner of the data. Optional, defaults to `'None'`.
-        facility (:py:attr:`str`, optional): The name of the facility the data was generated at. Optional, defaults to `'None'`.
-        experiment_id (:py:attr:`str`, optional): An identifier for the experiment (ie. proposal ID). Optional, defaults to `'None'`.
-        experiment_date (:py:attr:`str`, optional): The date or date range that the experiment was conducted on, in the format `"%Y-%m-%d"`. Optional, defaults to `'None'`.
-        title (:py:attr:`str`, optional): A name of the data source. Optional, defaults to `'None'`.
-        experiment (:py:class:`orso.Experiment`, optional): Information about the experimental setup. Optional, defaults to `'None'`.
-        measurement (:py:class:`orso.Measurement`, optional): Details of the measurement scheme. Optional, defaults to `'None'`.
+        owner (:py:attr:`str`, optional): The name (and affiliation/email address) of the owner of the data. Optional, defaults to :code:`'None'`.
+        facility (:py:attr:`str`, optional): The name of the facility the data was generated at. Optional, defaults to :code:`'None'`.
+        experiment_id (:py:attr:`str`, optional): An identifier for the experiment (ie. proposal ID). Optional, defaults to :code:`'None'`.
+        experiment_date (:py:attr:`str`, optional): The date or date range that the experiment was conducted on, in the format :code:`"%Y-%m-%d"`. Optional, defaults to :code:`'None'`.
+        title (:py:attr:`str`, optional): A name of the data source. Optional, defaults to :code:`'None'`.
+        experiment (:py:class:`orso.Experiment`, optional): Information about the experimental setup. Optional, defaults to :code:`'None'`.
+        measurement (:py:class:`orso.Measurement`, optional): Details of the measurement scheme. Optional, defaults to :code:`'None'`.
     """
     def __init__(self,
                  owner=None,
@@ -244,7 +244,7 @@ class Files(Header):
 
     Args:
         data_files (:py:attr:`list` of :py:class:`orso.File`): The experimental data files.
-        reference_files (:py:attr:`list` of :py:class:`orso.File`, optional): The reference files. Optional, defaults to `'None'`.
+        reference_files (:py:attr:`list` of :py:class:`orso.File`, optional): The reference files. Optional, defaults to :code:`'None'`.
     """
     def __init__(self, data_files, reference_files=None):
         self.data_files = data_files
@@ -257,9 +257,9 @@ class Reduction(Header):
     Details of the reduction processes.
 
     Args:
-        script (:py:attr:`str`, optional): The file name/path for the reduction script or notebook. Optional, defaults to `'None'`.
-        input_files (:py:class:`orso.Files`, optional): The input files for the reduction. Optional defaults to `'None'`.
-        comments (:py:attr:`str`, optional): An additional comment on the reduction. Optional, defaults to `'None'`.
+        script (:py:attr:`str`, optional): The file name/path for the reduction script or notebook. Optional, defaults to :code:`'None'`.
+        input_files (:py:class:`orso.Files`, optional): The input files for the reduction. Optional defaults to :code:`'None'`.
+        comments (:py:attr:`str`, optional): An additional comment on the reduction. Optional, defaults to :code:`'None'`.
     """
     def __init__(self, script=None, input_files=None, comment=None):
         self.software = f'ess-{VERSION}'
@@ -276,9 +276,9 @@ class Column:
     Information on a data column.
 
     Args:
-        quantity (:py:attr:`str`): The name of the column
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to `'dimensionless'`.
-        comments (:py:attr:`str`, optional): An additional comment on the column (ie. the definition for an uncertainty column). Optional, defaults to `'None'`.
+        quantity (:py:attr:`str`): The name of the column.
+        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
+        comments (:py:attr:`str`, optional): An additional comment on the column (ie. the definition for an uncertainty column). Optional, defaults to :code:`'None'`.
     """
     def __init__(self, quantity, unit='dimensionless', comment=None):
         self.quantity = quantity

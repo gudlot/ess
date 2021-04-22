@@ -33,7 +33,7 @@ def z_offset(position, offset_value):
     Offset in the z-dimension.
 
     Args:
-        position (:py:class:`scipp._scipp.core.Variable`): Position variable, should be `dtype=vector_3_float64`.
+        position (:py:class:`scipp._scipp.core.Variable`): Position variable, should be :code:`vector_3_float64`.
         offset_value (:py:class:`scipp._scipp.core.Variable`): z-dimension offset value.
 
     Returns:

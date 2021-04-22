@@ -14,7 +14,7 @@ def angle_with_gravity(data, pixel_position, sample_position):
 
     Args:
         data (:py:class:`scipp._scipp.core.DataArray`): Reduction data array.
-        pixel_position (:py:class:`scipp._scipp.core.VariableView`): Detector pixel positions, should be a `vector_3_float64`-type object.
+        pixel_position (:py:class:`scipp._scipp.core.VariableView`): Detector pixel positions, should be a :py:attr:`vector_3_float64`-type object.
         sample_position (:py:class:`scipp._scipp.core.VariableView`): Scattered neutron origin position.
 
     Returns:
