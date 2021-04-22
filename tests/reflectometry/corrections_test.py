@@ -140,9 +140,7 @@ class TestCorrections(unittest.TestCase):
     def test_illumination_range(self):
         beam_size = 100.0 * sc.units.m
         sample_size = 10.0 * sc.units.m
-        theta = sc.Variable(values=[15.0, 30.0],
-                            unit=sc.units.deg,
-                            dims=[''])
+        theta = sc.Variable(values=[15.0, 30.0], unit=sc.units.deg, dims=[''])
         expected_result = sc.Variable(values=[10, 10],
                                       unit=sc.units.m,
                                       dims=[''])
