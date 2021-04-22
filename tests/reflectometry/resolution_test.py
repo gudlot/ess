@@ -10,8 +10,6 @@ from numpy.testing import assert_almost_equal
 import scipp as sc
 from ess.reflectometry import resolution
 
-np.random.seed(1)
-
 
 class TestResolution(unittest.TestCase):
     def test_detector_resolution(self):
