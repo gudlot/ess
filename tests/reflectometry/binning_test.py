@@ -64,7 +64,7 @@ BINNED.bins.constituents['data'].coords["tof"] = sc.Variable(
 BINNED.bins.constituents['data'].coords["qz"] = sc.Variable(
     dims=["event"],
     values=np.linspace(1, 10, N) * 0.1,
-    unit=(1 / sc.units.angstrom).unit,
+    unit=sc.Unit('1/angstrom'),
 )
 BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
                                                        0. * sc.units.m,

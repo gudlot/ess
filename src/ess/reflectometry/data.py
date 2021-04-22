@@ -66,7 +66,7 @@ class ReflData:
         """
         return self.data.bins.constituents["data"]
 
-    def q_bin(self, bins=None, unit=(1 / sc.units.angstrom).unit):
+    def q_bin(self, bins=None, unit=sc.Unit('1/angstrom')):
         """
         Return data that has been binned in the q-bins passed.
 
@@ -98,7 +98,7 @@ class ReflData:
 
     def q_theta_bin(self,
                     bins=None,
-                    units=((1 / sc.units.angstrom).unit, sc.units.deg)):
+                    units=(sc.Unit('1/angstrom'), sc.units.deg)):
         """
         Return data that has been binned in the wavelength and theta bins passed.
 
@@ -116,7 +116,7 @@ class ReflData:
     def wavelength_q_bin(
             self,
             bins=None,
-            units=(sc.units.angstrom, (1 / sc.units.angstrom).unit),
+            units=(sc.units.angstrom, sc.Unit('1/angstrom')),
     ):
         """
         Return data that has been binned in the wavelength and theta bins passed.

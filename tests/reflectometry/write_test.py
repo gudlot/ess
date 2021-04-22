@@ -75,12 +75,12 @@ class TestWrite(unittest.TestCase):
         p.event.coords["qz"] = sc.Variable(
             dims=["event"],
             values=np.linspace(1, 10, N),
-            unit=(1 / sc.units.angstrom).unit,
+            unit=sc.Unit('1/angstrom'),
         )
         p.event.coords["sigma_qz_by_qz"] = sc.Variable(
             dims=["event"],
             values=np.linspace(0.1, 1.0, N),
-            unit=(1 / sc.units.angstrom).unit,
+            unit=sc.Unit('1/angstrom'),
             dtype=sc.dtype.float64,
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"],
@@ -96,12 +96,12 @@ class TestWrite(unittest.TestCase):
         p.event.coords["qz"] = sc.Variable(
             dims=["event"],
             values=np.linspace(1, 10, N),
-            unit=(1 / sc.units.angstrom).unit,
+            unit=sc.Unit('1/angstrom'),
         )
         p.event.coords["sigma_qz_by_qz"] = sc.Variable(
             dims=["event"],
             values=np.linspace(0.1, 1.0, N),
-            unit=(1 / sc.units.angstrom).unit,
+            unit=sc.Unit('1/angstrom'),
             dtype=sc.dtype.float64,
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"],

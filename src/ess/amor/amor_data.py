@@ -291,7 +291,7 @@ class Normalisation:
                 orso.File(self.reference.data_file)
             ]
 
-    def q_bin(self, bins=None, unit=(1 / sc.units.angstrom).unit):
+    def q_bin(self, bins=None, unit=sc.Unit('1/angstrom')):
         """
         Perform q-binned normalisation.
 
