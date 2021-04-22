@@ -98,7 +98,5 @@ def illumination_of_sample(beam_size, sample_size, theta):
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:
-        beam_on_sample = sc.broadcast(sample_size,
-                                      shape=theta.shape,
-                                      dims=theta.dims)
+        beam_on_sample = sample_size
     return beam_on_sample
