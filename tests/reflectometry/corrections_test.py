@@ -138,14 +138,14 @@ class TestCorrections(unittest.TestCase):
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_range(self):
-        beam_size = 1.0 * sc.units.m
+        beam_size = 100.0 * sc.units.m
         sample_size = 10.0 * sc.units.m
         theta = sc.Variable(values=[15.0, 30.0],
                             unit=sc.units.deg,
-                            dims=['events'])
-        expected_result = sc.Variable(values=[3.8637033, 2.0],
+                            dims=[''])
+        expected_result = sc.Variable(values=[10, 10],
                                       unit=sc.units.m,
-                                      dims=['events'])
+                                      dims=[''])
         actual_result = corrections.illumination_of_sample(
             beam_size, sample_size, theta)
         assert_almost_equal(actual_result.values, expected_result.values)
