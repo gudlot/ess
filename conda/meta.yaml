@@ -15,6 +15,7 @@ requirements:
     - scippneutron
     - tifffile
     - astropy
+    - scipy
     - matplotlib
 
 test:
