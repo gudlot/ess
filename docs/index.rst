@@ -8,4 +8,12 @@ Documentation
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
+   :caption: Instruments
+
+   instruments/amor
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Techniques
+
+   techniques/reflectometry
