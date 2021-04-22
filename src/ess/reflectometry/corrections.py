@@ -71,12 +71,12 @@ def illumination_correction(beam_size, sample_size, theta):
     scattering geometry, where the beam is Gaussian in shape.
 
     Args:
-        beam_size (:py:class:`sc.Variable`): Width of incident beam.
-        sample_size (:py:class:`sc.Variable`): Width of sample in the dimension of the beam.
-        theta (:py:class:`sc.Variable`): Incident angle.
+        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam.
+        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam.
+        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
 
     Returns:
-        (:py:class:`sc.Variable`): Correction factor.
+        (:py:class:`scipp._scipp.core.Variable`): Correction factor.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
@@ -89,12 +89,12 @@ def illumination_of_sample(beam_size, sample_size, theta):
     Determine the illumination of the sample by the beam and therefore the size of this illuminated length.
 
     Args:
-        beam_size (:py:class:`sc.Variable`): Width of incident beam, in metres.
-        sample_size (:py:class:`sc.Variable`): Width of sample in the dimension of the beam, in metres.
-        theta (:py:class:`sc.Variable`): Incident angle.
+        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam, in metres.
+        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam, in metres.
+        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
 
     Returns:
-        (:py:class:`sc.Variable`): The size of the beam, for each theta, on the sample.
+        (:py:class:`scipp._scipp.core.Variable`): The size of the beam, for each theta, on the sample.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:

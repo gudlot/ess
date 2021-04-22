@@ -27,18 +27,18 @@ class AmorData(ReflData):
         reduction_creator_affiliation (:py:attr:`str`, optional): The affiliation of the reduction owner. Optional, defaults to `None`.
         sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
         gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-        beam_size (:py:class:`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-        sample_size (:py:class:`sc.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-        detector_spatial_resolution (:py:class:`sc.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
-        chopper_sample_distance (:py:class:`sc.Variable`, optional): Distance from chopper to sample. Optional, default `15.*sc.units.m,`
-        chopper_speed (:py:class:`sc.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
-        chopper_detector_distance (:py:class:`sc.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
-        chopper_chopper_distance (:py:class:`sc.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
-        chopper_phase (:py:class:`sc.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
-        wavelength_cut (:py:class:`sc.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
+        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default `15. m`
+        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
+        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
+        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
+        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
+        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
 
     Attributes:
-        tau (:py:class:`sc.Variable`): Half of the inverse of the chopper speed.
+        tau (:py:class:`scipp._scipp.core.Variable`): Half of the inverse of the chopper speed.
     """
     def __init__(
         self,
@@ -181,8 +181,8 @@ class AmorData(ReflData):
         Overwriting the :py:class:`ReflData` wavelength masking functionality.
 
         Args:
-            wavelength_min (:py:class:`sc.Variable`, optional): Minimum wavelength to be used. Optional, default to `wavelength_cut` value.
-            wavelength_max (:py:class:`sc.Variable`, optional): Maximum wavelength to be used. Optional, default to `wavelength_min + tau * (HDM / chopper_detector_distance)`.
+            wavelength_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum wavelength to be used. Optional, default to `wavelength_cut` value.
+            wavelength_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum wavelength to be used. Optional, default to `wavelength_min + tau * (HDM / chopper_detector_distance)`.
         """
         if wavelength_min is None:
             wavelength_min = self.wavelength_cut
@@ -209,22 +209,22 @@ class AmorReference(AmorData):
         data (:py:class:`scipp._scipp.core.DataArray` or :py:attr:`str`): The data to be reduced or the path to the file to be reduced.
         sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
         gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-        beam_size (:py:class:`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-        sample_size (:py:class:`sc.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-        detector_spatial_resolution (:py:class:`sc.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
-        chopper_sample_distance (:py:class:`sc.Variable`, optional): Distance from chopper to sample. Optional, default `15.*sc.units.m,`
-        chopper_speed (:py:class:`sc.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
-        chopper_detector_distance (:py:class:`sc.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
-        chopper_chopper_distance (:py:class:`sc.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
-        chopper_phase (:py:class:`sc.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
-        wavelength_cut (:py:class:`sc.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
-        m_value (:py:class:`sc.Variable`, optional): m-value of supermirror for reference. Optional, default `5`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`
+        chopper_sample_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to sample. Optional, default `15. m,`
+        chopper_speed (:py:class:`scipp._scipp.core.Variable`, optional): Rotational velocity of the chopper. Optional, default `6.6666... e-6 µs^{-1}`.
+        chopper_detector_distance (:py:class:`scipp._scipp.core.Variable`, optional): Distance from chopper to detector. Optional, default `19 m`.
+        chopper_chopper_distance (:py:class:`scipp._scipp.core.Variable`, optional): The distance between the wavelength defining choppers. Optional, default `0.49 m`
+        chopper_phase (:py:class:`scipp._scipp.core.Variable`, optional): Phase offset between chopper pulse and ToF zero. Optional, default `-8.`.
+        wavelength_cut (:py:class:`scipp._scipp.core.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
+        m_value (:py:class:`scipp._scipp.core.Variable`, optional): m-value of supermirror for reference. Optional, default `5`.
         data_file (:py:attr:`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
-        supermirror_critical_edge (:py:class:`sc.Variable`, optional): The q-value at the critial edge for the supermirror. Optional, defaults to 0.022 Å.
+        supermirror_critical_edge (:py:class:`scipp._scipp.core.Variable`, optional): The q-value at the critial edge for the supermirror. Optional, defaults to 0.022 Å.
         supermirror_alpha (:py:attr:`float`): The alpha value for the supermirror. Optional, defaults to `2,841`.
 
     Attributes:
-        tau (:py:class:`sc.Variable`): Half of the inverse of the chopper speed.
+        tau (:py:class:`scipp._scipp.core.Variable`): Half of the inverse of the chopper speed.
 
     """
     def __init__(self,
