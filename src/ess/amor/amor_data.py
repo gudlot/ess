@@ -207,7 +207,9 @@ class AmorReference(AmorData):
                  chopper_phase=-8.0 * sc.units.deg,
                  wavelength_cut=2.4 * sc.units.angstrom,
                  m_value=5 * sc.units.dimensionless,
-                 data_file=None):
+                 data_file=None,
+                 supermirror_critical_edge=((0.022) * sc.Unit('1/angstrom')),
+                 supermirror_alpha=0.25 / 0.088):
         """
         Args:
             data (`scipp._scipp.core.DataArray` or `str`): The data to be reduced or the path to the file to be reduced.
@@ -224,6 +226,8 @@ class AmorReference(AmorData):
             wavelength_cut (`sc.Variable`, optional): Minimum cutoff for wavelength. Optional, default `2.4 Å`.
             m_value (`sc.Variable`, optional): m-value of supermirror for reference. Optional, default `5`.
             data_file (`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
+            supermirror_critical_edge (`sc.Variable`, optional): The q-value at the critial edge for the supermirror. Optional, defaults to 0.022 Å.
+            supermirror_alpha (`float`): The alpha value for the supermirror. Optional, defaults to `2,841`.
 
         Attributes:
             tau (`sc.Variable`): Half of the inverse of the chopper speed.
@@ -244,8 +248,10 @@ class AmorReference(AmorData):
             data_file=data_file,
         )
         self.m_value = m_value
-        supermirror_min_q = ((0.022) * self.event.coords['qz'].unit)
-        supermirror_max_q = self.m_value * supermirror_min_q
+        # The normalisation between the min and max of the supermirror is
+        # normalised based on the characteristic of the supermirror at Amor
+        # Currently this is hard coded.
+        supermirror_max_q = self.m_value * supermirror_critical_edge
         self.event.coords['normalisation'] = sc.ones(
             dims=['event'], shape=self.event.data.shape)
         self.event.masks[
@@ -254,11 +260,13 @@ class AmorReference(AmorData):
             self.event.coords['qz'].values < supermirror_max_q.
             value] = self.event.coords['normalisation'].values[
                 self.event.coords['qz'].values < supermirror_max_q.value] / (
-                    1.0 - (0.25 / 0.088) * (self.event.coords['qz'].values[
-                        self.event.coords['qz'].values <
-                        supermirror_max_q.value] - supermirror_min_q.value))
+                    1.0 - (supermirror_alpha) *
+                    (self.event.coords['qz'].values[
+                        self.event.coords['qz'].values < supermirror_max_q.
+                        value] - supermirror_critical_edge.value))
         self.event.coords['normalisation'].values[
-            self.event.coords['qz'].values < supermirror_min_q.value] = 1
+            self.event.coords['qz'].values <
+            supermirror_critical_edge.value] = 1
         self.data.bins.constituents[
             'data'].data = self.event.data / self.event.coords[
                 'normalisation'].astype(sc.dtype.float32)
