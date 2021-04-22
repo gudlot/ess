@@ -5,7 +5,6 @@ Tests for resolution module
 # author: Andrew R. McCluskey (arm61)
 
 import unittest
-import numpy as np
 from numpy.testing import assert_almost_equal
 import scipp as sc
 from ess.reflectometry import resolution
