@@ -222,15 +222,16 @@ class TestNormalisation(unittest.TestCase):
         assert_almost_equal(z.sample.data.bins.constituents['data'].values,
                             p.data.data.bins.constituents['data'].values)
 
-    def test_normalisation_data_file(self):
-        p = amor_data.AmorData(BINNED.copy())
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "reference.nxs")
-        q = amor_data.AmorReference(BINNED.copy(), data_file=file_path)
-        z = amor_data.Normalisation(p, q)
-        assert_equal(
-            z.sample.orso.reduction.input_files.reference_files[0].file,
-            file_path)
+    # Commented out until the reference.nxs file has a home
+    # def test_normalisation_data_file(self):
+    #     p = amor_data.AmorData(BINNED.copy())
+    #     file_path = (os.path.dirname(os.path.realpath(__file__)) +
+    #                  os.path.sep + "reference.nxs")
+    #     q = amor_data.AmorReference(BINNED.copy(), data_file=file_path)
+    #     z = amor_data.Normalisation(p, q)
+    #     assert_equal(
+    #         z.sample.orso.reduction.input_files.reference_files[0].file,
+    #         file_path)
 
     def test_q_bin_norm(self):
         p = amor_data.AmorData(BINNED.copy())

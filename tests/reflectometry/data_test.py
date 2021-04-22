@@ -62,12 +62,13 @@ BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 
 
 class TestData(unittest.TestCase):
-    def test_refldata_file(self):
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "sample.nxs")
-        p = data.ReflData(file_path)
-        assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(p.data_file, file_path)
+    # Commented out until the sample.nxs file has a home
+    # def test_refldata_file(self):
+    #     file_path = (os.path.dirname(os.path.realpath(__file__)) +
+    #                  os.path.sep + "sample.nxs")
+    #     p = data.ReflData(file_path)
+    #     assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
+    #     assert_equal(p.data_file, file_path)
 
     def test_refldata_init(self):
         """
