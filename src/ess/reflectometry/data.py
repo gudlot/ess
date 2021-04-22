@@ -77,7 +77,7 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        return binning._q_bin(self, bins, unit).bins.sum()
+        return binning.q_bin(self, bins, unit).bins.sum()
 
     def wavelength_theta_bin(self,
                              bins=None,
@@ -92,20 +92,9 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
-        if bins is None:
-            wavelength = self.event.coords["wavelength"].values
-            theta = self.event.coords["theta"].values
-            bins = [
-                np.linspace(wavelength.min(), wavelength.max(), 50),
-                np.linspace(theta.min(), theta.max(), 50),
-            ]
-        wavelength_bins = sc.array(dims=["wavelength"],
-                                   unit=units[0],
-                                   values=bins[0])
-        theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
-        return sc.bin(self.data.bins.concatenate('detector_id'),
-                      edges=[wavelength_bins, theta_bins]) / (
-                          self.event.shape[0] * sc.units.dimensionless)
+        return binning.two_dimensional_bin(
+            self, ['wavelength', 'theta'], bins,
+            units) / (self.event.shape[0] * sc.units.dimensionless)
 
     def q_theta_bin(self,
                     bins=None,
@@ -120,18 +109,9 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
-        if bins is None:
-            q_z_vector = self.event.coords["qz"].values
-            theta = self.event.coords["theta"].values
-            bins = [
-                np.linspace(q_z_vector.min(), q_z_vector.max(), 50),
-                np.linspace(theta.min(), theta.max(), 50),
-            ]
-        q_bins = sc.array(dims=["qz"], unit=units[0], values=bins[0])
-        theta_bins = sc.array(dims=["theta"], unit=units[1], values=bins[1])
-        return sc.bin(self.data.bins.concatenate('detector_id'),
-                      edges=[theta_bins, q_bins]) / (self.event.shape[0] *
-                                                     sc.units.dimensionless)
+        return binning.two_dimensional_bin(
+            self, ['qz', 'theta'], bins,
+            units) / (self.event.shape[0] * sc.units.dimensionless)
 
     def wavelength_q_bin(
             self,
@@ -148,20 +128,9 @@ class ReflData:
         Returns:
             (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
-        if bins is None:
-            wavelength = self.event.coords["wavelength"].values
-            q_z_vector = self.event.coords["qz"].values
-            bins = [
-                np.linspace(wavelength.min(), wavelength.max(), 50),
-                np.linspace(q_z_vector.min(), q_z_vector.max(), 50),
-            ]
-        wavelength_bins = sc.array(dims=["wavelength"],
-                                   unit=units[0],
-                                   values=bins[0])
-        q_bins = sc.array(dims=["qz"], unit=units[1], values=bins[1])
-        return sc.bin(self.data.bins.concatenate('detector_id'),
-                      edges=[wavelength_bins, q_bins]) / (
-                          self.event.shape[0] * sc.units.dimensionless)
+        return binning.two_dimensional_bin(
+            self, ['wavelength', 'qz'], bins,
+            units) / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
