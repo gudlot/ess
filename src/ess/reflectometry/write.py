@@ -7,7 +7,6 @@ Functions for file writing
 
 import copy
 import numpy as np
-from ess.amor import amor_data
 from ess.reflectometry import orso
 
 
@@ -46,10 +45,10 @@ def wavelength_theta(data, filename, bins, header=None):
         bins (`tuple` of `array_like`): wavelength and theta edges.
         header (`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
-    if isinstance(data, amor_data.Normalisation):
+    try:
         binned = data.sample.wavelength_theta_bin(bins).bins.sum(
         ) / data.reference.wavelength_theta_bin(bins).bins.sum()
-    else:
+    except AttributeError:
         binned = data.wavelength_theta_bin(bins).bins.sum()
     theta_c = binned.coords['theta'].values[:-1] + np.diff(
         binned.coords['theta'].values)
