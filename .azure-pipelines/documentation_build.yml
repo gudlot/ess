@@ -1,8 +1,8 @@
 jobs:
-  - job: 'documentation'
-    displayName: 'Documentation'
+  - job: 'documentation_build'
+    displayName: 'Build ocumentation'
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
     variables:
       docs_build_dir: '$(Build.StagingDirectory)/docs_build'
     steps:
