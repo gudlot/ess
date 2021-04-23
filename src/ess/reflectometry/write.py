@@ -15,9 +15,9 @@ def reflectometry(data, filename, bin_kwargs=None, header=None):
     Write the reflectometry intensity data to a file.
 
     Args:
-        filename (`str`): The file path for the file to be saved to.
-        bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
-        header (`ess.reflectometry.Orso`): ORSO-compatible header object.
+        filename (:py:attr:`str`): The file path for the file to be saved to.
+        bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
+        header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
     if bin_kwargs is None:
         binned = data.q_bin()
@@ -41,9 +41,9 @@ def wavelength_theta(data, filename, bins, header=None):
     Write the reflectometry intensity data as a function of wavelength-theta to a file.
 
     Args:
-        filename (`str`): The file path for the file to be saved to.
-        bins (`tuple` of `array_like`): wavelength and theta edges.
-        header (`ess.reflectometry.Orso`): ORSO-compatible header object.
+        filename (:py:attr:`str`): The file path for the file to be saved to.
+        bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
+        header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
     try:
         binned = data.sample.wavelength_theta_bin(bins).bins.sum(

@@ -14,12 +14,12 @@ def detector_resolution(spatial_resolution, pixel_position, sample_position):
     Calculation the resolution function due to the spatial resolution of the detector.
 
     Args:
-        spatial_resolution (`sc.Variable`): Detector spatial resolution.
-        pixel_position (`sc.Variable`): The position of each pixel in the dimension parallel to the beam.
-        sample_position (`sc.Variable`): The position of the sample in the dimension parallel to the beam.
+        spatial_resolution (:py:class:`scipp._scipp.core.Variable`): Detector spatial resolution.
+        pixel_position (:py:class:`scipp._scipp.core.Variable`): The position of each pixel in the dimension parallel to the beam.
+        sample_position (:py:class:`scipp._scipp.core.Variable`): The position of the sample in the dimension parallel to the beam.
 
     Returns:
-        (`sc.Variable`): Standard deviation of detector resolution.
+        (:py:class:`scipp._scipp.core.Variable`): Standard deviation of detector resolution.
     """
     fwhm = sc.to_unit(
         sc.atan(spatial_resolution / (pixel_position - sample_position)),
@@ -33,11 +33,11 @@ def z_offset(position, offset_value):
     Offset in the z-dimension.
 
     Args:
-        position (`sc.Variable`): Position variable, should be `dtype=vector_3_float64`.
-        offset_value (`sc.Variable`): z-dimension offset value.
+        position (:py:class:`scipp._scipp.core.Variable`): Position variable, should be :code:`vector_3_float64`.
+        offset_value (:py:class:`scipp._scipp.core.Variable`): z-dimension offset value.
 
     Returns:
-        (`sc.Variable`): New position variables that has been offset.
+        (:py:class:`scipp._scipp.core.Variable`): New position variables that has been offset.
     """
     return sc.geometry.position(
         sc.geometry.x(position),

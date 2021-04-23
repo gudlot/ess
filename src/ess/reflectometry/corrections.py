@@ -13,12 +13,12 @@ def angle_with_gravity(data, pixel_position, sample_position):
     Find the angle of reflection when accounting for the presence of gravity.
 
     Args:
-        data (`scipp._scipp.core.DataArray`): Reduction data array.
-        pixel_position (`scipp._scipp.core.VariableView`): Detector pixel positions, should be a `vector_3_float64`-type object.
-        sample_position (`scipp._scipp.core.VariableView`): Scattered neutron origin position.
+        data (:py:class:`scipp._scipp.core.DataArray`): Reduction data array.
+        pixel_position (:py:class:`scipp._scipp.core.VariableView`): Detector pixel positions, should be a :py:attr:`vector_3_float64`-type object.
+        sample_position (:py:class:`scipp._scipp.core.VariableView`): Scattered neutron origin position.
 
     Returns:
-        (`scipp._scipp.core.Variable`): Gravity corrected angle values.
+        (:py:class:`scipp._scipp.core.Variable`): Gravity corrected angle values.
     """
     # This is a workaround until scipp #1819 is resolved, at which time the following should be used instead
     # velocity = sc.to_unit(HDM / wavelength, 'm/s')
@@ -50,14 +50,14 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     Evaluation of the first dervative of the kinematic equations for for the trajectory of a neutron reflected from a surface.
 
     Args:
-        velocity (`scipp._scipp.core.VariableView`): Neutron velocity.
-        z_origin (`scipp._scipp.core.Variable`): The z-origin position for the reflected neutron.
-        y_origin (`scipp._scipp.core.Variable`): The y-origin position for the reflected neutron.
-        z_origin (`scipp._scipp.core.Variable`): The z-measured position for the reflected neutron.
-        y_origin (`scipp._scipp.core.Variable`): The y-measured position for the reflected neutron.
+        velocity (:py:class:`scipp._scipp.core.VariableView`): Neutron velocity.
+        z_origin (:py:class:`scipp._scipp.core.Variable`): The z-origin position for the reflected neutron.
+        y_origin (:py:class:`scipp._scipp.core.Variable`): The y-origin position for the reflected neutron.
+        z_measured (:py:class:`scipp._scipp.core.Variable`): The z-measured position for the reflected neutron.
+        y_measured (:py:class:`scipp._scipp.core.Variable`): The y-measured position for the reflected neutron.
 
     Returns:
-        (`scipp._scipp.core.VariableView` or `array_like`): The gradient of the trajectory of the neutron at the origin position.
+        (:py:class:`scipp._scipp.core.VariableView`): The gradient of the trajectory of the neutron at the origin position.
     """
     velocity2 = velocity * velocity
     z_diff = z_measured - z_origin
@@ -71,12 +71,12 @@ def illumination_correction(beam_size, sample_size, theta):
     scattering geometry, where the beam is Gaussian in shape.
 
     Args:
-        beam_size (:py:attr:`sc.Variable`): Width of incident beam.
-        sample_size (:py:attr:`sc.Variable`): Width of sample in the dimension of the beam.
-        theta (:py:attr:`sc.Variable`): Incident angle.
+        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam.
+        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam.
+        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
 
     Returns:
-        (:py:attr:`array_like`): Correction factor.
+        (:py:class:`scipp._scipp.core.Variable`): Correction factor.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
@@ -89,12 +89,12 @@ def illumination_of_sample(beam_size, sample_size, theta):
     Determine the illumination of the sample by the beam and therefore the size of this illuminated length.
 
     Args:
-        beam_size (:py:attr:`sc.Variable`): Width of incident beam, in metres.
-        sample_size (:py:attr:`sc.Variable`): Width of sample in the dimension of the beam, in metres.
-        theta (:py:attr:`sc.Variable`): Incident angle.
+        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam, in metres.
+        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam, in metres.
+        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
 
     Returns:
-        (`sc.Variable`): The size of the beam, for each theta, on the sample.
+        (:py:class:`scipp._scipp.core.Variable`): The size of the beam, for each theta, on the sample.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:

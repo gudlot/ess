@@ -1,7 +1,7 @@
 # flake8: noqa: E501
 """
 This is the super-class for raw reflectometry data for reduction.
-From this super-class, instrument specfic sub-classes may be created (see for example the `AmorData` class)>
+From this super-class, instrument specfic sub-classes may be created (see for example the :py:class:`ess.amor.AmorData` class).
 """
 
 # author: Andrew R. McCluskey (arm61)
@@ -15,7 +15,17 @@ from ess.reflectometry import corrections, resolution, binning, orso, write
 class ReflData:
     """
     The general reflectometry data class.
-    This will be used by the instrument specific sub-class for data storage, and in essence define the data present reduced data.
+    This will be used by the instrument specific sub-class for data storage and reduction.
+
+    Args:
+        data (:py:class:`scipp._scipp.core.DataArray` or :py:attr:`str`): The data to be reduced or the path to the file to be reduced.
+        sample_angle_offset (:py:class:`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default :code:`0 degrees of arc`.
+        gravity (:py:attr:`bool`, optional): Should gravity be accounted for. Optional, default :code:`True`.
+        beam_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default :code:`0.001 m`.
+        sample_size (:py:class:`scipp._scipp.core.Variable`, optional): Size of the sample in direction of the beam. Optional, default :code:`0.01 m`.
+        detector_spatial_resolution (:py:class:`scipp._scipp.core.Variable`, optional): Spatial resolution of the detector. Optional, default :code:`2.5 mm`.
+        data_file (:py:attr:`str`): If a :py:class:`scipp._scipp.core.DataArray` is given as the :py:attr:`data`, a :py:attr:`data_file` should be defined for output in the file. Optional, default :code:`None`.
+
     """
     def __init__(
         self,
@@ -27,16 +37,6 @@ class ReflData:
         detector_spatial_resolution=0.0025 * sc.units.m,
         data_file=None,
     ):
-        """
-        Args:
-            data (`scipp._scipp.core.DataArray` or `str`): The data to be reduced or the path to the file to be reduced.
-            sample_angle_offset (`scipp.Variable`, optional): Correction for omega or possibly misalignment of sample. Optional, default `0 degrees of arc`.
-            gravity (`bool`, optional): Should gravity be accounted for. Optional, default `True`.
-            beam_size (`sc.Variable`, optional): Size of the beam perpendicular to the scattering surface. Optional, default `0.001 m`.
-            sample_size (`sc.Variable`, optional): Size of the sample in direction of the beam. Optional, default `0.01 m`.
-            detector_spatial_resolution (`sc.Variable`, optional): Spatial resolution of the detector. Optional, default `2.5 mm`.
-            data_file (`str`): If a `scipp._scipp.core.DataArray` is given as the `data` a `data_file` should be defined for output in the file. Optional, default `None`.
-        """
         if isinstance(data, str):
             self.data_file = data
             self.data = scn.load_nexus(self.data_file)
@@ -62,7 +62,7 @@ class ReflData:
         Return the event data buffer.
 
         Returns
-            (`scipp._scipp.core.DataArrayView`): Event data information.
+            (:py:class:`scipp._scipp.core.DataArrayView`): Event data information.
         """
         return self.data.bins.constituents["data"]
 
@@ -71,11 +71,11 @@ class ReflData:
         Return data that has been binned in the q-bins passed.
 
         Args:
-            bins (`array_like`): q-bin edges.
-            unit (`scipp._scipp.core.Unit`): Unit for q. Defaults to 1/Å.
+            bins (:py:attr:`array_like`): q-bin edges.
+            unit (:py:class:`scipp._scipp.core.Unit`): Unit for q. Defaults to 1/Å.
 
         Returns:
-            (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
+            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
         return binning.q_bin(self, bins, unit).bins.sum()
 
@@ -86,11 +86,11 @@ class ReflData:
         Return data that has been binned in the wavelength and theta bins passed.
 
         Args:
-            bins (`tuple` of `array_like`): wavelength and theta edges.
-            unit (`tuple` of `scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`(Å, deg)`.
 
         Returns:
-            (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
         return binning.two_dimensional_bin(
             self, ['wavelength', 'theta'], bins,
@@ -103,11 +103,11 @@ class ReflData:
         Return data that has been binned in the wavelength and theta bins passed.
 
         Args:
-            bins (`tuple` of `array_like`): wavelength and theta edges.
-            unit (`tuple` of `scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å^{-1}, deg]`.
 
         Returns:
-            (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
         return binning.two_dimensional_bin(
             self, ['qz', 'theta'], bins,
@@ -122,11 +122,11 @@ class ReflData:
         Return data that has been binned in the wavelength and theta bins passed.
 
         Args:
-            bins (`tuple` of `array_like`): wavelength and theta edges.
-            unit (`tuple` of `scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to [Å, deg].
+            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
+            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å, Å^{-1}]`.
 
         Returns:
-            (`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
         """
         return binning.two_dimensional_bin(
             self, ['wavelength', 'qz'], bins,
@@ -262,12 +262,12 @@ class ReflData:
         Masking on detector pixels.
 
         Args:
-            x_min (`sc.Variable`, optional): Minimum x-dimension to be used. Optional, default no minimum mask.
-            x_max (`sc.Variable`, optional): Maximum x-dimension to be used. Optional, default no maximum mask.
-            y_min (`sc.Variable`, optional): Minimum y-dimension to be used. Optional, default no minimum mask.
-            y_max (`sc.Variable`, optional): Maximum y-dimension to be used. Optional, default no maximum mask.
-            z_min (`sc.Variable`, optional): Minimum z-dimension to be used. Optional, default no minimum mask.
-            z_max (`sc.Variable`, optional): Maximum z-dimension to be used. Optional, default no maximum mask.
+            x_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum x-dimension to be used. Optional, default no minimum mask.
+            x_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum x-dimension to be used. Optional, default no maximum mask.
+            y_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum y-dimension to be used. Optional, default no minimum mask.
+            y_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum y-dimension to be used. Optional, default no maximum mask.
+            z_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum z-dimension to be used. Optional, default no minimum mask.
+            z_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum z-dimension to be used. Optional, default no maximum mask.
         """
         x_position = sc.geometry.x(self.data.coords["position"])
         y_position = sc.geometry.y(self.data.coords["position"])
@@ -291,9 +291,10 @@ class ReflData:
     def theta_masking(self, theta_min=None, theta_max=None):
         """
         Masking data based on reflected angle.
+
         Args:
-            theta_min (`sc.Variable`, optional): Minimum theta to be used. Optional, default no minimum mask.
-            theta_max (`sc.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
+            theta_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum theta to be used. Optional, default no minimum mask.
+            theta_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
         """
         if theta_min is None:
             theta_min = sc.min(
@@ -323,9 +324,10 @@ class ReflData:
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
         Masking data based on wavelength.
+
         Args:
-            wavelength_min (`sc.Variable`, optional): Minimum wavelength to be used. Optional, default no minimum mask.
-            wavelength_max (`sc.Variable`, optional): Maximum wavelength to be used. Optional, default no maximum mask.
+            wavelength_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum wavelength to be used. Optional, default no minimum mask.
+            wavelength_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum wavelength to be used. Optional, default no maximum mask.
         """
         if wavelength_min is None:
             wavelength_min = sc.min(
@@ -358,9 +360,9 @@ class ReflData:
         Write the reflectometry intensity data to a file.
 
         Args:
-            filename (`str`): The file path for the file to be saved to.
-            bin_kwargs (`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
-            header (`ess.reflectometry.Orso`): ORSO-compatible header object.
+            filename (:py:attr:`str`): The file path for the file to be saved to.
+            bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
+            header (:py:class:`ess.reflectometry.Orso`, optional): ORSO-compatible header object. Optional defaults to :py:attr:`ReflData.orso`.
         """
         write.reflectometry(self, filename, bin_kwargs, header)
 
@@ -369,7 +371,8 @@ class ReflData:
         Write the reflectometry intensity data as a function of wavelength-theta to a file.
 
         Args:
-            filename (`str`): The file path for the file to be saved to.
-            bins (`tuple` of `array_like`): wavelength and theta edges.
+            filename (:py:attr:`str`): The file path for the file to be saved to.
+            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
+            header (:py:class:`ess.reflectometry.Orso`, optional): ORSO-compatible header object. Optional defaults to :py:attr:`ReflData.orso`.
         """
         write.wavelength_theta(self, filename, bins, header)

@@ -15,12 +15,12 @@ def q_bin(data, bins=None, unit=None):
     Return data that has been binned in the q-bins passed.
 
     Args:
-        data (`ess.reflectometry.ReflData` or `ess.amor.AmorData` or `ess.amor.AmorReference`): data to be binned.
-        bins (`array_like`, optional): q-bin edges. Defaults to 200 bins between max and min q.
-        unit (`scipp._scipp.core.Unit`, optional): Unit of q bins. Defaults to 1/Å.
+        data (:py:class:`ess.reflectometry.ReflData` or :py:class:`ess.amor.AmorData` or :py:class:`ess.amor.AmorReference`): data to be binned.
+        bins (:py:attr:`array_like`, optional): q-bin edges. Defaults to 200 bins between max and min q.
+        unit (:py:class:`scipp._scipp.core.Unit`, optional): Unit of q bins. Defaults to 1/Å.
 
     Returns:
-        (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
+        (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
     """
     if "qz" in data.event.coords and "tof" in data.event.coords:
         if unit is None:
@@ -54,13 +54,13 @@ def two_dimensional_bin(data, dims, bins=None, units=None):
     Perform some arbitrary two-dimensional binning.
 
     Args:
-        data (`ess.reflectometry.ReflData` or `ess.amor.AmorData` or `ess.amor.AmorReference`): data to be binned.
-        dims (`tuple` of `str`): The dimensions to be binned
-        bins (`tuple` of `array_like`, optional): Bin edges. Optional, defaults to min and max with 50 bins in each dim.
-        unit (`scipp._scipp.core.Unit`): Unit of bins. Optional, defaults to units of coord.
+        data (:py:class:`ess.reflectometry.ReflData` or :py:class:`ess.amor.AmorData` or :py:class:`ess.amor.AmorReference`): data to be binned.
+        dims (:py:attr:`tuple` of :py:attr:`str`): The dimensions to be binned
+        bins (:py:attr:`tuple` of :py:attr:`array_like`, optional): Bin edges. Optional, defaults to min and max with 50 bins in each dim.
+        unit (:py:class:`scipp._scipp.core.Unit`): Unit of bins. Optional, defaults to units of coord.
 
     Returns:
-        (`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
+        (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
     """
     for d in dims:
         if d not in list(data.event.coords):
