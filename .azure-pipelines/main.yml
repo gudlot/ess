@@ -114,8 +114,13 @@ stages:
               PathtoPublish: "$(conda_dir)/conda-bld/win-64"
               ArtifactName: 'win-64'
             displayName: 'Publish Conda package artefacts'
-  - stage: 'post_build_checks'
-    displayName: 'Post Build Checks'
 
+  - stage: 'build_documentation'
+    displayName: 'Build documentation'
     jobs:
       - template: documentation_build.yml
+
+  - stage: 'deploy_documentation'
+    displayName: 'Deploy documentation'
+    jobs:
+      - template: documentation_deploy.yml
