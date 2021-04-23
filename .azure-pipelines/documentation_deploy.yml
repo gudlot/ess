@@ -1,13 +1,13 @@
 parameters:
   - name: release
     type: boolean
-    default: False
+    default: false
 
 jobs:
-  - job: "documentation"
-    displayName: "Documentation"
+  - job: "documentation_deploy"
+    displayName: "Deploy documentation"
     pool:
-      vmImage: "ubuntu-latest"
+      vmImage: "ubuntu-20.04"
     variables:
       documentation_artefact_path: "$(Build.StagingDirectory)/documentation"
       documentation_repo_path: "$(Build.StagingDirectory)/git"

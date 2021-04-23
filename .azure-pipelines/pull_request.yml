@@ -23,7 +23,7 @@ stages:
         displayName: 'Python tests'
         timeoutInMinutes: 20
         pool:
-          vmImage: 'ubuntu-18.04'
+          vmImage: 'ubuntu-20.04'
         steps:
           - checkout: self
             submodules: true
@@ -54,8 +54,3 @@ stages:
     displayName: 'Build documentation'
     jobs:
       - template: documentation_build.yml
-
-  - stage: 'deploy_documentation'
-    displayName: 'Deploy documentation'
-    jobs:
-      - template: documentation_deploy.yml
