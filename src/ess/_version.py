@@ -9,7 +9,7 @@ def _version():
         g = git.cmd.Git(git_root)
         g.fetch()
         return g.describe('--tags')
-    except (ImportError, git.exc.InvalidGitRepositoryError):
+    except (ImportError, git.exc.GitError):
         from . import _fixed_version
         return _fixed_version.__version__
 
