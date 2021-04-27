@@ -18,7 +18,6 @@ requirements:
     - astropy
     - scipy
     - matplotlib
-    - gitpython
 
 test:
   imports:
