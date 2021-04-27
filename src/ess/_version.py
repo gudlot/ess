@@ -3,10 +3,9 @@ import os
 
 def _version():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    git_root = os.path.join(dir_path, '..', '..')
     try:
         import git
-        g = git.cmd.Git(git_root)
+        g = git.cmd.Git(dir_path)
         g.fetch()
         return g.describe('--tags')
     except (ImportError, git.exc.GitError):
