@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 from .operations import mask_from_adj_pixels, \
     mean_from_adj_pixels, median_from_adj_pixels
 from .helper_funcs import read_x_values, tiffs_to_variable, \

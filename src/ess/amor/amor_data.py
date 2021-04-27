@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 # flake8: noqa: E501
 """
 This is the class for data reduction from the Amor instrument, which is a subclass of the broader `ReflData` class.
