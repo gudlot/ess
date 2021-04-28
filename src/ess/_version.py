@@ -8,7 +8,7 @@ def _version():
         g = git.cmd.Git(dir_path)
         g.fetch()
         return g.describe('--tags')
-    except (ImportError, git.exc.GitError):
+    except Exception:
         from . import _fixed_version
         return _fixed_version.__version__
 
