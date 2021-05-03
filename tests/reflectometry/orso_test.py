@@ -13,6 +13,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 import scipp as sc
 from ess.reflectometry import orso
+from ess import __version__
 import getpass
 import socket
 
@@ -160,7 +161,7 @@ class TestOrso(unittest.TestCase):
             os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction('a_script.py', f)
-        assert_equal(c.software, 'ess-0.0.1')
+        assert_equal(c.software, f'ess-{__version__}')
         assert_equal(c.script, 'a_script.py')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
@@ -174,7 +175,7 @@ class TestOrso(unittest.TestCase):
             os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction('a_script.py', f, 'hi')
-        assert_equal(c.software, 'ess-0.0.1')
+        assert_equal(c.software, f'ess-{__version__}')
         assert_equal(c.script, 'a_script.py')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
@@ -189,7 +190,7 @@ class TestOrso(unittest.TestCase):
             os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction(None, f, 'hi')
-        assert_equal(c.software, 'ess-0.0.1')
+        assert_equal(c.software, f'ess-{__version__}')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
         assert_equal(

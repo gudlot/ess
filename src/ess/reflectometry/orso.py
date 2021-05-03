@@ -12,7 +12,7 @@ import socket
 import datetime
 import pathlib
 import getpass
-import ess.__version__ as VERSION
+from ess import __version__ as VERSION
 
 OSRO_VERSION = 0.1
 
