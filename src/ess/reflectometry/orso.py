@@ -12,9 +12,9 @@ import socket
 import datetime
 import pathlib
 import getpass
+import ess.__version__ as VERSION
 
 OSRO_VERSION = 0.1
-VERSION = '0.0.1'
 
 
 def noop(self, *args, **kw):
