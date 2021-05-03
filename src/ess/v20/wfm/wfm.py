@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 from .frames_analytical import frames_analytical
 # from .frames_peakfinding import frames_peakfinding
 

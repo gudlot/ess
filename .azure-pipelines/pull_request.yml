@@ -23,7 +23,7 @@ stages:
         displayName: 'Python tests'
         timeoutInMinutes: 20
         pool:
-          vmImage: 'ubuntu-18.04'
+          vmImage: 'ubuntu-20.04'
         steps:
           - checkout: self
             submodules: true
@@ -49,8 +49,8 @@ stages:
             inputs:
               testResultsFiles: 'junit/*.xml'
             condition: succeededOrFailed()
-  - stage: 'post_build_checks'
-    displayName: 'Post Build Checks'
 
+  - stage: 'build_documentation'
+    displayName: 'Build documentation'
     jobs:
       - template: documentation_build.yml
