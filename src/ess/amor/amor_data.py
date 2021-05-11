@@ -87,10 +87,12 @@ class AmorData(ReflData):
         self.tof_correction()
         # The wavelength contribution to the resolution function, defined
         # by the distance between the two choppers.
+        # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
         self.data.coords[
             "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
                 sc.geometry.z(self.data.coords["position"]) -
                 sc.geometry.z(self.data.attrs["source_position"]))
+        self.data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
         self.find_wavelength()
         self.find_theta()
         self.illumination()
