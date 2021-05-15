@@ -7,10 +7,8 @@ Tests for tools module
 
 # author: Andrew R. McCluskey (arm61)
 
-import os
 import unittest
-import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_almost_equal
 from ess.amor import tools
 
 
