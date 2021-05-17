@@ -92,7 +92,7 @@ class TestAmorData(unittest.TestCase):
             sc.geometry.position(0. * sc.units.m, 0. * sc.units.m,
                                  -15. * sc.units.m).values)
         assert_almost_equal(p.data.coords['sigma_lambda_by_lambda'].values,
-                            [0.030625, 0.030625, 0.030625, 0.030625])
+                            [0.0130052, 0.0130052, 0.0130052, 0.0130052])
         assert_almost_equal(p.tau.value, 75000)
         assert_almost_equal(p.chopper_detector_distance.value, 19e10)
         assert_almost_equal(p.chopper_chopper_distance.value, 0.49)
@@ -132,7 +132,7 @@ class TestAmorData(unittest.TestCase):
             sc.geometry.position(0. * sc.units.m, 0. * sc.units.m,
                                  -15. * sc.units.m).values)
         assert_almost_equal(p.data.coords['sigma_lambda_by_lambda'].values,
-                            [0.01875, 0.01875, 0.01875, 0.01875])
+                            [0.0079624, 0.0079624, 0.0079624, 0.0079624])
         assert_almost_equal(p.tau.value, 75000)
         assert_almost_equal(p.chopper_detector_distance.value, 18e10)
         assert_almost_equal(p.chopper_chopper_distance.value, 0.3)
