@@ -1,8 +1,8 @@
-name: ess-latest
+name: ess-stable
 
 channels:
   - conda-forge
-  - scipp/label/dev
+  - scipp
   - nodefaults
 
 dependencies:

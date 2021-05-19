@@ -36,8 +36,8 @@ stages:
              # If release use release scipp version from scipp channel, otherwise use scipp/label/dev channel
              conda config --set always_yes yes --set changeps1 no
              if [ $(is_release) == False ]; then
-                 conda env create -f ess-latest.yml
-                 source activate ess-latest
+                 conda env create -f ess-stable.yml
+                 source activate ess-stable
              else
                  conda env create -f scipp-ess.yml
                  source activate scipp-ess

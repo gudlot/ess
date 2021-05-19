@@ -1,4 +1,4 @@
-name: ess-latest
+name: ess-developer-next
 
 channels:
   - conda-forge
@@ -6,7 +6,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - scippneutron
+  - scipp/label/next::scippneutron
   - mantid-framework
   - pytest
   - sphinx>=1.6
@@ -15,4 +15,7 @@ dependencies:
   - astropy 
   - matplotlib
   - python
-  - gitpython
+  # For developement
+  - pytest
+  - ipython
+  - jupyter
