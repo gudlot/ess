@@ -20,3 +20,5 @@ dependencies:
   - ipython
   - jupyter
   - gitpython
+  - flake8
+  - yapf
