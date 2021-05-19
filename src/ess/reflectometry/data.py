@@ -52,7 +52,7 @@ class ReflData:
         self.beam_size = beam_size
         self.sample_size = sample_size
         self.detector_spatial_resolution = detector_spatial_resolution
-        self.orso = orso.Orso(orso.Creator(), orso.DataSource(),
+        self.orso = orso.Orso(orso.Creator(name='scipp'), orso.DataSource(),
                               orso.Reduction(), [])
         experiment = orso.Experiment(self.data.attrs['instrument_name'].value,
                                      'neutron')
