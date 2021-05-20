@@ -140,7 +140,7 @@ class ReflData:
         """
         self.data.bins.constituents["data"].coords["wavelength"] = (
             scn.convert(
-                self.data, "tof", "wavelength",
+                self.data, origin="tof", target="wavelength",
                 scatter=True).bins.constituents["data"].coords["wavelength"])
 
     def find_theta(self):
