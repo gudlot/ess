@@ -78,7 +78,7 @@ class TestData(unittest.TestCase):
         """
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable),
                      True)
         assert_almost_equal(
             sc.geometry.x(p.data.coords["position"]).values, X.values)
@@ -114,7 +114,7 @@ class TestData(unittest.TestCase):
 
     def test_refldata_event(self):
         p = data.ReflData(BINNED.copy())
-        assert_equal(isinstance(p.event, sc._scipp.core.DataArrayView), True)
+        assert_equal(isinstance(p.event, sc._scipp.core.DataArray), True)
         assert_almost_equal(np.sort(p.event.coords["detector_id"].values),
                             np.sort(DETECTORS))
         assert_almost_equal(np.sort(p.event.values),
