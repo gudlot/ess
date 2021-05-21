@@ -78,8 +78,7 @@ class TestData(unittest.TestCase):
         """
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable),
-                     True)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_almost_equal(
             sc.geometry.x(p.data.coords["position"]).values, X.values)
         assert_almost_equal(
