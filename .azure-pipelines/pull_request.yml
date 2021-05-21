@@ -8,6 +8,8 @@ pr:
   branches:
     include:
       - '*'
+    exclude:
+      - next
 
 variables:
   is_release: $[eq(variables['System.PullRequest.TargetBranch'], 'release')]

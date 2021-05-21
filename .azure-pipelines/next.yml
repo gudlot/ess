@@ -1,5 +1,5 @@
 trigger:
-  - main
+  - next
 
 pr: none
 
@@ -7,7 +7,7 @@ resources:
   pipelines:
   - pipeline: upstream_scippneutron_main
     project: scipp
-    source: Release
+    source: Main
     trigger: true
 
 stages:
@@ -37,7 +37,7 @@ stages:
              conda config --set always_yes yes --set changeps1 no
             displayName: 'create anaconda environment'
           - bash: |
-             conda build conda/ --channel scipp/label/main --channel conda-forge --label dev --user scipp --token "$ANACONDA_TOKEN"
+             conda build conda/ --channel scipp/label/next --channel conda-forge --label next --user scipp --token "$ANACONDA_TOKEN"
             env:
              ANACONDA_TOKEN: $(anaconda_token_secret)
             displayName: 'package'
@@ -70,7 +70,7 @@ stages:
              conda config --set always_yes yes --set changeps1 no
             displayName: 'create anaconda environment'
           - bash: |
-             conda build conda/ --channel scipp/label/main --channel conda-forge --label dev --user scipp --token "$ANACONDA_TOKEN"
+             conda build conda/ --channel scipp/label/next --channel conda-forge --label next --user scipp --token "$ANACONDA_TOKEN"
             env:
              ANACONDA_TOKEN: $(anaconda_token_secret)
             displayName: 'package'
@@ -105,7 +105,7 @@ stages:
               conda config --set always_yes yes --set changeps1 no
             displayName: 'Conda configuration'
           - script: |
-              conda build --user scipp --token "%ANACONDA_TOKEN%" --channel conda-forge --channel scipp/label/main --label dev --python="%PYTHON_VERSION%" ./conda
+              conda build --user scipp --token "%ANACONDA_TOKEN%" --channel conda-forge --channel scipp/label/next --label next --python="%PYTHON_VERSION%" ./conda
             env:
               ANACONDA_TOKEN: $(anaconda_token_secret)
             displayName: 'package'
@@ -119,8 +119,3 @@ stages:
     displayName: 'Build documentation'
     jobs:
       - template: documentation_build.yml
-
-  - stage: 'deploy_documentation'
-    displayName: 'Deploy documentation'
-    jobs:
-      - template: documentation_deploy.yml
