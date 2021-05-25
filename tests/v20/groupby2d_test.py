@@ -11,8 +11,7 @@ def test_groupby2d_simple_case_neutron_specific():
     wav = sc.scalar(value=1.0)
     x = sc.array(dims=['x'], values=np.arange(10))
     y = sc.array(dims=['y'], values=np.arange(10))
-    source_position = sc.scalar(value=[0, 0, -10],
-                                dtype=sc.dtype.vector_3_float64)
+    source_position = sc.vector(value=[0, 0, -10])
     ds = sc.Dataset(data={'a': data},
                     coords={
                         'y': y,
