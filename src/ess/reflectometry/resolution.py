@@ -41,8 +41,5 @@ def z_offset(position, offset_value):
     Returns:
         (:py:class:`scipp._scipp.core.Variable`): New position variables that has been offset.
     """
-    return sc.geometry.position(
-        sc.geometry.x(position),
-        sc.geometry.y(position),
-        sc.geometry.z(position) + offset_value,
-    )
+    return sc.geometry.position(position.x1, position.x2,
+                                position.x3 + offset_value)
