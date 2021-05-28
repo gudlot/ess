@@ -13,7 +13,7 @@ requirements:
     - gitpython
   run:
     - python {{ python }}
-    - scippneutron
+    - scippneutron {{ scippneutron }}
     - tifffile
     - astropy
     - scipy
