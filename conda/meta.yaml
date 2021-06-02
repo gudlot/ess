@@ -18,6 +18,7 @@ requirements:
     - astropy
     - scipy
     - matplotlib
+    - ipywidgets
 
 test:
   imports:
