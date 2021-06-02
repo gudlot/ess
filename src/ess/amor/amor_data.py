@@ -90,8 +90,8 @@ class AmorData(ReflData):
         # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
         self.data.coords[
             "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
-                self.data.coords["position"].x3 -
-                self.data.attrs["source_position"].x3)
+                self.data.coords["position"].fields.z -
+                self.data.attrs["source_position"].fields.z)
         self.data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(
             2 * np.log(2))
         self.find_wavelength()

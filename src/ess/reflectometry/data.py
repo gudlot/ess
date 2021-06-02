@@ -191,8 +191,8 @@ class ReflData:
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
                 self.detector_spatial_resolution,
-                self.data.coords["position"].x3,
-                self.data.attrs["sample_position"].x3)
+                self.data.coords["position"].fields.z,
+                self.data.attrs["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
                 (self.data.attrs["sigma_gamma"] /
@@ -269,9 +269,9 @@ class ReflData:
             z_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum z-dimension to be used. Optional, default no minimum mask.
             z_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum z-dimension to be used. Optional, default no maximum mask.
         """
-        x_position = self.data.coords["position"].x1
-        y_position = self.data.coords["position"].x2
-        z_position = self.data.coords["position"].x3
+        x_position = self.data.coords["position"].fields.x
+        y_position = self.data.coords["position"].fields.y
+        z_position = self.data.coords["position"].fields.z
         if x_min is None:
             x_min = sc.min(x_position)
         if x_max is None:

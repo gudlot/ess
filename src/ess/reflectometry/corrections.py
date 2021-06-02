@@ -35,10 +35,10 @@ def angle_with_gravity(data, pixel_position, sample_position):
     data.bins.constituents["data"].coords["velocity"] = velocity
     velocity = data.bins.coords["velocity"]
     velocity.events.unit = sc.units.m / sc.units.s
-    y_measured = pixel_position.x2
-    z_measured = pixel_position.x3
-    z_origin = sample_position.x3
-    y_origin = sample_position.x2
+    y_measured = pixel_position.fields.y
+    z_measured = pixel_position.fields.z
+    z_origin = sample_position.fields.z
+    y_origin = sample_position.fields.y
     y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
     intercept = y_origin - y_dash * z_origin
     y_true = z_measured * y_dash + intercept
