@@ -138,9 +138,10 @@ class ReflData:
         """
         From the time-of-flight data, find the wavelength for each neutron event.
         """
+        scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
         self.data.bins.constituents["data"].coords["wavelength"] = (
             scn.convert(
-                self.data, "tof", "wavelength",
+                self.data, origin="tof", target="wavelength",
                 scatter=True).bins.constituents["data"].coords["wavelength"])
 
     def find_theta(self):
@@ -172,10 +173,8 @@ class ReflData:
             self.data.bins.constituents['data'].attrs[
                 'offset_negative'] = offset_negative
             angle_max = corrections.angle_with_gravity(
-                self.data,
-                self.data.coords["position"],
-                self.data.bins.attrs['offset_positive'],
-            )
+                self.data, self.data.coords["position"],
+                self.data.bins.attrs['offset_positive'])
             angle_min = corrections.angle_with_gravity(
                 self.data,
                 self.data.coords["position"],
@@ -192,9 +191,8 @@ class ReflData:
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
                 self.detector_spatial_resolution,
-                sc.geometry.z(self.data.coords["position"]),
-                sc.geometry.z(self.data.attrs["sample_position"]),
-            )
+                self.data.coords["position"].fields.z,
+                self.data.attrs["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
                 (self.data.attrs["sigma_gamma"] /
@@ -271,9 +269,9 @@ class ReflData:
             z_min (:py:class:`scipp._scipp.core.Variable`, optional): Minimum z-dimension to be used. Optional, default no minimum mask.
             z_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum z-dimension to be used. Optional, default no maximum mask.
         """
-        x_position = sc.geometry.x(self.data.coords["position"])
-        y_position = sc.geometry.y(self.data.coords["position"])
-        z_position = sc.geometry.z(self.data.coords["position"])
+        x_position = self.data.coords["position"].fields.x
+        y_position = self.data.coords["position"].fields.y
+        z_position = self.data.coords["position"].fields.z
         if x_min is None:
             x_min = sc.min(x_position)
         if x_max is None:

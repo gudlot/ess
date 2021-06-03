@@ -78,14 +78,13 @@ class TestData(unittest.TestCase):
         """
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
-                     True)
-        assert_almost_equal(
-            sc.geometry.x(p.data.coords["position"]).values, X.values)
-        assert_almost_equal(
-            sc.geometry.y(p.data.coords["position"]).values, Y.values)
-        assert_almost_equal(
-            sc.geometry.z(p.data.coords["position"]).values, Z.values)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
+        assert_almost_equal(p.data.coords["position"].fields.x.values,
+                            X.values)
+        assert_almost_equal(p.data.coords["position"].fields.y.values,
+                            Y.values)
+        assert_almost_equal(p.data.coords["position"].fields.z.values,
+                            Z.values)
         assert_almost_equal(
             np.sort(
                 p.data.bins.constituents["data"].coords["detector_id"].values),
@@ -114,7 +113,7 @@ class TestData(unittest.TestCase):
 
     def test_refldata_event(self):
         p = data.ReflData(BINNED.copy())
-        assert_equal(isinstance(p.event, sc._scipp.core.DataArrayView), True)
+        assert_equal(isinstance(p.event, sc._scipp.core.DataArray), True)
         assert_almost_equal(np.sort(p.event.coords["detector_id"].values),
                             np.sort(DETECTORS))
         assert_almost_equal(np.sort(p.event.values),

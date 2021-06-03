@@ -77,8 +77,7 @@ class TestAmorData(unittest.TestCase):
         """
         p = amor_data.AmorData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
-                     True)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_almost_equal(
             np.sort(p.data.bins.constituents["data"].coords["tof"].values),
             [
@@ -117,8 +116,7 @@ class TestAmorData(unittest.TestCase):
                                sc.units.angstrom,
                                wavelength_cut=2.0 * sc.units.angstrom)
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
-                     True)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_almost_equal(
             np.sort(p.data.bins.constituents["data"].coords["tof"].values),
             [
@@ -198,8 +196,7 @@ class TestAmorReference(unittest.TestCase):
         """
         p = amor_data.AmorReference(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
-                     True)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_equal(p.m_value.value, 5)
         assert_almost_equal(p.event.coords['normalisation'].values, np.ones(9))
 
@@ -210,8 +207,7 @@ class TestAmorReference(unittest.TestCase):
         p = amor_data.AmorReference(BINNED.copy(),
                                     m_value=4 * sc.units.dimensionless)
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
-        assert_equal(isinstance(p.data.data, sc._scipp.core.VariableView),
-                     True)
+        assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_equal(p.m_value.value, 4)
         assert_almost_equal(p.event.coords['normalisation'].values, np.ones(9))
 

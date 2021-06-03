@@ -14,15 +14,15 @@ jobs:
           echo "##vso[task.prependpath]$CONDA/bin"
         displayName: Add Conda to PATH
       - bash: |
-          conda env create -f ess-latest.yml
+          conda env create -f ess-stable.yml
         displayName: 'Create Conda environment'
       - bash: |
           set -ex
-          source activate ess-latest
+          source activate ess-stable
         displayName: 'Activate Conda environment'
       - bash: |
           set -ex
-          source activate ess-latest
+          source activate ess-stable
           export PYTHONPATH=$PYTHONPATH:src
           sphinx-build docs "$(docs_build_dir)"
         displayName: 'Build documentation'

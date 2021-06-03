@@ -1,4 +1,4 @@
-name: ess-latest
+name: ess-stable
 
 channels:
   - conda-forge
@@ -6,7 +6,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - scippneutron
+  - scippneutron=0.2
   - mantid-framework
   - pytest
   - sphinx>=1.6
@@ -16,3 +16,4 @@ dependencies:
   - matplotlib
   - python
   - gitpython
+  - ipywidgets

@@ -11,8 +11,7 @@ def test_groupby2d_simple_case_neutron_specific():
     wav = sc.scalar(value=1.0)
     x = sc.array(dims=['x'], values=np.arange(10))
     y = sc.array(dims=['y'], values=np.arange(10))
-    source_position = sc.scalar(value=[0, 0, -10],
-                                dtype=sc.dtype.vector_3_float64)
+    source_position = sc.vector(value=[0, 0, -10])
     ds = sc.Dataset(data={'a': data},
                     coords={
                         'y': y,
@@ -44,12 +43,7 @@ def test_simple_case_any_naming():
     grouped = groupby2D(ds, nx_target=5, ny_target=5, x='w', y='v', z='u')
     assert grouped['a'].shape == [2, 5, 5]
     projection = sc.array(dims=['v', 'w'], values=np.ones((5, 5))) * 4
-    expected_data = sc.reshape(sc.concatenate(projection, projection, dim='u'),
-                               sizes={
-                                   'u': 2,
-                                   'v': 5,
-                                   'w': 5
-                               })
+    expected_data = sc.concatenate(projection, projection, dim='u')
     assert sc.all(
         sc.isclose(grouped['a'].data, expected_data,
                    atol=1e-14 * sc.units.one)).value
