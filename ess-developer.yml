@@ -15,6 +15,7 @@ dependencies:
   - astropy 
   - matplotlib
   - python
+  - ipywidgets
   # For developement
   - pytest
   - ipython

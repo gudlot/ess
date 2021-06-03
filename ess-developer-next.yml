@@ -6,7 +6,7 @@ channels:
   - nodefaults
 
 dependencies:
-  #- scipp/label/next::scippneutron
+  - scipp/label/next::scippneutron
   - mantid-framework
   - pytest
   - sphinx>=1.6
@@ -15,6 +15,7 @@ dependencies:
   - astropy 
   - matplotlib
   - python=3.7
+  - ipywidgets
   # For developement
   - pytest
   - ipython
