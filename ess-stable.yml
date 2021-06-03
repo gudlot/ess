@@ -6,7 +6,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - scippneutron
+  - scippneutron=0.2
   - mantid-framework
   - pytest
   - sphinx>=1.6
