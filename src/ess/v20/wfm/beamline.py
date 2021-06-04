@@ -104,10 +104,9 @@ def choppers(parameters=None):
                  values=inventory["phase"],
                  unit=sc.units.deg))
 
-    ds["distance"] = sc.array(dims=["chopper"],
-                              values=inventory["distance"],
-                              unit=sc.units.m,
-                              dtype=sc.dtype.vector_3_float64)
+    ds["distance"] = sc.vectors(dims=["chopper"],
+                                values=inventory["distance"],
+                                unit=sc.units.m)
 
     tdc_array = np.array(inventory["tdc"]).reshape(4, 1)
 
