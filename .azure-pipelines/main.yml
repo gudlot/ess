@@ -86,8 +86,6 @@ stages:
           matrix:
             Python37:
               PYTHON_VERSION: '3.7'
-            Python38:
-              PYTHON_VERSION: '3.8'
         pool:
           vmImage: 'windows-latest'
         variables:
