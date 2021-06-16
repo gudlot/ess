@@ -30,15 +30,10 @@ class FileMover():
 
 if __name__ == '__main__':
 
-    # Search for a defined SCIPP_INSTALL_PREFIX env variable.
-    # If it exists, it points to a previously built target and we simply move
-    # the files from there into the conda build directory.
-    # If it is undefined, we build the C++ library by calling main() from
-    # build_cpp.
     source_root = os.getcwd()
     destination_root = os.environ.get('CONDA_PREFIX')
 
-    # Create a file mover to place the built files in the correct directories
+    # Create a file mover to place the source files in the correct directories
     # for conda build.
     m = FileMover(source_root=source_root, destination_root=destination_root)
 
@@ -48,7 +43,10 @@ if __name__ == '__main__':
     else:
         lib_dest = os.path.join('lib', 'python*')
 
-    from src.ess._version import __version__ as v
+    # Write fixed version to file to avoid having gitpython as a hard
+    # dependency
+    sys.path.append(os.path.join('..', 'src'))
+    from ess._version import __version__ as v
     with open(os.path.join('src', 'ess', '_fixed_version.py')) as f:
         f.write(f'__version__ = {v}')
 
