@@ -1,9 +1,10 @@
 import scippneutron as scn
 import scipp as sc
-import numpy as np
+import operator
+from functools import reduce
 
 
-def load_component_info_to_2d(geometry_file, advanced_geometry=False):
+def load_component_info_to_2d(geometry_file, sizes, advanced_geometry=False):
     """Load geometry information from a mantid Instrument Definition File
         or a NeXuS file containing instrument geometry. and reshape into 2D
         physical dimensions.
@@ -11,6 +12,7 @@ def load_component_info_to_2d(geometry_file, advanced_geometry=False):
         This function requires mantid-framework to be installed
 
         :param geometry_file: IDF or NeXus file
+        :param sizes: Dict of dim to size for output
         :return dictionary of component names to positions,
             rotations and shapes
         :raises ImportError if mantid cannot be imported
@@ -21,23 +23,32 @@ def load_component_info_to_2d(geometry_file, advanced_geometry=False):
     geometry = {}
     geometry["source_position"] = source_pos
     geometry["sample_position"] = sample_pos
-    print(source_pos)
-    print(sample_pos)
     pos, rot, shp = scn.mantid.get_detector_properties(
         ws,
         source_pos,
         sample_pos,
         spectrum_dim='spectrum',
         advanced_geometry=advanced_geometry)
-    x = int(np.sqrt(pos.shape[0]))
-    pos2d = sc.fold(pos, dim='spectrum', dims=['y', 'x'], shape=[x, x])
+    pos_shape = pos.shape[0]
+    reshape_volume = reduce(operator.mul, sizes.values(), 1)
+    if not pos_shape == reshape_volume:
+        raise ValueError(
+            f'file contains {pos_shape} spectra, but you are attempting\
+            to reshape to an output with volume\
+            {reshape_volume} via sizes argument')
+    fold_args = {
+        'dim': 'spectrum',
+        'dims': sizes.keys(),
+        'shape': sizes.values()
+    }
+    pos2d = sc.fold(pos, **fold_args)
     geometry["position"] = pos2d
     if rot is not None:
-        rot2d = sc.fold(rot, dim='spectrum', dims=['y', 'x'], shape=[x, x])
+        rot2d = sc.fold(rot, **fold_args)
         geometry["rotation"] = rot2d
     if shp is not None:
-        shp2d = sc.fold(shp, dim='spectrum', dims=['y', 'x'], shape=[x, x])
+        shp2d = sc.fold(shp, **fold_args)
         geometry["shape"] = shp2d
-    geometry["x"] = pos2d.fields.x['y', 0]
-    geometry["y"] = pos2d.fields.y['x', 0]
+    for u, v in zip(sizes.keys(), reversed(list(sizes.keys()))):
+        geometry[u] = pos2d.fields.x[v, 0]
     return geometry
