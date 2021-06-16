@@ -45,9 +45,9 @@ if __name__ == '__main__':
 
     # Write fixed version to file to avoid having gitpython as a hard
     # dependency
-    sys.path.append(os.path.join('..', 'src'))
+    sys.path.append(os.path.abspath('src'))
     from ess._version import __version__ as v
-    with open(os.path.join('src', 'ess', '_fixed_version.py')) as f:
+    with open(os.path.join('src', 'ess', '_fixed_version.py'), 'w') as f:
         f.write(f'__version__ = {v}')
 
     m.move(['src', 'ess'], [lib_dest])
