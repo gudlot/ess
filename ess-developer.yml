@@ -6,7 +6,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - scippneutron=0.2.1
+  - scippneutron
   - mantid-framework
   - pytest
   - sphinx>=1.6
@@ -14,7 +14,7 @@ dependencies:
   - tifffile
   - astropy 
   - matplotlib
-  - python=3.7
+  - python
   - ipywidgets
   # For developement
   - pytest
