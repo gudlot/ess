@@ -1,3 +1,21 @@
+parameters:
+- name: verbose
+  displayName: Verbose
+  type: boolean
+  default: false
+
+# Note: the 'endpoint' refers to the Azure service connection, which can be
+# found on the Azure pipelines web interface under
+# scipp > scippneutron > Settings > Service connections
+
+resources:
+  repositories:
+  - repository: SharedPipelines
+    name: scipp/pipelines
+    type: github
+    endpoint: scipp
+    ref: main
+
 trigger:
   branches:
     exclude:
@@ -8,51 +26,20 @@ pr:
   branches:
     include:
       - '*'
-    exclude:
-      - next
 
-variables:
-  is_release: $[eq(variables['System.PullRequest.TargetBranch'], 'release')]
-  target_branch: $[variables['System.PullRequest.TargetBranch']]
-
-stages:
-  - template: code_quality_checks.yml
-  - stage: 'test'
-    displayName: 'python tests'
-
-    jobs:
-      - job: 'python_test'
-        displayName: 'Python tests'
-        timeoutInMinutes: 20
-        pool:
-          vmImage: 'ubuntu-20.04'
-        steps:
-          - checkout: self
-            submodules: true
-          - bash: echo "##vso[task.prependpath]$CONDA/bin"
-            displayName: 'add conda to PATH'
-          - bash: |
-             set -ex
-             echo is master $(is_release)
-             echo target branch $(System.PullRequest.TargetBranch)
-             # If release use release scipp version from scipp channel, otherwise use scipp/label/dev channel
-             conda config --set always_yes yes --set changeps1 no
-             if [ $(is_release) == False ]; then
-                 conda env create -f ess-stable.yml
-                 source activate ess-stable
-             else
-                 conda env create -f scipp-ess.yml
-                 source activate scipp-ess
-             fi
-             export PYTHONPATH=$PYTHONPATH:src
-             python -m pytest --junitxml=junit/unit-test.xml
-            displayName: 'run pytest'
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFiles: 'junit/*.xml'
-            condition: succeededOrFailed()
-
-  - stage: 'build_documentation'
-    displayName: 'Build documentation'
-    jobs:
-      - template: documentation_build.yml
+extends:
+  template: stages.yml@SharedPipelines
+  parameters:
+    verbose: ${{ parameters.verbose }}
+    conda_channels: '--channel scipp --channel ess-dmsc'
+    gh_pages_subdirectory: 'scippneutron'
+    config:
+      linux:
+        py_versions: ['3.7']
+        conda_env: 'scippneutron-developer.yml'
+      osx:
+        py_versions: ['3.7']
+        conda_env: 'scippneutron-developer.yml'
+      windows:
+        py_versions: ['3.7']
+        conda_env: 'scippneutron-developer-no-mantid.yml'
