@@ -48,6 +48,6 @@ if __name__ == '__main__':
     sys.path.append(os.path.abspath('src'))
     from ess._version import __version__ as v
     with open(os.path.join('src', 'ess', '_fixed_version.py'), 'w') as f:
-        f.write(f'__version__ = {v}')
+        f.write(f'__version__ = \'{v}\'')
 
     m.move(['src', 'ess'], [lib_dest])
