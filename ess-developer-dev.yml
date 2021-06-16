@@ -1,19 +1,24 @@
-name: ess-stable
+name: ess-developer-dev
 
 channels:
   - conda-forge
-  - scipp
+  - scipp/label/dev
   - nodefaults
 
 dependencies:
-  - scippneutron=0.2
-  - mantid-framework
+  - scippneutron
   - pytest
   - sphinx>=1.6
   - sphinx_rtd_theme
   - tifffile
-  - astropy 
+  - astropy
   - matplotlib
   - python
   - gitpython
   - ipywidgets
+  - pytest
+  - ipython
+  - jupyter
+  - gitpython
+  - flake8
+  - yapf

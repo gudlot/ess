@@ -35,6 +35,8 @@ test:
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+  script:
+    - python tools/build_conda.py
 
 about:
   home: https://github.com/scipp/ess
@@ -42,4 +44,4 @@ about:
   summary: Neutron scattering tools for the European Spallation Source (ESS)
   description: Neutron scattering tools for Data Reduction bespoke to ESS facility and instruments
   dev_url: https://github.com/scipp/ess
-  doc_url:
+  doc_url: https://scipp.github.io/ess
