@@ -48,4 +48,8 @@ if __name__ == '__main__':
     else:
         lib_dest = os.path.join('lib', 'python*')
 
+    from src.ess._version import __version__ as v
+    with open(os.path.join('src', 'ess', '_fixed_version.py')) as f:
+        f.write(f'__version__ = {v}')
+
     m.move(['src', 'ess'], [lib_dest])
