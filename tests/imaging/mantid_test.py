@@ -4,6 +4,18 @@ import os
 import pytest
 
 
+def mantid_is_available():
+    try:
+        import mantid  # noqa: F401
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
+with_mantid_only = pytest.mark.skipif(not mantid_is_available(),
+                                      reason='Mantid framework is unavailable')
+
+
 @pytest.fixture(scope="module")
 def geom_file():
     import mantid.simpleapi as sapi
@@ -22,12 +34,14 @@ def geom_file():
         pass
 
 
+@with_mantid_only
 def test_load_component_info_to_2d_geometry_bad_sizes(geom_file):
     bad_sizes = {'x': 10, 'y': 5}  # gives volume of 50 not 100
     with pytest.raises(ValueError):
         mantid.load_component_info_to_2d(geom_file, sizes=bad_sizes)
 
 
+@with_mantid_only
 def test_load_component_info_to_2d_geometry(geom_file):
     geometry = mantid.load_component_info_to_2d(geom_file,
                                                 sizes={
@@ -37,6 +51,7 @@ def test_load_component_info_to_2d_geometry(geom_file):
     assert geometry["position"].sizes == {'x': 10, 'y': 10}
 
 
+@with_mantid_only
 def test_load_component_info_to_2d_geometry_irregular(geom_file):
     geometry = mantid.load_component_info_to_2d(geom_file,
                                                 sizes={
@@ -46,6 +61,7 @@ def test_load_component_info_to_2d_geometry_irregular(geom_file):
     assert geometry["position"].sizes == {'x': 50, 'y': 2}
 
 
+@with_mantid_only
 def test_load_component_info_to_2d_geometry_with_specified_keys(geom_file):
     geometry = mantid.load_component_info_to_2d(geom_file,
                                                 sizes={
@@ -55,6 +71,7 @@ def test_load_component_info_to_2d_geometry_with_specified_keys(geom_file):
     assert geometry["position"].sizes == {'u': 10, 'v': 10}
 
 
+@with_mantid_only
 def test_load_component_info_to_2d_geometry_advanced_geom(geom_file):
     geometry = mantid.load_component_info_to_2d(geom_file,
                                                 sizes={
