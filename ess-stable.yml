@@ -7,7 +7,6 @@ channels:
 
 dependencies:
   - scippneutron=0.2
-  - mantid-framework
   - pytest
   - sphinx>=1.6
   - sphinx_rtd_theme
