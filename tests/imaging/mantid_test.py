@@ -18,7 +18,7 @@ def geom_file():
     yield geom_path
     try:
         os.remove(geom_path)
-    except:
+    except Exception:
         pass
 
 
