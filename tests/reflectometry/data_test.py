@@ -648,6 +648,7 @@ class TestData(unittest.TestCase):
         p.write_reflectometry(file_path)
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (4, 199))
+        os.remove(file_path)
 
     def test_write_bins(self):
         p = data.ReflData(BINNED.copy())
@@ -672,6 +673,7 @@ class TestData(unittest.TestCase):
         assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
         assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
         assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
+        os.remove(file_path)
 
     def test_write_wavelength_theta(self):
         p = data.ReflData(BINNED.copy())
@@ -688,3 +690,4 @@ class TestData(unittest.TestCase):
         p.write_wavelength_theta(file_path, (bins, bins))
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (11, 9))
+        os.remove(file_path)

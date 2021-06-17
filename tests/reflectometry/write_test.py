@@ -120,6 +120,7 @@ class TestWrite(unittest.TestCase):
         f = open(file_path, 'r')
         assert_equal(f.readline(), '# hello\n')
         f.close()
+        os.remove(file_path)
 
     def test_write_wavelength_theta(self):
         p = data.ReflData(BINNED.copy())
@@ -136,6 +137,7 @@ class TestWrite(unittest.TestCase):
         write.wavelength_theta(p, file_path, (bins, bins))
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (11, 9))
+        os.remove(file_path)
 
     def test_write_wavelength_theta_norm(self):
         p = data.ReflData(BINNED.copy())
@@ -161,6 +163,7 @@ class TestWrite(unittest.TestCase):
         write.wavelength_theta(z, file_path, (bins, bins), z.sample.orso)
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (11, 9))
+        os.remove(file_path)
 
     def test_write_wavelength_theta_header(self):
         p = data.ReflData(BINNED.copy())
@@ -185,3 +188,4 @@ class TestWrite(unittest.TestCase):
             '# # ORSO reflectivity data file | 0.1 standard | YAML encoding | https://reflectometry.org\n'
         )
         f.close()
+        os.remove(file_path)

@@ -276,6 +276,7 @@ class TestNormalisation(unittest.TestCase):
         z.write_reflectometry(file_path)
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (4, 199))
+        os.remove(file_path)
 
     def test_binwavelength_theta_norm(self):
         p = amor_data.AmorData(BINNED.copy())
@@ -323,3 +324,4 @@ class TestNormalisation(unittest.TestCase):
         z.write_wavelength_theta(file_path, (bins, bins))
         written_data = np.loadtxt(file_path, unpack=True)
         assert_equal(written_data.shape, (11, 9))
+        os.remove(file_path)
