@@ -13,6 +13,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 import scipp as sc
 from ess.amor import amor_data
+from ..tools.io import file_location
 
 np.random.seed(1)
 
@@ -271,12 +272,10 @@ class TestNormalisation(unittest.TestCase):
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "test1.txt")
-        z.write_reflectometry(file_path)
-        written_data = np.loadtxt(file_path, unpack=True)
-        assert_equal(written_data.shape, (4, 199))
-        os.remove(file_path)
+        with file_location("test1.txt") as file_path:
+            z.write_reflectometry(file_path)
+            written_data = np.loadtxt(file_path, unpack=True)
+            assert_equal(written_data.shape, (4, 199))
 
     def test_binwavelength_theta_norm(self):
         p = amor_data.AmorData(BINNED.copy())
@@ -318,10 +317,8 @@ class TestNormalisation(unittest.TestCase):
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "test1.txt")
-        bins = np.linspace(0, 100, 10)
-        z.write_wavelength_theta(file_path, (bins, bins))
-        written_data = np.loadtxt(file_path, unpack=True)
-        assert_equal(written_data.shape, (11, 9))
-        os.remove(file_path)
+        with file_location("test1.txt") as file_path:
+            bins = np.linspace(0, 100, 10)
+            z.write_wavelength_theta(file_path, (bins, bins))
+            written_data = np.loadtxt(file_path, unpack=True)
+            assert_equal(written_data.shape, (11, 9))

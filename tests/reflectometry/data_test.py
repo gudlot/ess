@@ -13,6 +13,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal, assert_equal
 import scipp as sc
 from ess.reflectometry import data
+from ..tools.io import file_location
 
 np.random.seed(1)
 
@@ -643,12 +644,10 @@ class TestData(unittest.TestCase):
             dtype=sc.dtype.float64,
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "test1.txt")
-        p.write_reflectometry(file_path)
-        written_data = np.loadtxt(file_path, unpack=True)
-        assert_equal(written_data.shape, (4, 199))
-        os.remove(file_path)
+        with file_location("test1.txt") as file_path:
+            p.write_reflectometry(file_path)
+            written_data = np.loadtxt(file_path, unpack=True)
+            assert_equal(written_data.shape, (4, 199))
 
     def test_write_bins(self):
         p = data.ReflData(BINNED.copy())
@@ -665,15 +664,14 @@ class TestData(unittest.TestCase):
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = np.linspace(0, 11, 4)
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "test2.txt")
-        p.write_reflectometry(file_path, {"bins": bins})
-        written_data = np.loadtxt(file_path, unpack=True)
-        assert_almost_equal(written_data[0], bins[:-1] + np.diff(bins))
-        assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
-        assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
-        assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
-        os.remove(file_path)
+        with file_location("test2.txt") as file_path:
+            p.write_reflectometry(file_path, {"bins": bins})
+            written_data = np.loadtxt(file_path, unpack=True)
+            assert_almost_equal(written_data[0], bins[:-1] + np.diff(bins))
+            assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
+            assert_almost_equal(written_data[2],
+                                np.sqrt(np.array([3, 3, 3]) / 81))
+            assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
 
     def test_write_wavelength_theta(self):
         p = data.ReflData(BINNED.copy())
@@ -684,10 +682,8 @@ class TestData(unittest.TestCase):
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
-        file_path = (os.path.dirname(os.path.realpath(__file__)) +
-                     os.path.sep + "test1.txt")
         bins = np.linspace(0, 100, 10)
-        p.write_wavelength_theta(file_path, (bins, bins))
-        written_data = np.loadtxt(file_path, unpack=True)
-        assert_equal(written_data.shape, (11, 9))
-        os.remove(file_path)
+        with file_location("test1.txt") as file_path:
+            p.write_wavelength_theta(file_path, (bins, bins))
+            written_data = np.loadtxt(file_path, unpack=True)
+            assert_equal(written_data.shape, (11, 9))
