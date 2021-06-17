@@ -37,9 +37,3 @@ extends:
       linux:
         py_versions: ['3.7']
         conda_env: 'ess-developer-stable.yml'
-      osx:
-        py_versions: ['3.7']
-        conda_env: 'ess-developer-stable.yml'
-      windows:
-        py_versions: ['3.7']
-        conda_env: 'ess-developer-stable.yml'
