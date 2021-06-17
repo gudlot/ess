@@ -16,3 +16,4 @@ dependencies:
   - python
   - gitpython
   - ipywidgets
+  - scipy

@@ -16,6 +16,7 @@ dependencies:
   - matplotlib
   - python
   - ipywidgets
+  - scipy
   # For developement
   - pytest
   - ipython
