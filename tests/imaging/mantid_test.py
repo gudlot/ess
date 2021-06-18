@@ -2,6 +2,8 @@ from ess.imaging import mantid
 import tempfile
 import os
 import pytest
+import scipp as sc
+import numpy as np
 
 
 def mantid_is_available():
@@ -22,6 +24,7 @@ def geom_file():
     # 100 output positions (10 by 10)
     ws = sapi.CreateSampleWorkspace(NumBanks=1,
                                     BankPixelWidth=10,
+                                    PixelSpacing=0.01,
                                     StoreInADS=False)
     file_name = "example_geometry.nxs"
     geom_path = os.path.join(tempfile.gettempdir(), file_name)
@@ -49,6 +52,14 @@ def test_load_component_info_to_2d_geometry(geom_file):
                                                     'y': 10
                                                 })
     assert geometry["position"].sizes == {'x': 10, 'y': 10}
+    assert sc.identical(
+        geometry["x"],
+        sc.array(dims=["x"], values=np.arange(0.0, 0.1, 0.01),
+                 unit=sc.units.m))
+    assert sc.identical(
+        geometry["y"],
+        sc.array(dims=["y"], values=np.arange(0.0, 0.1, 0.01),
+                 unit=sc.units.m))
 
 
 @with_mantid_only
@@ -59,16 +70,21 @@ def test_load_component_info_to_2d_geometry_irregular(geom_file):
                                                     'x': 50
                                                 })
     assert geometry["position"].sizes == {'x': 50, 'y': 2}
+    assert "x" in geometry
+    assert "y" in geometry
 
 
 @with_mantid_only
-def test_load_component_info_to_2d_geometry_with_specified_keys(geom_file):
+def test_load_component_info_to_2d_geometry_non_cartesian(geom_file):
     geometry = mantid.load_component_info_to_2d(geom_file,
                                                 sizes={
-                                                    'u': 10,
-                                                    'v': 10
+                                                    'u': 20,
+                                                    'v': 5
                                                 })
-    assert geometry["position"].sizes == {'u': 10, 'v': 10}
+    assert geometry["position"].sizes == {'u': 20, 'v': 5}
+    # Cannot extract x, y as fields
+    assert "x" not in geometry
+    assert "y" not in geometry
 
 
 @with_mantid_only

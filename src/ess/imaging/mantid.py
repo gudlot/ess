@@ -49,6 +49,9 @@ def load_component_info_to_2d(geometry_file, sizes, advanced_geometry=False):
     if shp is not None:
         shp2d = sc.fold(shp, **fold_args)
         geometry["shape"] = shp2d
-    for u, v in zip(sizes.keys(), reversed(list(sizes.keys()))):
-        geometry[u] = pos2d.fields.x[v, 0]
+    # Could be upgraded, but logic complex for mapping to fields of vector
+    # We therefore limit the element coord generation to x, y, z only
+    if set(sizes.keys()).issubset({'x', 'y', 'z'}):
+        for u, v in zip(sizes.keys(), reversed(list(sizes.keys()))):
+            geometry[u] = getattr(pos2d.fields, u)[v, 0]
     return geometry
