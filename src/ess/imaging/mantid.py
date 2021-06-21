@@ -13,14 +13,15 @@ def load_component_info_to_2d(geometry_file, sizes, advanced_geometry=False):
 
         :param geometry_file: IDF or NeXus file
         :param sizes: Dict of dim to size for output
-        :return dictionary of component names to positions,
+        :return Dataset containing items for positions,
             rotations and shapes
         :raises ImportError if mantid cannot be imported
+        :raises ValueError if sizes argument invalid
         """
     from mantid.simpleapi import LoadEmptyInstrument
     ws = LoadEmptyInstrument(Filename=geometry_file, StoreInADS=False)
     source_pos, sample_pos = scn.mantid.make_component_info(ws)
-    geometry = {}
+    geometry = sc.Dataset()
     geometry["source_position"] = source_pos
     geometry["sample_position"] = sample_pos
     pos, rot, shp = scn.mantid.get_detector_properties(

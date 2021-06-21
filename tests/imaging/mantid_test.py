@@ -54,12 +54,12 @@ def test_load_component_info_to_2d_geometry(geom_file):
     assert geometry["position"].sizes == {'x': 10, 'y': 10}
     assert sc.identical(
         geometry["x"],
-        sc.array(dims=["x"], values=np.arange(0.0, 0.1, 0.01),
-                 unit=sc.units.m))
+        sc.DataArray(data=sc.array(
+            dims=["x"], values=np.arange(0.0, 0.1, 0.01), unit=sc.units.m)))
     assert sc.identical(
         geometry["y"],
-        sc.array(dims=["y"], values=np.arange(0.0, 0.1, 0.01),
-                 unit=sc.units.m))
+        sc.DataArray(data=sc.array(
+            dims=["y"], values=np.arange(0.0, 0.1, 0.01), unit=sc.units.m)))
 
 
 @with_mantid_only
