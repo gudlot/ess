@@ -6,19 +6,27 @@ channels:
   - nodefaults
 
 dependencies:
+  # Build
   - scippneutron
-  - pytest
-  - sphinx>=1.6
-  - sphinx_rtd_theme
-  - tifffile
+  - gitpython
+
+  # Run
   - astropy
   - matplotlib
+  - tifffile
   - python
-  - gitpython
-  - ipywidgets
-  - pytest
   - ipython
   - jupyter
-  - gitpython
+  - ipywidgets
+    
+  # Test
+  - pytest
+
+  # Formatting & static analysis
   - flake8
   - yapf
+
+  # Docs
+  - sphinx
+  - sphinx_rtd_theme
+  - nbsphinx
