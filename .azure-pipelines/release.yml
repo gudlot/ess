@@ -15,14 +15,11 @@ resources:
     type: github
     endpoint: scipp
     ref: allow_for_ess_pipeline # TODO update
-  pipelines:
-  - pipeline: upstream_scippneutron_release
-    project: scippneutron
-    source: Release
-    trigger: true
 
 trigger:
-  - main
+  tags:
+    include:
+      - '*.*.*'
 
 pr: none
 
@@ -37,5 +34,5 @@ extends:
         py_versions: ['3.7']
         conda_env: 'ess-developer-stable.yml'
     deploy: true
-    conda_label: 'dev'
-    publish_docs: false
+    conda_label: 'main'
+    publish_docs: true
