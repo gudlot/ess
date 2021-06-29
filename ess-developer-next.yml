@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   # Build
-  - scippneutron
+  - scipp/label/next::scippneutron
   - gitpython
 
   # Run
@@ -18,7 +18,8 @@ dependencies:
   - ipython
   - jupyter
   - ipywidgets
-    
+  - scipy
+
   # Test
   - pytest
 
