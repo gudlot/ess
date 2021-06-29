@@ -19,6 +19,7 @@ requirements:
     - scipy
     - matplotlib
     - ipywidgets
+    - scipy
 
 test:
   imports:

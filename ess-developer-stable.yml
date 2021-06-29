@@ -18,7 +18,8 @@ dependencies:
   - ipython
   - jupyter
   - ipywidgets
-    
+  - scipy
+
   # Test
   - pytest
 
