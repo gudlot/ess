@@ -32,8 +32,9 @@ extends:
     verbose: ${{ parameters.verbose }}
     conda_channels: '--channel scipp'
     gh_pages_subdirectory: 'ess'
+    noarch: true
     config:
-      noarch:
+      linux:
         py_versions: ['3.7']
         conda_env: 'ess-developer-stable.yml'
     deploy: true
