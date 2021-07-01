@@ -15,7 +15,7 @@ def grouping_reducer(*, dim, group):
 def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
     """
     Example:
-    >>> reduced = reduce_to_q(data, q_bins=q_bins, reducer=simple_reducer('spectrum'))
+    >>> reduced = reduce_to_q(data, q_bins=q_bins, reducer=simple_reducer('spectrum'))  # noqa: E501
     """
     # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
