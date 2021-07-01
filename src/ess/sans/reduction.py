@@ -12,6 +12,10 @@ def grouping_reducer(*, dim, group):
 
 
 def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
+    """
+    Example:
+    >>> reduced = reduce_to_q(data, q_bins=q_bins, reducer=simple_reducer('spectrum'))
+    """
     # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
     data = sc.neutron.convert(data, 'wavelength', 'Q', out=data)
