@@ -22,7 +22,7 @@ def _chopper_ang_freq(window_opening_t, window_size):
 def _single_chopper_beamline(window_opening_t,
                              pulse_length,
                              window_size=np.pi / 4 * sc.units.rad,
-                             tdc=None):
+                             phase=None):
     instrument = sc.Dataset()
     # single pixel set 10m down the beam
     instrument['position'] = sc.vector(value=[0, 0, 10], unit=sc.units.m)
@@ -42,13 +42,16 @@ def _single_chopper_beamline(window_opening_t,
                                                    dims=['chopper'],
                                                    shape=[1])
 
-    blind_t = sc.to_unit(pulse_length, sc.units.s) - window_opening_t
-    # For calculation simplicity to center cutout opening over center of pulse
-    phase_offset_t = blind_t / 2
-    phase = phase_offset_t * chopper_ang_frequency
-    instrument['phase'] = sc.array(dims=['chopper'],
-                                   values=[phase.value],
-                                   unit=sc.units.rad)
+    if phase is None:
+        blind_t = sc.to_unit(pulse_length, sc.units.s) - window_opening_t
+        # For calc simplicity to center cutout opening over center of pulse
+        phase_offset_t = blind_t / 2
+        phase = phase_offset_t * chopper_ang_frequency
+        instrument['phase'] = sc.array(dims=['chopper'],
+                                       values=[phase.value],
+                                       unit=sc.units.rad)
+    else:
+        instrument['phase'] = sc.broadcast(phase, dims=['chopper'], shape=[1])
 
     # window opening angle
     instrument['frame_start'] = sc.array(
@@ -58,9 +61,6 @@ def _single_chopper_beamline(window_opening_t,
     instrument['frame_end'] = sc.ones(dims=['frame'], shape=[1]) * sc.ones(
         dims=['chopper'], shape=[1]) * window_size
 
-    instrument['tdc'] = sc.zeros(dims=['chopper'], shape=[
-        1
-    ]) if tdc is None else sc.array(dims=['chopper'], values=[tdc])
     instrument['choppers'] = sc.array(dims=['chopper'], values=['chopper'])
     return instrument
 
@@ -143,3 +143,27 @@ def test_frames_analytical_with_different_window_times():
         sc.array(dims=['frame'],
                  values=[invariant_shift.value],
                  unit=sc.units.us))
+
+
+def test_frames_analytical_one_chopper_one_cutout_shift_phase():
+    offset = 0.0 * sc.units.us  # start of pulse t offset from 0
+    window_opening_t = 5.0 * sc.units.us
+    window_size = np.pi / 4.0 * sc.units.rad
+    pulse_length = 10.0 * sc.units.us
+    freq = _chopper_ang_freq(window_opening_t, window_size)
+    for phase in [i * sc.units.rad for i in [0.0, np.pi / 4.0, np.pi]]:
+        tshift = phase / freq  # Expected tshift from chopper phase
+        instrument = _single_chopper_beamline(window_opening_t,
+                                              pulse_length,
+                                              window_size=window_size,
+                                              phase=phase)
+        frames = frames_analytical(instrument, offset=offset)
+        # Factor 2 comes from the geometry. Pixel 2 * source - chopper distance
+        assert allclose(
+            frames['left_edges'].data,
+            sc.array(dims=['frame'], values=[-10.0], unit=sc.units.us) +
+            offset + (tshift * 2))
+        assert allclose(
+            frames['right_edges'].data,
+            sc.array(dims=['frame'], values=[10.0], unit=sc.units.us) +
+            offset + (tshift * 2))
