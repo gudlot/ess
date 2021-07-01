@@ -52,3 +52,9 @@ class TestQGrid(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = tools.q_grid(q_min=0.7 * sc.Unit('1/angstrom'),
                              q_max=0.001 * sc.Unit('1/angstrom'))
+
+    def test_q_grid_unit(self):
+        actual = tools.q_grid(q_min=0.7 * sc.Unit('1/nm'),
+                              q_fix=1. * sc.Unit('1/nm'))
+        expected = [0.07, 0.075, 0.08, 0.085]
+        assert_almost_equal(actual.values, expected)

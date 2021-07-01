@@ -29,6 +29,8 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
     :return: The bin edges to be used in q-binning.
     :rtype: scipp._scipp.core.Variable 
     """
+    q_min = sc.to_unit(q_min, q_max.unit)
+    q_fix = sc.to_unit(q_fix, q_max.unit)
     if d_q is None:
         d_q = 0.05 * q_fix
     if (q_min < q_fix).value and (q_fix < q_max).value:
@@ -40,7 +42,7 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
                             values=(q_fix.value * (1. + d_q / q_fix).value**
                                     sc.arange('qz', 0,
                                               (n_log + 1).values, 1).values),
-                            unit=sc.Unit('1/angstrom'))
+                            unit=q_max.unit)
         return sc.concatenate(q_linear, q_log, 'qz')
     elif (q_min < q_max).value and (q_max < q_fix).value:
         n_linear = ((q_fix - q_min) / d_q + 0.5).astype(sc.dtype.int64)
@@ -58,7 +60,7 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
             values=q_fix.value *
             (1. + d_q / q_fix).values**sc.arange('qz', m_log.value,
                                                  (n_log + 1).value, 1.).values,
-            unit=sc.Unit('1/angstrom'))
+            unit=q_max.unit)
         return q_log
     else:
         raise ValueError(
