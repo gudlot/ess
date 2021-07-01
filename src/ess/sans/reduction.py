@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+import scippneutron as scn
 
 
 def simple_reducer(*, dim):
@@ -18,7 +19,7 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
     """
     # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
-    data = sc.neutron.convert(data, 'wavelength', 'Q', out=data)
+    data = scn.convert(data, 'wavelength', 'Q', out=data)
     if wavelength_bands is None:
         data = sc.histogram(data, q_bins)
         return reducer(data)
