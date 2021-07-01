@@ -330,9 +330,9 @@ class Normalisation:
                     sc.max(self.sample.event.coords['qz']).value,
                     sc.max(self.reference.event.coords['qz']).value
                 ]) * unit
-                bins = np.linspace(min_q.value, max_q.value, 200)
-            binned_sample = self.sample.q_bin(bins, unit)
-            binned_reference = self.reference.q_bin(bins, unit)
+                bins = sc.linspace('qz', min_q.value, max_q.value, 200, unit=sc.Unit('1/angstrom'))
+            binned_sample = self.sample.q_bin(bins)
+            binned_reference = self.reference.q_bin(bins)
             del binned_reference.coords['sigma_qz_by_qz']
         else:
             raise sc.NotFoundError("qz coordinate cannot be found.")

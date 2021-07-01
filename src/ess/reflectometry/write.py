@@ -12,19 +12,18 @@ import numpy as np
 from ess.reflectometry import orso
 
 
-def reflectometry(data, filename, bin_kwargs=None, header=None):
+def reflectometry(data, filename, bins, header=None):
     """
     Write the reflectometry intensity data to a file.
 
-    Args:
-        filename (:py:attr:`str`): The file path for the file to be saved to.
-        bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
-        header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
+    :param filename: The file path for the file to be saved to
+    :type filename: str
+    :param bins: bin edges for qz
+    :type bins: scipp._scipp.core.Variable
+    :param header: ORSO-compatible header object
+    :type: ess.reflectometry.Orso
     """
-    if bin_kwargs is None:
-        binned = data.q_bin()
-    else:
-        binned = data.q_bin(**bin_kwargs)
+    binned = data.q_bin(bins)
     q_z_edges = binned.coords["qz"].values
     q_z_vector = q_z_edges[:-1] + np.diff(q_z_edges)
     dq_z_vector = binned.coords["sigma_qz_by_qz"].values

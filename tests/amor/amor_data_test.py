@@ -59,11 +59,7 @@ Z = sc.Variable(
     unit=sc.units.m,
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
-BINNED.bins.constituents['data'].coords["tof"] = sc.Variable(
-    dims=["event"],
-    values=np.linspace(1, 10, N),
-    unit=sc.units.us,
-)
+BINNED.bins.constituents['data'].coords["tof"] = sc.linspace("event", 1, 10, N, unit=sc.units.us)
 BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
                                                        0. * sc.units.m,
                                                        0. * sc.units.m)
@@ -295,8 +291,9 @@ class TestNormalisation(unittest.TestCase):
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
-        bins = np.linspace(0, 100, 10)
-        k = z.wavelength_theta_bin((bins, bins))
+        bins1 = sc.linspace('wavelength', 0, 100, 10, unit=sc.units.angstrom)
+        bins2 = sc.linspace('theta', 0, 100, 10, unit=sc.units.deg)
+        k = z.wavelength_theta_bin((bins1, bins2))
         assert_equal(k.shape, (9, 9))
 
     def test_write_wavelength_theta_norm(self):
@@ -318,7 +315,8 @@ class TestNormalisation(unittest.TestCase):
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
         with file_location("test1.txt") as file_path:
-            bins = np.linspace(0, 100, 10)
-            z.write_wavelength_theta(file_path, (bins, bins))
+            bins1 = sc.linspace('wavelength', 0, 100, 10, unit=sc.units.angstrom)
+            bins2 = sc.linspace('theta', 0, 100, 10, unit=sc.units.deg)
+            z.write_wavelength_theta(file_path, (bins1, bins2))
             written_data = np.loadtxt(file_path, unpack=True)
             assert_equal(written_data.shape, (11, 9))
