@@ -19,7 +19,7 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
     """
     # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
-    data = scn.convert(data, 'wavelength', 'Q', out=data)
+    data = scn.convert(data, 'wavelength', 'Q', scatter=True)
     if wavelength_bands is None:
         data = sc.histogram(data, q_bins)
         return reducer(data)
