@@ -15,7 +15,7 @@ from ess.amor import tools
 
 class TestQGrid(unittest.TestCase):
     def test_q_grid_a(self):
-        actual = tools.q_grid(q_fix=0.05*sc.Unit('1/angstrom'))
+        actual = tools.q_grid(q_fix=0.05 * sc.Unit('1/angstrom'))
         expected = [
             0.0075, 0.01, 0.0125, 0.015, 0.0175, 0.02, 0.0225, 0.025, 0.0275,
             0.03, 0.0325, 0.035, 0.0375, 0.04, 0.0425, 0.045, 0.0475, 0.05,
@@ -25,19 +25,19 @@ class TestQGrid(unittest.TestCase):
         assert_almost_equal(actual.values, expected)
 
     def test_q_grid_b(self):
-        actual = tools.q_grid(q_min=0.07*sc.Unit('1/angstrom'),
-                              q_fix=0.1*sc.Unit('1/angstrom'))
+        actual = tools.q_grid(q_min=0.07 * sc.Unit('1/angstrom'),
+                              q_fix=0.1 * sc.Unit('1/angstrom'))
         expected = [0.07, 0.075, 0.08, 0.085]
         assert_almost_equal(actual.values, expected)
 
     def test_q_grid_c(self):
-        actual = tools.q_grid(q_min=0.07*sc.Unit('1/angstrom'),
-                              q_fix=0.001*sc.Unit('1/angstrom'))
+        actual = tools.q_grid(q_min=0.07 * sc.Unit('1/angstrom'),
+                              q_fix=0.001 * sc.Unit('1/angstrom'))
         expected = [0.06641707, 0.06973792, 0.07322482, 0.07688606, 0.08073037]
         assert_almost_equal(actual.values, expected)
 
     def test_q_grid_d(self):
-        actual = tools.q_grid(d_q=0.0005*sc.Unit('1/angstrom'))
+        actual = tools.q_grid(d_q=0.0005 * sc.Unit('1/angstrom'))
         expected = [
             0.0073205, 0.00805255, 0.00885781, 0.00974359, 0.01071794,
             0.01178974, 0.01296871, 0.01426558, 0.01569214, 0.01726136,
@@ -50,5 +50,5 @@ class TestQGrid(unittest.TestCase):
 
     def test_q_grid_e(self):
         with self.assertRaises(ValueError):
-            _ = tools.q_grid(q_min=0.7*sc.Unit('1/angstrom'),
-                             q_max=0.001*sc.Unit('1/angstrom'))
+            _ = tools.q_grid(q_min=0.7 * sc.Unit('1/angstrom'),
+                             q_max=0.001 * sc.Unit('1/angstrom'))

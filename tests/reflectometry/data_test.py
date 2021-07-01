@@ -128,8 +128,17 @@ class TestData(unittest.TestCase):
 
     def test_q_bin(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace('event', 1, 10, N, unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=sc.Unit('1/angstrom'),
+        p.event.coords["qz"] = sc.linspace('event',
+                                           1,
+                                           10,
+                                           N,
+                                           unit=sc.Unit('1/angstrom'))
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
+            "event",
+            0.1,
+            1.0,
+            N,
+            unit=sc.Unit('1/angstrom'),
             dtype=sc.dtype.float64,
         )
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
@@ -143,8 +152,18 @@ class TestData(unittest.TestCase):
 
     def test_q_bin_different_unit(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event", 1, 10, N, unit=(1 / sc.units.m).unit)
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=(1 / sc.units.m).unit, dtype=sc.dtype.float64)
+        p.event.coords["qz"] = sc.linspace("event",
+                                           1,
+                                           10,
+                                           N,
+                                           unit=(1 / sc.units.m).unit)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event",
+                                                       0.1,
+                                                       1.0,
+                                                       N,
+                                                       unit=(1 /
+                                                             sc.units.m).unit,
+                                                       dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace('qz', 0, 11, 4, unit=sc.Unit('1/m'))
         b = p.q_bin(bins)
@@ -156,7 +175,13 @@ class TestData(unittest.TestCase):
 
     def test_q_bin_no_qz(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=(1 / sc.units.m).unit, dtype=sc.dtype.float64)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event",
+                                                       0.1,
+                                                       1.0,
+                                                       N,
+                                                       unit=(1 /
+                                                             sc.units.m).unit,
+                                                       dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace('qz', 0, 11, 4, unit=sc.Unit('1/angstrom'))
         with self.assertRaises(sc.NotFoundError):
@@ -164,7 +189,11 @@ class TestData(unittest.TestCase):
 
     def test_q_bin_no_qzresolution(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event", 1, 10, N, unit=sc.Unit('1/angstrom'))
+        p.event.coords["qz"] = sc.linspace("event",
+                                           1,
+                                           10,
+                                           N,
+                                           unit=sc.Unit('1/angstrom'))
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace('qz', 0, 11, 4, unit=sc.Unit('1/angstrom'))
         b = p.q_bin(bins)
@@ -174,8 +203,18 @@ class TestData(unittest.TestCase):
 
     def test_q_bin_no_tof(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event", 1, 10, N, unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=sc.Unit('1/angstrom'), dtype=sc.dtype.float64)
+        p.event.coords["qz"] = sc.linspace("event",
+                                           1,
+                                           10,
+                                           N,
+                                           unit=sc.Unit('1/angstrom'))
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
+            "event",
+            0.1,
+            1.0,
+            N,
+            unit=sc.Unit('1/angstrom'),
+            dtype=sc.dtype.float64)
         bins = sc.linspace('qz', 0., 11., 4, unit=sc.Unit('1/angstrom'))
         with self.assertRaises(sc.NotFoundError):
             _ = p.q_bin(bins)
@@ -194,7 +233,11 @@ class TestData(unittest.TestCase):
             dtype=sc.dtype.float64,
             unit=sc.units.deg,
         )
-        bins1 = sc.linspace('wavelength', 0.01, 2, 50, unit=sc.Unit('angstrom'))
+        bins1 = sc.linspace('wavelength',
+                            0.01,
+                            2,
+                            50,
+                            unit=sc.Unit('angstrom'))
         bins2 = sc.linspace('theta', 0.01, 2, 50, unit=sc.Unit('deg'))
         binned = p.wavelength_theta_bin((bins1, bins2))
         assert_equal(binned.shape, [49, 49])
@@ -232,7 +275,10 @@ class TestData(unittest.TestCase):
             dtype=sc.dtype.float64,
             unit=sc.units.angstrom,
         )
-        bins1 = sc.linspace('wavelength', 0.01, 2, 50,
+        bins1 = sc.linspace('wavelength',
+                            0.01,
+                            2,
+                            50,
                             unit=sc.Unit('angstrom'))
         bins2 = sc.linspace('qz', 0.01, 2, 50, unit=sc.Unit('1/angstrom'))
         binned = p.wavelength_q_bin((bins1, bins2))
@@ -588,8 +634,18 @@ class TestData(unittest.TestCase):
 
     def test_write(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event", 1, 10, N, unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=sc.Unit('1/angstrom'), dtype=sc.dtype.float64)
+        p.event.coords["qz"] = sc.linspace("event",
+                                           1,
+                                           10,
+                                           N,
+                                           unit=sc.Unit('1/angstrom'))
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
+            "event",
+            0.1,
+            1.0,
+            N,
+            unit=sc.Unit('1/angstrom'),
+            dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace('qz', 0, 11, 200, unit=sc.Unit('1/angstrom'))
         with file_location("test1.txt") as file_path:
@@ -599,14 +655,25 @@ class TestData(unittest.TestCase):
 
     def test_write_bins(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event", 1, 10, N, unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace("event", 0.1, 1.0, N, unit=sc.Unit('1/angstrom'), dtype=sc.dtype.float64)
+        p.event.coords["qz"] = sc.linspace("event",
+                                           1,
+                                           10,
+                                           N,
+                                           unit=sc.Unit('1/angstrom'))
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
+            "event",
+            0.1,
+            1.0,
+            N,
+            unit=sc.Unit('1/angstrom'),
+            dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace('qz', 0, 11, 4, unit=sc.Unit('1/angstrom'))
         with file_location("test2.txt") as file_path:
             p.write_reflectometry(file_path, bins)
             written_data = np.loadtxt(file_path, unpack=True)
-            assert_almost_equal(written_data[0], bins.values[:-1] + np.diff(bins.values))
+            assert_almost_equal(written_data[0],
+                                bins.values[:-1] + np.diff(bins.values))
             assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
             assert_almost_equal(written_data[2],
                                 np.sqrt(np.array([3, 3, 3]) / 81))

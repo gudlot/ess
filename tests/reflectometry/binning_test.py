@@ -58,9 +58,13 @@ Z = sc.Variable(
     unit=sc.units.m,
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
-BINNED.bins.constituents['data'].coords["tof"] = sc.linspace(
-    'event', 1, 10, N, unit=sc.units.us)
-BINNED.bins.constituents['data'].coords["qz"] = sc.linspace('event', 0.1, 1.0, N, unit = sc.Unit('1/angstrom'))
+BINNED.bins.constituents['data'].coords["tof"] = sc.linspace('event',
+                                                             1,
+                                                             10,
+                                                             N,
+                                                             unit=sc.units.us)
+BINNED.bins.constituents['data'].coords["qz"] = sc.linspace(
+    'event', 0.1, 1.0, N, unit=sc.Unit('1/angstrom'))
 BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
                                                        0. * sc.units.m,
                                                        0. * sc.units.m)
@@ -86,14 +90,19 @@ class TestBinning(unittest.TestCase):
     def test_2d_bin(self):
         p = data.ReflData(BINNED.copy())
         bins = (sc.linspace('tof', 0.1e-6, 10e-6, 50, unit=sc.units.us),
-                sc.linspace('qz', 0.01e10, 2e10, 50, unit=sc.Unit('1/angstrom')))
+                sc.linspace('qz',
+                            0.01e10,
+                            2e10,
+                            50,
+                            unit=sc.Unit('1/angstrom')))
         result = binning.two_dimensional_bin(p, bins)
         assert_equal(result.shape, [49, 49])
 
     def test_2d_bin_unit(self):
         p = data.ReflData(BINNED.copy())
         bins = (sc.linspace('tof', 0.1e-6, 10e-6, 5, unit=sc.units.s),
-                sc.linspace('qz', 0.01e10, 2e10, 5, unit=(1 / sc.units.m).unit))
+                sc.linspace('qz', 0.01e10, 2e10, 5,
+                            unit=(1 / sc.units.m).unit))
         result = binning.two_dimensional_bin(p, bins)
         assert_equal(result.shape, [4, 4])
         assert_almost_equal(sc.max(result.coords['qz']).value, 2e10)

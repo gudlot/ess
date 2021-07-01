@@ -34,10 +34,12 @@ def q_bin(data, bins):
             qzr = np.array([])
             for i in binned.data.values:
                 try:
-                    qzr = np.append(qzr, i.coords['sigma_qz_by_qz'].values.max())
+                    qzr = np.append(qzr,
+                                    i.coords['sigma_qz_by_qz'].values.max())
                 except ValueError:
                     qzr = np.append(qzr, 0)
-            binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr, dims=['qz'])
+            binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr,
+                                                          dims=['qz'])
     else:
         raise sc.NotFoundError('qz or tof coordinate cannot be found.')
     return binned / (data.data.events.shape[0] * sc.units.dimensionless)
