@@ -214,7 +214,7 @@ def test_frames_analytical_one_chopper_one_cutout_shift_phase():
             offset + (tshift * 2))
 
 
-def test_frames_analytical_one_chopper_one_cutout_dual_cutout():
+def test_frames_analytical_one_chopper_dual_cutout():
     window_opening_t = 5.0 * sc.units.us
     window_size = np.pi / 4.0 * sc.units.rad
     pulse_length = 10.0 * sc.units.us
