@@ -94,15 +94,20 @@ def frames_analytical(instrument, plot=False, offset=None):
         intercept_min = y0 - (slopes_min[imin] * x0.value * y0.unit)
         intercept_max = y0 - (slopes_max[imax] * x1.value * y0.unit)
 
+        def make_edge(dims, x):
+            kwargs = {'unit': sc.units.us}
+            if hasattr(x, '__len__'):
+                return sc.array(dims=dims, values=x, **kwargs)
+            else:
+                return sc.scalar(value=x, **kwargs)
+
         # Frame edges for each pixel
-        frames["right_edges"]["frame", i] = sc.Variable(
-            dims=pos_norm.dims,
-            values=((pos_norm - intercept_min).values / slopes_min[imin]),
-            unit=sc.units.us)
-        frames["left_edges"]["frame", i] = sc.Variable(
-            dims=pos_norm.dims,
-            values=((pos_norm - intercept_max).values / slopes_max[imax]),
-            unit=sc.units.us)
+        frames["right_edges"]["frame", i] = make_edge(
+            pos_norm.dims,
+            (pos_norm - intercept_min).values / slopes_min[imin])
+        frames["left_edges"]["frame", i] = make_edge(
+            pos_norm.dims,
+            (pos_norm - intercept_max).values / slopes_max[imax])
         # Frame shifts
         frames["shifts"]["frame", i] = sc.mean(
             sc.concatenate(xstart["chopper", 0:2], xend["chopper", 0:2],
