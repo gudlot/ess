@@ -95,11 +95,11 @@ def frames_analytical(instrument, plot=False, offset=None):
         intercept_max = y0 - (slopes_max[imax] * x1.value * y0.unit)
 
         # Frame edges for each pixel
-        frames["right_edges"]["frame", i] = sc.array(
+        frames["right_edges"]["frame", i] = sc.Variable(
             dims=pos_norm.dims,
             values=((pos_norm - intercept_min).values / slopes_min[imin]),
             unit=sc.units.us)
-        frames["left_edges"]["frame", i] = sc.array(
+        frames["left_edges"]["frame", i] = sc.Variable(
             dims=pos_norm.dims,
             values=((pos_norm - intercept_max).values / slopes_max[imax]),
             unit=sc.units.us)
