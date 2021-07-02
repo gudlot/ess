@@ -96,7 +96,7 @@ def frames_analytical(instrument, plot=False, offset=None):
 
         def make_edge(dims, x):
             kwargs = {'unit': sc.units.us}
-            if hasattr(x, '__len__'):
+            if dims:
                 return sc.array(dims=dims, values=x, **kwargs)
             else:
                 return sc.scalar(value=x, **kwargs)
