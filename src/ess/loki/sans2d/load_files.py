@@ -6,7 +6,7 @@ def load_isis(filename, spectrum_size):
     #TODO: decide how to handle internal arguments
     tof_bins = sc.Variable(dims=['tof'], unit=sc.units.us, values=np.linspace(0, 100000, num=101))
     events = scn.load(filename=filename, mantid_args={'LoadMonitors':True})
-    return sc.histogram(events['spectrum',:spectrum_size//2], tof_bins)
+    return sc.histogram(events['spectrum',:spectrum_size], tof_bins)
 
 def load_rkh_wav(filename):
     return scn.load(
