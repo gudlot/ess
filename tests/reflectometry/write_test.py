@@ -60,10 +60,10 @@ Z = sc.Variable(
     unit=sc.units.m,
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
-BINNED.bins.constituents['data'].coords["tof"] = sc.linspace("event",
-                                                             1,
-                                                             10,
-                                                             N,
+BINNED.bins.constituents['data'].coords["tof"] = sc.linspace(dim="event",
+                                                             start=1,
+                                                             stop=10,
+                                                             num=N,
                                                              unit=sc.units.us)
 BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
                                                        0. * sc.units.m,
@@ -75,21 +75,25 @@ BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 class TestWrite(unittest.TestCase):
     def test_write_bins(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace("event",
-                                           1,
-                                           10,
-                                           N,
+        p.event.coords["qz"] = sc.linspace(dim="event",
+                                           start=1,
+                                           stop=10,
+                                           num=N,
                                            unit=sc.Unit('1/angstrom'))
         p.event.coords["sigma_qz_by_qz"] = sc.linspace(
-            "event",
-            0.1,
-            1.0,
-            N,
+            dim="event",
+            start=0.1,
+            stop=1.0,
+            num=N,
             unit=sc.Unit('1/angstrom'),
             dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"],
                                             values=DETECTORS.astype(float))
-        bins = sc.linspace('qz', 0, 11, 4, unit=sc.Unit('1/angstrom'))
+        bins = sc.linspace(dim='qz',
+                           start=0,
+                           stop=11,
+                           num=4,
+                           unit=sc.Unit('1/angstrom'))
         with file_location("test2.txt") as file_path:
             write.reflectometry(p, file_path, bins, 'hello')
             written_data = np.loadtxt(file_path, unpack=True)
@@ -113,12 +117,16 @@ class TestWrite(unittest.TestCase):
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         with file_location("test1.txt") as file_path:
-            bins1 = sc.linspace('wavelength',
-                                0,
-                                100,
-                                10,
+            bins1 = sc.linspace(dim='wavelength',
+                                start=0,
+                                stop=100,
+                                num=10,
                                 unit=sc.Unit('angstrom'))
-            bins2 = sc.linspace('theta', 0, 100, 10, unit=sc.Unit('deg'))
+            bins2 = sc.linspace(dim='theta',
+                                start=0,
+                                stop=100,
+                                num=10,
+                                unit=sc.Unit('deg'))
             write.wavelength_theta(p, file_path, (bins1, bins2))
             written_data = np.loadtxt(file_path, unpack=True)
             assert_equal(written_data.shape, (11, 9))
@@ -142,12 +150,16 @@ class TestWrite(unittest.TestCase):
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
         with file_location("test1.txt") as file_path:
-            bins1 = sc.linspace('wavelength',
-                                0,
-                                100,
-                                10,
+            bins1 = sc.linspace(dim='wavelength',
+                                start=0,
+                                stop=100,
+                                num=10,
                                 unit=sc.Unit('angstrom'))
-            bins2 = sc.linspace('theta', 0, 100, 10, unit=sc.Unit('deg'))
+            bins2 = sc.linspace(dim='theta',
+                                start=0,
+                                stop=100,
+                                num=10,
+                                unit=sc.Unit('deg'))
             write.wavelength_theta(z, file_path, (bins1, bins2), z.sample.orso)
             written_data = np.loadtxt(file_path, unpack=True)
             assert_equal(written_data.shape, (11, 9))
@@ -162,12 +174,16 @@ class TestWrite(unittest.TestCase):
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         with file_location("test1.txt") as file_path:
-            bins1 = sc.linspace('wavelength',
-                                0,
-                                100,
-                                10,
+            bins1 = sc.linspace(dim='wavelength',
+                                start=0,
+                                stop=100,
+                                num=10,
                                 unit=sc.Unit('angstrom'))
-            bins2 = sc.linspace('theta', 0, 100, 10, unit=sc.Unit('deg'))
+            bins2 = sc.linspace(dim='theta',
+                                start=0,
+                                stop=100,
+                                num=10,
+                                unit=sc.Unit('deg'))
             write.wavelength_theta(
                 p, file_path, (bins1, bins2),
                 orso.Orso(orso.Creator(), orso.DataSource(), orso.Reduction(),

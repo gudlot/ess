@@ -17,7 +17,7 @@ def q_bin(data, bins):
     Return data that has been binned in the q-bins passed.
 
     :param data: reflectometry data to be binned
-    :type data: Union[ess.reflectometry.ReflData, ess.amor.AmorData, ess.amor.AmorReference]
+    :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
     :param bins: q-bin edges 
     :type bins: scipp._scipp.core.Variable 
 
@@ -25,12 +25,12 @@ def q_bin(data, bins):
     :rtype: scipp._scipp.core.DataArray 
     :raises: NotFoundError is qz or tof coordinate cannot be found 
     """
-    if 'qz' in data.data.events.coords and 'tof' in data.data.events.coords:
-        erase = ['tof'] + data.data.dims
-        data.data.events.coords['qz'] = sc.to_unit(
-            data.data.events.coords['qz'], bins.unit)
-        binned = sc.bin(data.data, erase=erase, edges=[bins])
-        if 'sigma_qz_by_qz' in data.data.events.coords:
+    if 'qz' in data.events.coords and 'tof' in data.events.coords:
+        erase = ['tof'] + data.dims
+        data.events.coords['qz'] = sc.to_unit(data.events.coords['qz'],
+                                              bins.unit)
+        binned = sc.bin(data, erase=erase, edges=[bins])
+        if 'sigma_qz_by_qz' in data.events.coords:
             qzr = np.array([])
             for i in binned.data.values:
                 try:
@@ -42,7 +42,7 @@ def q_bin(data, bins):
                                                           dims=['qz'])
     else:
         raise sc.NotFoundError('qz or tof coordinate cannot be found.')
-    return binned / (data.data.events.shape[0] * sc.units.dimensionless)
+    return binned / (data.events.shape[0] * sc.units.dimensionless)
 
 
 def two_dimensional_bin(data, bins):
@@ -50,7 +50,7 @@ def two_dimensional_bin(data, bins):
     Perform some arbitrary two-dimensional binning.
 
     :param data: reflectometry data to be binned
-    :type data: Union[ess.reflectometry.ReflData, ess.amor.AmorData, ess.amor.AmorReference]
+    :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
     :param bins: Bin edges
     :type bins: Tuple[scipp._scipp.core.Variable]
     
@@ -58,6 +58,6 @@ def two_dimensional_bin(data, bins):
     :rtype: scipp._scipp.core.DataArray 
     """
     for i in bins:
-        data.data.events.coords[i.dims[0]] = sc.to_unit(
-            data.data.events.coords[i.dims[0]], i.unit)
-    return sc.bin(data.data.bins.concatenate('detector_id'), edges=list(bins))
+        data.events.coords[i.dims[0]] = sc.to_unit(
+            data.events.coords[i.dims[0]], i.unit)
+    return sc.bin(data.bins.concatenate('detector_id'), edges=list(bins))

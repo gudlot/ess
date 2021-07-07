@@ -79,7 +79,7 @@ class ReflData:
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        return binning.q_bin(self, bins).bins.sum()
+        return binning.q_bin(self.data, bins).bins.sum()
 
     def wavelength_theta_bin(self, bins):
         """
@@ -92,7 +92,7 @@ class ReflData:
         :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, bins) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
     def q_theta_bin(self, bins):
         """
@@ -105,7 +105,7 @@ class ReflData:
         :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, bins) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
     def wavelength_q_bin(self, bins):
         """
@@ -118,7 +118,7 @@ class ReflData:
         :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, bins) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
