@@ -68,7 +68,7 @@ class ReflData:
         """
         return self.data.bins.constituents["data"]
 
-    def q_bin(self, bins=None, unit=sc.Unit('1/angstrom')):
+    def q_bin(self, bins):
         """
         Return data that has been binned in the q-bins passed.
 
@@ -79,60 +79,46 @@ class ReflData:
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        return binning.q_bin(self, bins, unit).bins.sum()
+        return binning.q_bin(self.data, bins).bins.sum()
 
-    def wavelength_theta_bin(self,
-                             bins=None,
-                             units=(sc.units.angstrom, sc.units.deg)):
+    def wavelength_theta_bin(self, bins):
         """
         Return data that has been binned in the wavelength and theta bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`(Å, deg)`.
-
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :param bins: wavelength and theta edges
+        :type bins: Tuple(scipp._scipp.core.Variable)
+        
+        :return: Data array binned into wavelength and theta
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['wavelength', 'theta'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
-    def q_theta_bin(self,
-                    bins=None,
-                    units=(sc.Unit('1/angstrom'), sc.units.deg)):
+    def q_theta_bin(self, bins):
         """
-        Return data that has been binned in the wavelength and theta bins passed.
+        Return data that has been binned in the q and theta bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å^{-1}, deg]`.
+        :param bins: q and theta edges
+        :type: Tuple(scipp._scipp.core.Variable)
 
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :return: Data array binned into q and theta
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['qz', 'theta'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
-    def wavelength_q_bin(
-            self,
-            bins=None,
-            units=(sc.units.angstrom, sc.Unit('1/angstrom')),
-    ):
+    def wavelength_q_bin(self, bins):
         """
-        Return data that has been binned in the wavelength and theta bins passed.
+        Return data that has been binned in the wavelength and q bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å, Å^{-1}]`.
+        :param bins: q and theta edges
+        :type: Tuple(scipp._scipp.core.Variable)
 
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :return: Data array binned into wavelength and q
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['wavelength', 'qz'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
@@ -355,7 +341,7 @@ class ReflData:
         self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
                                                  values=[True, False, True])
 
-    def write_reflectometry(self, filename, bin_kwargs=None, header=None):
+    def write_reflectometry(self, filename, bins, header=None):
         """
         Write the reflectometry intensity data to a file.
 
@@ -364,7 +350,7 @@ class ReflData:
             bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
             header (:py:class:`ess.reflectometry.Orso`, optional): ORSO-compatible header object. Optional defaults to :py:attr:`ReflData.orso`.
         """
-        write.reflectometry(self, filename, bin_kwargs, header)
+        write.reflectometry(self, filename, bins, header)
 
     def write_wavelength_theta(self, filename, bins, header=None):
         """

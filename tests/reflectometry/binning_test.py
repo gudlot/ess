@@ -58,16 +58,13 @@ Z = sc.Variable(
     unit=sc.units.m,
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
-BINNED.bins.constituents['data'].coords["tof"] = sc.Variable(
-    dims=["event"],
-    values=np.linspace(1, 10, N),
-    unit=sc.units.us,
-)
-BINNED.bins.constituents['data'].coords["qz"] = sc.Variable(
-    dims=["event"],
-    values=np.linspace(1, 10, N) * 0.1,
-    unit=sc.Unit('1/angstrom'),
-)
+BINNED.bins.constituents['data'].coords["tof"] = sc.linspace(dim='event',
+                                                             start=1,
+                                                             stop=10,
+                                                             num=N,
+                                                             unit=sc.units.us)
+BINNED.bins.constituents['data'].coords["qz"] = sc.linspace(
+    dim='event', start=0.1, stop=1.0, num=N, unit=sc.Unit('1/angstrom'))
 BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
                                                        0. * sc.units.m,
                                                        0. * sc.units.m)
@@ -78,48 +75,69 @@ BINNED.attrs['experiment_title'] = sc.scalar(value='test')
 class TestBinning(unittest.TestCase):
     def test_q_bin(self):
         p = data.ReflData(BINNED.copy())
-        result = binning.q_bin(p)
-        assert_equal(result.shape, [199])
-
-    def test_q_bin_bins(self):
-        p = data.ReflData(BINNED.copy())
-        bins = np.linspace(0.01, 2, 10)
-        result = binning.q_bin(p, bins=bins)
+        bins = sc.linspace(dim='qz',
+                           start=0.01,
+                           stop=2,
+                           num=10,
+                           unit=sc.Unit('1/angstrom'))
+        result = binning.q_bin(p.data, bins)
         assert_equal(result.shape, [9])
         assert_almost_equal(sc.max(result.coords['qz']).value, 2)
 
     def test_q_bin_unit(self):
         p = data.ReflData(BINNED.copy())
-        bins = np.linspace(0.01e10, 2e10, 5)
-        result = binning.q_bin(p, bins=bins, unit=(1 / sc.units.m).unit)
+        bins = sc.linspace(dim='qz',
+                           start=0.01e10,
+                           stop=2e10,
+                           num=5,
+                           unit=sc.Unit('1/m'))
+        result = binning.q_bin(p.data, bins)
         assert_equal(result.shape, [4])
         assert_almost_equal(sc.max(result.coords['qz']).value, 2e10)
 
     def test_2d_bin(self):
         p = data.ReflData(BINNED.copy())
-        result = binning.two_dimensional_bin(p, ['tof', 'qz'])
+        bins = (sc.linspace(dim='tof',
+                            start=0.1e-6,
+                            stop=10e-6,
+                            num=50,
+                            unit=sc.units.us),
+                sc.linspace(dim='qz',
+                            start=0.01e10,
+                            stop=2e10,
+                            num=50,
+                            unit=sc.Unit('1/angstrom')))
+        result = binning.two_dimensional_bin(p.data, bins)
         assert_equal(result.shape, [49, 49])
-
-    def test_2d_bin_bins(self):
-        p = data.ReflData(BINNED.copy())
-        bins = [np.linspace(0.1, 10, 10), np.linspace(0.01, 2, 10)]
-        result = binning.two_dimensional_bin(p, ['tof', 'qz'], bins=bins)
-        assert_equal(result.shape, [9, 9])
-        assert_almost_equal(sc.max(result.coords['qz']).value, 2)
-        assert_almost_equal(sc.max(result.coords['tof']).value, 10)
 
     def test_2d_bin_unit(self):
         p = data.ReflData(BINNED.copy())
-        bins = [np.linspace(0.1e-6, 10e-6, 5), np.linspace(0.01e10, 2e10, 5)]
-        result = binning.two_dimensional_bin(
-            p, ['tof', 'qz'],
-            bins=bins,
-            units=[sc.units.s, (1 / sc.units.m).unit])
+        bins = (sc.linspace(dim='tof',
+                            start=0.1e-6,
+                            stop=10e-6,
+                            num=5,
+                            unit=sc.units.s),
+                sc.linspace(dim='qz',
+                            start=0.01e10,
+                            stop=2e10,
+                            num=5,
+                            unit=(1 / sc.units.m).unit))
+        result = binning.two_dimensional_bin(p.data, bins)
         assert_equal(result.shape, [4, 4])
         assert_almost_equal(sc.max(result.coords['qz']).value, 2e10)
         assert_almost_equal(sc.max(result.coords['tof']).value, 10e-6)
 
     def test_2d_bin_bad_dim(self):
         p = data.ReflData(BINNED.copy())
+        bins = (sc.linspace(dim='tof',
+                            start=0.1e-6,
+                            stop=10e-6,
+                            num=5,
+                            unit=sc.units.s),
+                sc.linspace(dim='q',
+                            start=0.01e10,
+                            stop=2e10,
+                            num=5,
+                            unit=(1 / sc.units.m).unit))
         with self.assertRaises(sc.NotFoundError):
-            result = binning.two_dimensional_bin(p, ['tof', 'q'])
+            result = binning.two_dimensional_bin(p.data, bins)
