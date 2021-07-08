@@ -125,10 +125,10 @@ def frames_analytical(instrument, plot=False):
         origin_lambda_max = instrument["pulse_t_0"] + dt_max
         slopes_lambda_max = (dist - source_pos) / (tend - origin_lambda_max)
 
-        # Find largest of the minimum slopes
-        slope_lambda_min = sc.max(slopes_lambda_min.data)
-        # Find smallest of the maximum slopes
-        slope_lambda_max = sc.min(slopes_lambda_max.data)
+        # Find smallest of the lambda_min slopes
+        slope_lambda_min = sc.min(slopes_lambda_min.data)
+        # Find largest of the lambda max slopes
+        slope_lambda_max = sc.max(slopes_lambda_max.data)
 
         # Compute line equation intercept y = slope*x + intercept
         intercept_lambda_min = source_pos - (slope_lambda_min *
