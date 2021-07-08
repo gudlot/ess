@@ -4,23 +4,9 @@ import numpy as np
 import scipp as sc
 
 
-def _deg_to_rad(x):
+def make_beamline(parameters=None):
     """
-    Convert degrees to radians.
-    """
-    return x * (np.pi * sc.units.rad / (180.0 * sc.units.deg))
-
-
-def _to_angular_frequency(f):
-    """
-    Convert frequency in Hz to angular frequency.
-    """
-    return (2.0 * np.pi * sc.units.rad) * f
-
-
-def choppers(parameters=None):
-    """
-    Create V20 chopper cascade and component positions.
+    V20 chopper cascade and component positions.
     Chopper opening angles taken from Woracek et al. (2016)
     https://doi.org/10.1016/j.nima.2016.09.034
 
@@ -28,7 +14,7 @@ def choppers(parameters=None):
     containing the chopper name ("WFM1" or "FOL2") and a sub-dict of parameters
     such as frequency or tdc.
     For example:
-        choppers({"WFM1": {"frequency": 17., "phase": 55.}})
+        make_beamline({"WFM1": {"frequency": 17., "phase": 55.}})
     Frequencies are in Hz and angles are in degrees.
     For components distances, we assume that the origin is the source double
     chopper, and the direction of the beam is along `z`.
