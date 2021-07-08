@@ -24,7 +24,7 @@ def load_mask(idf_filename, mask_file):
 
     return scn.load(filename=idf_filename, mantid_alg='LoadMask', mantid_args={'InputFile': mask_file})
 
-def setup_masks(idf_filename, mask_files, sample, background):
+def setup_masks(idf_filename, mask_files, sample, background, spectrum_size):
 
     mask_1_xml = load_mask(idf_filename, mask_files[0])
     mask_2_xml = load_mask(idf_filename, mask_files[1])
@@ -36,23 +36,22 @@ def setup_masks(idf_filename, mask_files, sample, background):
     mask_8_xml = load_mask(idf_filename, mask_files[7])
     mask_9_xml = load_mask(idf_filename, mask_files[8])
 
+    sample.masks['mask_1_xml'] = mask_1_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_2_xml'] = mask_2_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_3_xml'] = mask_3_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_4_xml'] = mask_4_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_5_xml'] = mask_5_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_6_xml'] = mask_6_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_7_xml'] = mask_7_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_8_xml'] = mask_8_xml['spectrum',:spectrum_size].data
+    sample.masks['mask_9_xml'] = mask_9_xml['spectrum',:spectrum_size].data
 
-    sample.masks['mask_1_xml'] = mask_1_xml['spectrum',:245760//2].data
-    sample.masks['mask_2_xml'] = mask_2_xml['spectrum',:245760//2].data
-    sample.masks['mask_3_xml'] = mask_3_xml['spectrum',:245760//2].data
-    sample.masks['mask_4_xml'] = mask_4_xml['spectrum',:245760//2].data
-    sample.masks['mask_5_xml'] = mask_5_xml['spectrum',:245760//2].data
-    sample.masks['mask_6_xml'] = mask_6_xml['spectrum',:245760//2].data
-    sample.masks['mask_7_xml'] = mask_7_xml['spectrum',:245760//2].data
-    sample.masks['mask_8_xml'] = mask_8_xml['spectrum',:245760//2].data
-    sample.masks['mask_9_xml'] = mask_9_xml['spectrum',:245760//2].data
-
-    background.masks['mask_1_xml'] = mask_1_xml['spectrum',:245760//2].data
-    background.masks['mask_2_xml'] = mask_2_xml['spectrum',:245760//2].data
-    background.masks['mask_3_xml'] = mask_3_xml['spectrum',:245760//2].data
-    background.masks['mask_4_xml'] = mask_4_xml['spectrum',:245760//2].data
-    background.masks['mask_5_xml'] = mask_5_xml['spectrum',:245760//2].data
-    background.masks['mask_6_xml'] = mask_6_xml['spectrum',:245760//2].data
-    background.masks['mask_7_xml'] = mask_7_xml['spectrum',:245760//2].data
-    background.masks['mask_8_xml'] = mask_8_xml['spectrum',:245760//2].data
-    background.masks['mask_9_xml'] = mask_9_xml['spectrum',:245760//2].data
+    background.masks['mask_1_xml'] = mask_1_xml['spectrum',:spectrum_size].data
+    background.masks['mask_2_xml'] = mask_2_xml['spectrum',:spectrum_size].data
+    background.masks['mask_3_xml'] = mask_3_xml['spectrum',:spectrum_size].data
+    background.masks['mask_4_xml'] = mask_4_xml['spectrum',:spectrum_size].data
+    background.masks['mask_5_xml'] = mask_5_xml['spectrum',:spectrum_size].data
+    background.masks['mask_6_xml'] = mask_6_xml['spectrum',:spectrum_size].data
+    background.masks['mask_7_xml'] = mask_7_xml['spectrum',:spectrum_size].data
+    background.masks['mask_8_xml'] = mask_8_xml['spectrum',:spectrum_size].data
+    background.masks['mask_9_xml'] = mask_9_xml['spectrum',:spectrum_size].data

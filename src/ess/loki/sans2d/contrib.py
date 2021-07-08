@@ -1,16 +1,13 @@
 # Generic helpers that may end up as contributions to scipp if cleaned up
 import scipp as sc
 
-
 def midpoints(var, dim):
     return 0.5 * (var[dim, 1:] + var[dim, :-1])
-
 
 def to_bin_centers(d, dim):
     edges = d.coords[dim].copy()
     del d.coords[dim]
     d.coords[dim] = 0.5 * (edges[dim, 1:] + edges[dim, :-1])
-
 
 def to_bin_edges(d, dim):
     centers = d.coords[dim].copy()
@@ -21,7 +18,6 @@ def to_bin_edges(d, dim):
     edges = sc.concatenate(first, bulk, dim)
     edges = sc.concatenate(edges, last, dim)
     d.coords[dim] = edges
-
 
 def map_to_bins(data, dim, edges):
     data = data.copy()
@@ -35,7 +31,6 @@ def map_to_bins(data, dim, edges):
     data /= bin_width
     return data
 
-
 def select_bins(array, dim, start, end):
     coord = array.coords[dim]
     edges = coord.shape[0]
@@ -45,7 +40,6 @@ def select_bins(array, dim, start, end):
     assert first >= 0
     assert last < edges
     return array[dim, first:last + 1]
-
 
 def make_slices(var, dim, cutting_points):
     points = var.shape[0]
