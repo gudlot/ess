@@ -78,7 +78,9 @@ def frames_analytical(instrument, plot=False):
         dims=["frame"] + instrument["position"].dims,
         shape=[instrument.sizes["frame"]] + instrument["position"].shape,
         unit=sc.units.us)
-    frames["right_edges"] = frames["left_edges"].copy()
+    frames["right_edges"] = sc.zeros_like(frames["left_edges"])
+    frames["left_dt"] = sc.zeros_like(frames["left_edges"])
+    frames["right_dt"] = sc.zeros_like(frames["left_edges"])
     frames["shifts"] = sc.zeros(dims=["frame"],
                                 shape=[instrument.sizes["frame"]],
                                 unit=sc.units.us)
@@ -130,14 +132,19 @@ def frames_analytical(instrument, plot=False):
         # Find largest of the lambda max slopes
         slope_lambda_max = sc.max(slopes_lambda_max.data)
 
+        # Keep a record of the dt resolutions for each frame
+        frames["left_dt"]["frame", i] = dt_min
+        frames["right_dt"]["frame", i] = dt_max
+
         # Compute line equation intercept y = slope*x + intercept
-        intercept_lambda_min = source_pos - (slope_lambda_min *
-                                             origin_lambda_min)
-        intercept_lambda_max = source_pos - (slope_lambda_max *
-                                             origin_lambda_max)
+        intercept_lambda_min = source_pos - (
+            slope_lambda_min * (origin_lambda_min + 0.5 * dt_min.data))
+        intercept_lambda_max = source_pos - (
+            slope_lambda_max * (origin_lambda_max - 0.5 * dt_max.data))
 
         # print(intercept_lambda_min, pos_norm)
         # Frame edges for each pixel
+
         frames["left_edges"]["frame",
                              i] = (pos_norm -
                                    intercept_lambda_min) / slope_lambda_min
@@ -252,33 +259,77 @@ def _plot(instrument, frames):
                         va="center")
 
         col = "C{}".format(i)
-        left_edge = frames["left_edges"]["frame", i]
-        right_edge = frames["right_edges"]["frame", i]
+        # left_edge = frames["left_edges"]["frame", i]
+        # right_edge = frames["right_edges"]["frame", i]
+        frame = frames["frame", i]
+        # right_edge = frames["right_edges"]["frame", i]
         pos = pos_norm.copy()
         for dim in instrument["position"].dims:
-            left_edge = left_edge[dim, 0]
-            right_edge = right_edge[dim, 0]
+            # left_edge = left_edge[dim, 0]
+            # right_edge = right_edge[dim, 0]
+            frame = frame[dim, 0]
             pos = pos[dim, 0]
-        ax.fill([
-            instrument["pulse_t_0"].value,
-            (instrument["pulse_t_0"] + instrument["pulse_length"]).value,
-            left_edge.value, right_edge.value
-        ], [source_pos.value, source_pos.value, pos.value, pos.value],
+        ax.fill([(instrument["pulse_t_0"] + frame["right_dt"]).value,
+                 (instrument["pulse_t_0"] + instrument["pulse_length"] -
+                  frame["left_dt"]).value,
+                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
+                 (frame["right_edges"] -
+                  (0.5 * frame["right_dt"].data)).value],
+                [source_pos.value, source_pos.value, pos.value, pos.value],
                 alpha=0.3,
                 color=col)
-        ax.plot([instrument["pulse_t_0"].value, right_edge.value],
+        ax.fill([
+            instrument["pulse_t_0"].value,
+            (instrument["pulse_t_0"] + frame["right_dt"]).value,
+            (frame["right_edges"] + (0.5 * frame["right_dt"].data)).value,
+            (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
+        ], [source_pos.value, source_pos.value, pos.value, pos.value],
+                alpha=0.15,
+                color=col)
+        ax.fill([(instrument["pulse_t_0"] + instrument["pulse_length"] -
+                  frame["left_dt"]).value,
+                 (instrument["pulse_t_0"] + instrument["pulse_length"]).value,
+                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
+                 (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
+                [source_pos.value, source_pos.value, pos.value, pos.value],
+                alpha=0.15,
+                color=col)
+
+        # Minimum wavelength
+        ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"]).value,
+                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value],
                 [source_pos.value, pos.value],
                 color=col,
                 lw=1)
-        ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"]).value,
-                 left_edge.value], [source_pos.value, pos.value],
+        ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"] -
+                  frame['left_dt']).value,
+                 (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
+                [source_pos.value, pos.value],
                 color=col,
                 lw=1)
-        ax.text(0.5 * (left_edge + right_edge).value,
-                pos.value,
-                "Frame {}".format(i + 1),
-                ha="center",
-                va="top")
+        # Maximum wavelength
+        ax.plot([
+            instrument["pulse_t_0"].value,
+            (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
+        ], [source_pos.value, pos.value],
+                color=col,
+                lw=1)
+        ax.plot([(instrument["pulse_t_0"] + frame["right_dt"]).value,
+                 (frame["right_edges"] +
+                  (0.5 * frame["right_dt"].data)).value],
+                [source_pos.value, pos.value],
+                color=col,
+                lw=1)
+
+        # ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"]).value,
+        #          left_edge.value], [source_pos.value, pos.value],
+        #         color=col,
+        #         lw=1)
+        # ax.text(0.5 * (left_edge + right_edge).value,
+        #         pos.value,
+        #         "Frame {}".format(i + 1),
+        #         ha="center",
+        #         va="top")
 
     ax.plot([0, sc.max(frames["right_edges"].data).value],
             [det_last.value] * 2,
