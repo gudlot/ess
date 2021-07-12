@@ -30,16 +30,21 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
 
     return target
 
+
 def items(x):
     if isinstance(x, sc.Dataset):
         return (i for i in x.items())
     else:
         return (i for i in [(x.name, x)])
 
+
 def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
 
-    # TODO dim would be expected to be time-based and have units of time (s, us etc). Check this.
-    # something like try - except sc.UnitError sc.to_unit(frames['left_edges'], sc.units.us)
+    # TODO dim would be expected to be time-based and have
+    #  units of time (s, us etc). Check this.
+
+    # something like try - except sc.UnitError
+    # sc.to_unit(frames['left_edges'], sc.units.us)
     #
 
     values = np.linspace(
@@ -48,7 +53,6 @@ def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
         (frames["right_edges"]["frame", -1] -
          frames["shifts"]["frame", -1]).value,
         nbins + 1)
-    print(values)
     # TODO use sc.linspace.
     # Assumes edges in frames are sorted. TODO check
     tof_coord = sc.Variable(dims=["tof"],
