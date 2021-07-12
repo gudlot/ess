@@ -4,11 +4,7 @@ import numpy as np
 from .common import _chopper_ang_freq, allclose
 
 
-# Single chopper single cutout
-def _single_chopper_beamline(window_opening_t,
-                             pulse_length,
-                             window_size=np.pi / 4 * sc.units.rad,
-                             phase=None):
+def _common_beamline(window_opening_t, pulse_length, window_size):
     instrument = sc.Dataset()
     # single pixel set 10m down the beam
     instrument['position'] = sc.vector(value=[0, 0, 10], unit=sc.units.m)
@@ -17,9 +13,19 @@ def _single_chopper_beamline(window_opening_t,
     no_offset = sc.zeros(dims=['chopper'], shape=[1], unit=sc.units.m)
     instrument['distance'] = sc.geometry.position(no_offset, no_offset,
                                                   z_offset)
-    # Arbitrary pulse length of 10us in duration
     instrument['pulse_length'] = pulse_length
+    return instrument
 
+
+# Single chopper single cutout
+def _single_chopper_beamline(window_opening_t,
+                             pulse_length,
+                             window_size=np.pi / 4 * sc.units.rad,
+                             phase=None):
+
+    instrument = _common_beamline(window_opening_t=window_opening_t,
+                                  pulse_length=pulse_length,
+                                  window_size=window_size)
     # We now set out to engineer a single cutout to deliver a specified
     # length sub-pulse.
     window_opening_t = sc.to_unit(window_opening_t, sc.units.s)
@@ -53,21 +59,11 @@ def _single_chopper_beamline(window_opening_t,
 
 def _single_chopper_double_window(window_opening_t,
                                   pulse_length,
-                                  window_size=np.pi / 4 * sc.units.rad,
-                                  phase=None):
-    instrument = sc.Dataset()
-    # single pixel set 10m down the beam
-    instrument['position'] = sc.vector(value=[0, 0, 10], unit=sc.units.m)
-    # single chopper set 5m down the beam
-    z_offset = sc.array(dims=['chopper'], values=[5.0], unit=sc.units.m)
-    no_offset = sc.zeros(dims=['chopper'], shape=[1], unit=sc.units.m)
-    instrument['distance'] = sc.geometry.position(no_offset, no_offset,
-                                                  z_offset)
-    # Arbitrary pulse length of 10us in duration
-    instrument['pulse_length'] = pulse_length
+                                  window_size=np.pi / 4 * sc.units.rad):
 
-    # We now set out to engineer a single cutout to deliver a specified
-    # length sub-pulse.
+    instrument = _common_beamline(window_opening_t=window_opening_t,
+                                  pulse_length=pulse_length,
+                                  window_size=window_size)
     window_opening_t = sc.to_unit(window_opening_t, sc.units.s)
     chopper_ang_frequency = _chopper_ang_freq(window_opening_t, window_size)
     instrument['angular_frequency'] = sc.broadcast(chopper_ang_frequency,
@@ -119,7 +115,7 @@ def test_frames_analytical_one_chopper_one_cutout_different_pulse_offset():
     # frame edges and shifts
     window_opening_t = 5.0 * sc.units.us
     pulse_length = 10.0 * sc.units.us
-    for offset in [0.0 * sc.units.us, 5.0 * sc.units.us]:
+    for offset in [0.0 * sc.units.us, 1.0 * sc.units.us, 2.0 * sc.units.us]:
         instrument = _single_chopper_beamline(window_opening_t, pulse_length)
         frames = frames_analytical(instrument, offset=offset)
 
