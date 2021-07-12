@@ -30,19 +30,32 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
 
     return target
 
+def items(x):
+    if isinstance(x, sc.Dataset):
+        return (i for i in x.items())
+    else:
+        return (i for i in [(x.name, x)])
 
 def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
 
-    tof_coord = sc.Variable(["tof"],
-                            unit=sc.units.us,
-                            values=np.linspace(
-                                (frames["left_edges"]["frame", 0] -
-                                 frames["shifts"]["frame", 0]).value,
-                                (frames["right_edges"]["frame", -1] -
-                                 frames["shifts"]["frame", -1]).value,
-                                nbins + 1))
+    # TODO dim would be expected to be time-based and have units of time (s, us etc). Check this.
+    # something like try - except sc.UnitError sc.to_unit(frames['left_edges'], sc.units.us)
+    #
 
-    is_dataset = sc.is_dataset(data)
+    values = np.linspace(
+        (frames["left_edges"]["frame", 0] -
+         frames["shifts"]["frame", 0]).value,
+        (frames["right_edges"]["frame", -1] -
+         frames["shifts"]["frame", -1]).value,
+        nbins + 1)
+    print(values)
+    # TODO use sc.linspace.
+    # Assumes edges in frames are sorted. TODO check
+    tof_coord = sc.Variable(dims=["tof"],
+                            unit=sc.units.us,
+                            values=values)
+
+    is_dataset = isinstance(data, sc.Dataset)
 
     if is_dataset:
         key = list(data.keys())[0]
