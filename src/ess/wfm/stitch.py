@@ -39,21 +39,22 @@ def _stitch_item(item, dim, frames, target, plot):
 def stitch(data, dim, frames, nbins=256, plot=False):
 
     # TODO: for now, if frames depend on positions, we take the mean along the
-    # position dimensions. We will implement the position-dependent stitching
-    # in a later step?
+    # position dimensions. We should implement the position-dependent stitching
+    # in the future.
     dims_to_reduce = list(set(frames.dims) - {'frame'})
     for _dim in dims_to_reduce:
         frames["left_edges"] = sc.mean(frames["left_edges"], _dim)
         frames["right_edges"] = sc.mean(frames["right_edges"], _dim)
 
-    tof_coord = sc.Variable(["tof"],
-                            unit=sc.units.us,
-                            values=np.linspace(
-                                (frames["left_edges"]["frame", 0] -
-                                 frames["shifts"]["frame", 0]).value,
-                                (frames["right_edges"]["frame", -1] -
-                                 frames["shifts"]["frame", -1]).value,
-                                nbins + 1))
+    tof_coord = sc.linspace(
+        dim="tof",
+        start=(frames["left_edges"]["frame", 0] -
+               frames["shifts"]["frame", 0]).value,
+        stop=(frames["right_edges"]["frame", -1] -
+              frames["shifts"]["frame", -1]).value,
+        num=nbins + 1,
+        unit=frames["left_edges"].unit,
+    )
 
     is_dataset = sc.is_dataset(data)
 
