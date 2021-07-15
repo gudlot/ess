@@ -137,10 +137,14 @@ def frames_analytical(instrument, plot=False):
         frames["right_dt"]["frame", i] = dt_max
 
         # Compute line equation intercept y = slope*x + intercept
-        intercept_lambda_min = source_pos - (
-            slope_lambda_min * (origin_lambda_min + 0.5 * dt_min.data))
-        intercept_lambda_max = source_pos - (
-            slope_lambda_max * (origin_lambda_max - 0.5 * dt_max.data))
+        # intercept_lambda_min = source_pos - (
+        #     slope_lambda_min * (origin_lambda_min + 0.5 * dt_min.data))
+        # intercept_lambda_max = source_pos - (
+        #     slope_lambda_max * (origin_lambda_max - 0.5 * dt_max.data))
+        intercept_lambda_min = source_pos - (slope_lambda_min *
+                                             origin_lambda_min)
+        intercept_lambda_max = source_pos - (slope_lambda_max *
+                                             origin_lambda_max)
 
         # print(intercept_lambda_min, pos_norm)
         # Frame edges for each pixel
@@ -181,7 +185,7 @@ def frames_analytical(instrument, plot=False):
             sc.concatenate(tstart["chopper", 0:2], tend["chopper", 0:2],
                            "none"))
 
-    print(frames)
+    # print(frames)
 
     # Make figure if required
     if plot:

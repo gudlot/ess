@@ -5,7 +5,7 @@ import scipp as sc
 import matplotlib.pyplot as plt
 
 
-def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
+def _stitch_item(item, dim, frames, target, plot):
 
     if plot:
         fig, ax = plt.subplots()
@@ -28,10 +28,23 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
                 section = sc.sum(section, dim_)
             section.plot(ax=ax, color="C{}".format(i))
 
+    if plot:
+        ax.autoscale(True)
+        ax.relim()
+        ax.autoscale_view()
+
     return target
 
 
-def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
+def stitch(data, dim, frames, nbins=256, plot=False):
+
+    # TODO: for now, if frames depend on positions, we take the mean along the
+    # position dimensions. We will implement the position-dependent stitching
+    # in a later step?
+    dims_to_reduce = list(set(frames.dims) - {'frame'})
+    for _dim in dims_to_reduce:
+        frames["left_edges"] = sc.mean(frames["left_edges"], _dim)
+        frames["right_edges"] = sc.mean(frames["right_edges"], _dim)
 
     tof_coord = sc.Variable(["tof"],
                             unit=sc.units.us,
