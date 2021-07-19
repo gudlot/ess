@@ -81,8 +81,8 @@ def choppers(beamline):
 
     ds = sc.Dataset()
 
-    ds["choppers"] = sc.array(dims=["chopper"],
-                              values=list(beamline.choppers.keys()))
+    ds["names"] = sc.array(dims=["chopper"],
+                           values=list(beamline.choppers.keys()))
 
     ds["angular_frequency"] = _to_angular_frequency(
         _extract_and_concatenate(container=beamline.choppers,
@@ -107,8 +107,8 @@ def choppers(beamline):
                                      key=key,
                                      dim="chopper"), 'rad')
 
-    ds["pulse_length"] = beamline.source["pulse_length"]
-    ds["pulse_t_0"] = beamline.source["pulse_t_0"]
-    ds["source_position"] = beamline.source["distance"]
+    # ds["pulse_length"] = beamline.source["pulse_length"]
+    # ds["pulse_t_0"] = beamline.source["pulse_t_0"]
+    # ds["source_position"] = beamline.source["distance"]
 
-    return ds
+    return ds, beamline.source

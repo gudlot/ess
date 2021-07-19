@@ -82,6 +82,9 @@ def stitch(data, dim, frames, nbins=256, plot=False):
     if is_dataset:
         stitched = sc.Dataset()
         for i, (key, item) in enumerate(data.items()):
+            for attr in item.attrs:
+                if attr != dim:
+                    empty.attrs[attr] = item.attrs[attr]
             stitched[key] = _stitch_item(item=item,
                                          dim=dim,
                                          frames=frames,
@@ -93,5 +96,12 @@ def stitch(data, dim, frames, nbins=256, plot=False):
                                 frames=frames,
                                 target=empty.copy(),
                                 plot=plot)
+
+    # Make sure to shift the position of the source to the midpoint between the
+    # WFM choppers
+    chopper_distances = data.coords["choppers"].value["distance"].data
+    stitched.coords['source_position'] += sc.mean(
+        sc.concatenate(chopper_distances["chopper", 0:2],
+                       chopper_distances["chopper", 0:2], "none"))
 
     return stitched

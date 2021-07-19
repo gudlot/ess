@@ -104,7 +104,7 @@ def make_beamline():
     source = {
         "pulse_length": sc.scalar(2.86e+03, unit='us'),
         "pulse_t_0": sc.scalar(140.0, unit='us'),
-        "distance": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
+        "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 
     return Beamline(choppers=choppers, source=source)

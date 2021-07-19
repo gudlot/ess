@@ -14,17 +14,15 @@ def _angular_frame_edge_to_time(angular_frequency, angle, phase):
     return (angle + phase) / div * (1.0e6 * sc.units.us)
 
 
-def _get_frame(frame_number, instrument):
+def _get_frame(frame):
     """
     Get coordinates of a chopper frame opening in time and distance.
     """
-    dist = sc.norm(instrument["distance"].data)
-    tstart = _angular_frame_edge_to_time(
-        instrument["angular_frequency"],
-        instrument["frame_start"]["frame", frame_number], instrument["phase"])
-    tend = _angular_frame_edge_to_time(
-        instrument["angular_frequency"],
-        instrument["frame_end"]["frame", frame_number], instrument["phase"])
+    dist = sc.norm(frame["distance"])
+    tstart = _angular_frame_edge_to_time(frame["angular_frequency"],
+                                         frame["frame_start"], frame["phase"])
+    tend = _angular_frame_edge_to_time(frame["angular_frequency"],
+                                       frame["frame_end"], frame["phase"])
     return dist, tstart, tend
 
 
@@ -39,7 +37,7 @@ def _get_frame(frame_number, instrument):
 #     return x0, x1, y0
 
 
-def frames_analytical(instrument, plot=False):
+def frames_analytical(data, plot=False):
     """
     Compute analytical frame boundaries and shifts based on chopper
     parameters and detector pixel positions.
@@ -65,37 +63,41 @@ def frames_analytical(instrument, plot=False):
     # alpha = neutron_mass / planck_constant
 
     # Compute distances for each pixel
-    pos_norm = sc.norm(instrument["position"].data)
-    source_pos = sc.norm(instrument["source_position"])
+    pos_norm = sc.norm(data.meta["position"])
+    source_pos = sc.norm(data.meta["source_position"])
 
     # # Define source pulse
     # x0, x1, y0 = _get_source_pulse(instrument["pulse_length"],
     #                                instrument["pulse_t_0"])
 
+    nframes = data.meta["choppers"].value["frame_start"].sizes["frame"]
+
     # Now find frame boundaries
     frames = sc.Dataset()
     frames["left_edges"] = sc.zeros(
-        dims=["frame"] + instrument["position"].dims,
-        shape=[instrument.sizes["frame"]] + instrument["position"].shape,
+        dims=["frame"] + data.meta["position"].dims,
+        shape=[nframes] + data.meta["position"].shape,
         unit=sc.units.us)
     frames["right_edges"] = sc.zeros_like(frames["left_edges"])
     frames["left_dt"] = sc.zeros_like(frames["left_edges"])
     frames["right_dt"] = sc.zeros_like(frames["left_edges"])
     frames["shifts"] = sc.zeros(dims=["frame"],
-                                shape=[instrument.sizes["frame"]],
+                                shape=[nframes],
                                 unit=sc.units.us)
 
     # Distance between WFM choppers
-    dz_wfm = sc.norm(instrument["distance"]["chopper", 1].data -
-                     instrument["distance"]["chopper", 0].data)
-    z_wfm = 0.5 * sc.norm(instrument["distance"]["chopper", 0].data +
-                          instrument["distance"]["chopper", 1].data)
+    dz_wfm = sc.norm(
+        data.meta["choppers"].value["distance"]["chopper", 1].data -
+        data.meta["choppers"].value["distance"]["chopper", 0].data)
+    z_wfm = 0.5 * sc.norm(
+        data.meta["choppers"].value["distance"]["chopper", 0].data +
+        data.meta["choppers"].value["distance"]["chopper", 1].data)
 
-    for i in range(instrument.sizes["frame"]):
+    for i in range(nframes):
 
         # Get frame parameters
-        dist, tstart, tend = _get_frame(i, instrument)
-        # print(dist, tstart, tend)
+        frame = data.meta["choppers"].value["frame", i]
+        dist, tstart, tend = _get_frame(frame)
 
         # Find deltat for the min and max wavelengths:
         # - dt_max is equal to the time width of the WFM choppers windows
@@ -108,10 +110,16 @@ def frames_analytical(instrument, plot=False):
         #                   alpha * sc.norm(instrument["WFMC1"].distance.data))
         # print(tmax * (sc.norm(instrument["distance"]["chopper", 1].data) /
         #               sc.norm(instrument["distance"]["chopper", 0].data)))
-        tmin = tmax * (sc.norm(instrument["distance"]["chopper", 1].data) /
-                       sc.norm(instrument["distance"]["chopper", 0].data)
-                       ) - instrument["pulse_length"] * (pos_norm / sc.norm(
-                           instrument["distance"]["chopper", 0].data))
+        # tmin = tmax * (sc.norm(instrument["distance"]["chopper", 1].data) /
+        #                sc.norm(instrument["distance"]["chopper", 0].data)
+        #                ) - instrument["pulse_length"] * (pos_norm / sc.norm(
+        #                    instrument["distance"]["chopper", 0].data))
+
+        tmin = tmax * (sc.norm(frame["distance"]["chopper", 1].data) /
+                       sc.norm(frame["distance"]["chopper", 0].data)
+                       ) - data.meta["pulse_length"] * (pos_norm / sc.norm(
+                           frame["distance"]["chopper", 0].data))
+
         dt_min = dz_wfm * tmin / (pos_norm - z_wfm)
 
         # # For left edge of frame, find rightmost chopper leading edge
@@ -120,11 +128,11 @@ def frames_analytical(instrument, plot=False):
         # tend_min = sc.min(tend)
 
         # Compute slopes
-        origin_lambda_min = instrument["pulse_t_0"] + instrument[
+        origin_lambda_min = data.meta["pulse_t_0"] + data.meta[
             "pulse_length"] - dt_min
         slopes_lambda_min = (dist - source_pos) / (tstart - origin_lambda_min)
 
-        origin_lambda_max = instrument["pulse_t_0"] + dt_max
+        origin_lambda_max = data.meta["pulse_t_0"] + dt_max
         slopes_lambda_max = (dist - source_pos) / (tend - origin_lambda_max)
 
         # Find smallest of the lambda_min slopes
@@ -189,14 +197,14 @@ def frames_analytical(instrument, plot=False):
 
     # Make figure if required
     if plot:
-        fig = _plot(instrument, frames)
+        fig = _plot(data, frames)
         if isinstance(plot, str):
             fig.savefig(plot, bbox_inches='tight')
 
     return frames
 
 
-def _plot(instrument, frames):
+def _plot(data, frames):
     """
     Plot the time-distance diagram that was used to compute the frame
     boundaries.
@@ -206,8 +214,8 @@ def _plot(instrument, frames):
     #                                instrument["pulse_t_0"])
 
     # Find detector pixel furthest away from source
-    pos_norm = sc.norm(instrument["position"].data)
-    source_pos = sc.norm(instrument["source_position"])
+    pos_norm = sc.norm(data.meta["position"])
+    source_pos = sc.norm(data.meta["source_position"])
     det_last = sc.max(pos_norm)
     fig, ax = plt.subplots(1, 1, figsize=(9, 7))
     ax.grid(True, color='lightgray', linestyle="dotted")
@@ -222,43 +230,48 @@ def _plot(instrument, frames):
     #                  hatch="////",
     #                  zorder=10)
     ax.add_patch(
-        Rectangle((0, source_pos.value),
-                  (2.0 * instrument["pulse_t_0"].data +
-                   instrument["pulse_length"]).value,
-                  -psize,
-                  lw=1,
-                  fc='lightgrey',
-                  ec='k',
-                  zorder=10))
+        Rectangle(
+            (0, source_pos.value),
+            (2.0 * data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
+            -psize,
+            lw=1,
+            fc='lightgrey',
+            ec='k',
+            zorder=10))
     ax.add_patch(
-        Rectangle((instrument["pulse_t_0"].value, source_pos.value),
-                  instrument["pulse_length"].value,
+        Rectangle((data.meta["pulse_t_0"].value, source_pos.value),
+                  data.meta["pulse_length"].value,
                   -psize,
                   lw=1,
                   fc='grey',
                   ec='k',
                   zorder=11))
-    ax.text(instrument["pulse_t_0"].value,
+    ax.text(data.meta["pulse_t_0"].value,
             -psize,
-            "Source pulse ({} {})".format(instrument["pulse_length"].value,
-                                          instrument["pulse_length"].unit),
+            "Source pulse ({} {})".format(data.meta["pulse_length"].value,
+                                          data.meta["pulse_length"].unit),
             ha="left",
             va="top",
             fontsize=6)
 
-    for i in range(instrument.sizes["frame"]):
+    for i in range(data.meta["choppers"].value["frame_start"].sizes["frame"]):
 
-        dist, xstart, xend = _get_frame(i, instrument)
+        dist, xstart, xend = _get_frame(data.meta["choppers"].value["frame",
+                                                                    i])
+        # dist, xstart, xend = _get_frame(i, instrument)
 
-        for j in range(instrument.sizes["chopper"]):
+        for j in range(
+                data.meta["choppers"].value["frame_start"].sizes["chopper"]):
             ax.plot([xstart["chopper", j].value, xend["chopper", j].value],
                     [dist["chopper", j].value] * 2,
                     color="C{}".format(i))
-            if i == instrument.sizes["frame"] - 1:
+            if i == data.meta["choppers"].value["frame_start"].sizes[
+                    "frame"] - 1:
                 ax.text((2.0 * xend["chopper", j].data -
                          xstart["chopper", j]).value,
                         dist["chopper", j].value,
-                        instrument["choppers"]["chopper", j].value,
+                        data.meta["choppers"].value["names"]["chopper",
+                                                             j].value,
                         ha="left",
                         va="center")
 
@@ -268,13 +281,13 @@ def _plot(instrument, frames):
         frame = frames["frame", i]
         # right_edge = frames["right_edges"]["frame", i]
         pos = pos_norm.copy()
-        for dim in instrument["position"].dims:
+        for dim in data.meta["position"].dims:
             # left_edge = left_edge[dim, 0]
             # right_edge = right_edge[dim, 0]
             frame = frame[dim, 0]
             pos = pos[dim, 0]
-        ax.fill([(instrument["pulse_t_0"] + frame["right_dt"]).value,
-                 (instrument["pulse_t_0"] + instrument["pulse_length"] -
+        ax.fill([(data.meta["pulse_t_0"] + frame["right_dt"]).value,
+                 (data.meta["pulse_t_0"] + data.meta["pulse_length"] -
                   frame["left_dt"]).value,
                  (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
                  (frame["right_edges"] -
@@ -283,16 +296,16 @@ def _plot(instrument, frames):
                 alpha=0.3,
                 color=col)
         ax.fill([
-            instrument["pulse_t_0"].value,
-            (instrument["pulse_t_0"] + frame["right_dt"]).value,
+            data.meta["pulse_t_0"].value,
+            (data.meta["pulse_t_0"] + frame["right_dt"]).value,
             (frame["right_edges"] + (0.5 * frame["right_dt"].data)).value,
             (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
         ], [source_pos.value, source_pos.value, pos.value, pos.value],
                 alpha=0.15,
                 color=col)
-        ax.fill([(instrument["pulse_t_0"] + instrument["pulse_length"] -
+        ax.fill([(data.meta["pulse_t_0"] + data.meta["pulse_length"] -
                   frame["left_dt"]).value,
-                 (instrument["pulse_t_0"] + instrument["pulse_length"]).value,
+                 (data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
                  (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
                  (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
                 [source_pos.value, source_pos.value, pos.value, pos.value],
@@ -300,12 +313,12 @@ def _plot(instrument, frames):
                 color=col)
 
         # Minimum wavelength
-        ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"]).value,
+        ax.plot([(data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
                  (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value],
                 [source_pos.value, pos.value],
                 color=col,
                 lw=1)
-        ax.plot([(instrument["pulse_t_0"] + instrument["pulse_length"] -
+        ax.plot([(data.meta["pulse_t_0"] + data.meta["pulse_length"] -
                   frame['left_dt']).value,
                  (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
                 [source_pos.value, pos.value],
@@ -313,12 +326,12 @@ def _plot(instrument, frames):
                 lw=1)
         # Maximum wavelength
         ax.plot([
-            instrument["pulse_t_0"].value,
+            data.meta["pulse_t_0"].value,
             (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
         ], [source_pos.value, pos.value],
                 color=col,
                 lw=1)
-        ax.plot([(instrument["pulse_t_0"] + frame["right_dt"]).value,
+        ax.plot([(data.meta["pulse_t_0"] + frame["right_dt"]).value,
                  (frame["right_edges"] +
                   (0.5 * frame["right_dt"].data)).value],
                 [source_pos.value, pos.value],
