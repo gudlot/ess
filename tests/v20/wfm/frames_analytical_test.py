@@ -86,39 +86,6 @@ def _single_chopper_beamline(window_opening_t,
     return instrument
 
 
-def _single_chopper_double_window(window_opening_t,
-                                  pulse_length,
-                                  window_size=np.pi / 4 * sc.units.rad):
-
-    instrument = _common_beamline(chopper_z_offsets=[5.0],
-                                  pulse_length=pulse_length)
-    window_opening_t = sc.to_unit(window_opening_t, sc.units.s)
-    chopper_ang_frequency = _chopper_ang_freq(window_opening_t, window_size)
-    instrument['angular_frequency'] = sc.broadcast(chopper_ang_frequency,
-                                                   dims=['chopper'],
-                                                   shape=[1])
-
-    blind_t = sc.to_unit(pulse_length, sc.units.s) - window_opening_t
-    # For calc simplicity to center cutout opening over center of pulse
-    phase_offset_t = blind_t / 2
-    phase = phase_offset_t * chopper_ang_frequency
-    instrument['phase'] = sc.array(dims=['chopper'],
-                                   values=[phase.value],
-                                   unit=sc.units.rad)
-
-    # window opening angle
-    instrument['frame_start'] = sc.array(
-        dims=['frame'], values=[0, np.pi], unit=sc.units.rad) * sc.ones(
-            dims=['chopper'], shape=[1])
-    # window closing angle
-    instrument['frame_end'] = sc.concatenate(
-        dim='frame', x=window_size, y=window_size +
-        np.pi * sc.units.rad) * sc.ones(dims=['chopper'], shape=[1])
-
-    instrument['choppers'] = sc.array(dims=['chopper'], values=['chopper'])
-    return instrument
-
-
 def _make_chopper_phases(pulse_length, window_opening_t, window_size,
                          start_chopper_padding_t, n_choppers):
     freq = _chopper_ang_freq(window_opening_t, window_size)
