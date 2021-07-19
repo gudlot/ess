@@ -2,7 +2,7 @@ name: ess-developer
 
 channels:
   - conda-forge
-  - scipp/label/dev
+  - scipp 
   - nodefaults
 
 dependencies:
