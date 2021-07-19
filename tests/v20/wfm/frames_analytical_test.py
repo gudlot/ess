@@ -71,16 +71,8 @@ def _single_chopper_beamline(window_opening_t,
                                                    dims=['chopper'],
                                                    shape=[1])
 
-    if phase is None:
-        blind_t = sc.to_unit(pulse_length, sc.units.s) - window_opening_t
-        # For calc simplicity to center cutout opening over center of pulse
-        phase_offset_t = blind_t / 2
-        phase = phase_offset_t * chopper_ang_frequency
-        instrument['phase'] = sc.array(dims=['chopper'],
-                                       values=[phase.value],
-                                       unit=sc.units.rad)
-    else:
-        instrument['phase'] = sc.broadcast(phase, dims=['chopper'], shape=[1])
+    instrument['phase'] = phase if phase.shape[0] > 0 else sc.broadcast(
+        phase, dims=['chopper'], shape=[1])
 
     # window opening angle
     instrument['frame_start'] = sc.array(
@@ -127,125 +119,105 @@ def _single_chopper_double_window(window_opening_t,
     return instrument
 
 
-def test_frames_analytical_one_chopper_one_cutout():
-    offset = 5.0 * sc.units.us  # start of pulse t offset from 0
-    window_opening_t = 5.0 * sc.units.us
-    pulse_length = 10.0 * sc.units.us
-    instrument = _single_chopper_beamline(window_opening_t, pulse_length)
+def _make_chopper_phases(pulse_length, window_opening_t, window_size,
+                         start_chopper_padding_t, n_choppers):
+    freq = _chopper_ang_freq(window_opening_t, window_size)
+    # After pulse, get t-gap then contiguous
+    # times from sequentially opening choppers
+    l_time_edges = [
+        pulse_length + start_chopper_padding_t + (window_opening_t * i)
+        for i in range(n_choppers)
+    ]
+    # Convert this to phases for each chopper cutout
+    phases = sc.array(dims=['chopper'],
+                      values=[(t * freq).value for t in l_time_edges],
+                      unit=sc.units.rad)
+    return phases
+
+
+def _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                       window_opening_t, window_size):
+    phase = _make_chopper_phases(pulse_length=pulse_length,
+                                 window_opening_t=window_opening_t,
+                                 window_size=window_size,
+                                 start_chopper_padding_t=padding,
+                                 n_choppers=1)
+    source_to_chopper_distance = 5.0 * sc.units.m
+    source_to_pixel_distance = 10.0 * sc.units.m
+    max_gradient = source_to_chopper_distance / (
+        padding)  # 5.0 is source - chopper distance
+    l_edge_predicted = (source_to_pixel_distance /
+                        max_gradient) + (offset + pulse_length)
+    min_gradient = source_to_pixel_distance / (pulse_length + padding +
+                                               window_opening_t)
+    r_edge_predicted = (source_to_pixel_distance / min_gradient) + (
+        offset + pulse_length + padding + window_opening_t)
+    shift_predicted = window_opening_t / 2.0 + offset + pulse_length + padding
+    instrument = _single_chopper_beamline(window_opening_t=window_opening_t,
+                                          pulse_length=pulse_length,
+                                          window_size=window_size,
+                                          phase=phase)
     frames = frames_analytical(instrument, offset=offset)
     # Following results best understood sketching simple time-distance
     # diagram of above.
     assert allclose(
         frames['left_edges'].data,
-        sc.array(dims=['frame'], values=[-5.0], unit=sc.units.us) + offset)
+        sc.broadcast(dims=['frame'], shape=[1], x=l_edge_predicted))
     assert allclose(
         frames['right_edges'].data,
-        sc.array(dims=['frame'], values=[15.0], unit=sc.units.us) + offset)
-    assert allclose(
-        frames['shifts'].data,
-        sc.array(dims=['frame'], values=[5.0], unit=sc.units.us) + offset)
+        sc.broadcast(dims=['frame'], shape=[1], x=r_edge_predicted))
+    assert allclose(frames['shifts'].data,
+                    sc.broadcast(dims=['frame'], shape=[1], x=shift_predicted))
+    return frames
+
+
+def test_frames_analytical_one_chopper_one_cutout():
+    offset = 0.0 * sc.units.us  # start of pulse t offset from 0
+    window_opening_t = 0.5 * sc.units.us
+    pulse_length = 10.0 * sc.units.us
+    window_size = (np.pi / 4.0) * sc.units.rad  # 45 degree opening
+
+    padding = 1.0 * sc.units.us
+    _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                       window_opening_t, window_size)
 
 
 def test_frames_analytical_one_chopper_one_cutout_different_pulse_offset():
     # Offsetting the pulse start time should impact directly on the
     # frame edges and shifts
-    window_opening_t = 5.0 * sc.units.us
+    offset = 5.0 * sc.units.us  # start of pulse t offset from 0
+    window_opening_t = 0.5 * sc.units.us
     pulse_length = 10.0 * sc.units.us
-    for offset in [0.0 * sc.units.us, 1.0 * sc.units.us, 2.0 * sc.units.us]:
-        instrument = _single_chopper_beamline(window_opening_t, pulse_length)
-        frames = frames_analytical(instrument, offset=offset)
+    window_size = (np.pi / 4.0) * sc.units.rad  # 45 degree opening
 
-        # Following results best understood sketching simple time-distance
-        # diagram of above.
-        assert allclose(
-            frames['left_edges'].data,
-            sc.array(dims=['frame'], values=[-5.0], unit=sc.units.us) + offset)
-        assert allclose(
-            frames['right_edges'].data,
-            sc.array(dims=['frame'], values=[15.0], unit=sc.units.us) + offset)
-        assert allclose(
-            frames['shifts'].data,
-            sc.array(dims=['frame'], values=[5.0], unit=sc.units.us) + offset)
+    padding = 1.0 * sc.units.us
+    a = _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                           window_opening_t, window_size)
+    # Now with new larger offset
+    offset += 1.0 * sc.units.us
+    b = _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                           window_opening_t, window_size)
+    assert sc.all(b['left_edges'].data > a['left_edges'].data).value
+    assert sc.all(b['right_edges'].data > a['right_edges'].data).value
+    assert sc.all(b['shifts'].data > a['shifts'].data).value
+    assert allclose(b['shifts'].data, a['shifts'].data + 1.0 * sc.units.us)
 
 
 def test_frames_analytical_with_different_window_times():
-    # Setting different window times will NOT
-    # change the shift (windows always centered on center of pulse),
-    # but this will change the frame edges
-    offset = 0.0 * sc.units.us  # start of pulse t offset from 0
+    offset = 5.0 * sc.units.us  # start of pulse t offset from 0
+    window_opening_t = 0.5 * sc.units.us
     pulse_length = 10.0 * sc.units.us
-    invariant_shift = (pulse_length / 2) + offset
+    window_size = (np.pi / 4.0) * sc.units.rad  # 45 degree opening
 
-    window_opening_t = 10.0 * sc.units.us
-    instrument = _single_chopper_beamline(window_opening_t, pulse_length)
-    frames = frames_analytical(instrument, offset=offset)
-    assert allclose(
-        frames['left_edges'].data,
-        sc.array(dims=['frame'], values=[-10.0], unit=sc.units.us) + offset)
-    assert allclose(
-        frames['right_edges'].data,
-        sc.array(dims=['frame'], values=[20.0], unit=sc.units.us) + offset)
-    assert allclose(
-        frames['shifts'].data,
-        sc.array(dims=['frame'],
-                 values=[invariant_shift.value],
-                 unit=sc.units.us))
-
-    window_opening_t = 2.0 * sc.units.us
-    instrument = _single_chopper_beamline(window_opening_t, pulse_length)
-    frames = frames_analytical(instrument, offset=offset)
-    assert allclose(
-        frames['left_edges'].data,
-        sc.array(dims=['frame'], values=[-2.0], unit=sc.units.us) + offset)
-    assert allclose(
-        frames['right_edges'].data,
-        sc.array(dims=['frame'], values=[12.0], unit=sc.units.us) + offset)
-    assert allclose(
-        frames['shifts'].data,
-        sc.array(dims=['frame'],
-                 values=[invariant_shift.value],
-                 unit=sc.units.us))
-
-
-def test_frames_analytical_one_chopper_one_cutout_shift_phase():
-    offset = 0.0 * sc.units.us  # start of pulse t offset from 0
-    window_opening_t = 5.0 * sc.units.us
-    window_size = np.pi / 4.0 * sc.units.rad
-    pulse_length = 10.0 * sc.units.us
-    freq = _chopper_ang_freq(window_opening_t, window_size)
-    for phase in [i * sc.units.rad for i in [0.0, np.pi / 4.0, np.pi]]:
-        tshift = phase / freq  # Expected tshift from chopper phase
-        instrument = _single_chopper_beamline(window_opening_t,
-                                              pulse_length,
-                                              window_size=window_size,
-                                              phase=phase)
-        frames = frames_analytical(instrument, offset=offset)
-        # Factor 2 comes from the geometry. Pixel 2 * source - chopper distance
-        assert allclose(
-            frames['left_edges'].data,
-            sc.array(dims=['frame'], values=[-10.0], unit=sc.units.us) +
-            offset + (tshift * 2))
-        assert allclose(
-            frames['right_edges'].data,
-            sc.array(dims=['frame'], values=[10.0], unit=sc.units.us) +
-            offset + (tshift * 2))
-
-
-def test_frames_analytical_one_chopper_dual_cutout():
-    window_opening_t = 5.0 * sc.units.us
-    window_size = np.pi / 4.0 * sc.units.rad
-    pulse_length = 10.0 * sc.units.us
-    freq = _chopper_ang_freq(window_opening_t, window_size)
-    # windows are opposite (pi apart)
-    time_between_frames = np.pi * sc.units.rad / freq
-    instrument = _single_chopper_double_window(window_opening_t, pulse_length,
-                                               window_size)
-    frames = frames_analytical(instrument)
-    np.isclose(frames['left_edges'].data.values[0] + time_between_frames.value,
-               frames['left_edges'].data.values[1])
-    np.isclose(
-        frames['right_edges'].data.values[0] + time_between_frames.value,
-        frames['right_edges'].data.values[1])
+    padding = 1.0 * sc.units.us
+    a = _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                           window_opening_t, window_size)
+    # increase opening times on second pass
+    b = _test_single_chopper_single_cutout(offset, padding, pulse_length,
+                                           window_opening_t + window_opening_t,
+                                           window_size)
+    assert allclose(b['shifts'].data,
+                    a['shifts'].data + (window_opening_t / 2.0))
 
 
 def test_frames_analytical_dual_chopper_single_cutout_():
