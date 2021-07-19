@@ -13,18 +13,19 @@ def _stitch_item(item, dim, frames, target, plot):
     for i in range(frames.sizes["frame"]):
         section = item[dim, frames["left_edges"].data[
             "frame", i]:frames["right_edges"].data["frame", i]].copy()
-        section.coords[dim] -= frames["shifts"].data["frame", i]
+        section.meta[dim] -= frames["shifts"].data["frame", i]
         section.rename_dims({dim: 'tof'})
 
-        target += sc.rebin(section, 'tof', target.coords["tof"])
+        target += sc.rebin(section, 'tof', target.meta["tof"])
         if plot:
             section.name = "frame-{}".format(i)
             # TODO: we manually remove the 2d coord here, but this should be
             # made into a generic check
-            del section.coords["position"]
-            dims = section.dims
-            dims.remove("tof")
-            for dim_ in dims:
+            if "position" in section.coords:
+                del section.coords["position"]
+            elif "position" in section.attrs:
+                del section.attrs["position"]
+            for dim_ in list(set(section.dims) - {'tof'}):
                 section = sc.sum(section, dim_)
             section.plot(ax=ax, color="C{}".format(i))
 
@@ -99,8 +100,8 @@ def stitch(data, dim, frames, nbins=256, plot=False):
 
     # Make sure to shift the position of the source to the midpoint between the
     # WFM choppers
-    chopper_distances = data.coords["choppers"].value["distance"].data
-    stitched.coords['source_position'] += sc.mean(
+    chopper_distances = data.meta["choppers"].value["distance"].data
+    stitched.meta['source_position'] += sc.mean(
         sc.concatenate(chopper_distances["chopper", 0:2],
                        chopper_distances["chopper", 0:2], "none"))
 
