@@ -85,6 +85,11 @@ def frames_analytical(instrument, plot=False, offset=None):
         slopes_min = (dist - y0).values / (xend - x0).values
         slopes_max = (dist - y0).values / (xstart - x1).values
 
+        # TODO (1) this should constrain all slopes to pass through
+        #  all frame gaps
+        # TODO (2) negative slopes are possible
+        # TODO (3) no constraint made by moderator energies
+
         # Find largest of the minimum slopes
         imin = np.argmax(slopes_min)
         # Find smallest of the maximum slopes
@@ -147,9 +152,11 @@ def _plot(instrument, frames, offset):
                      hatch="////",
                      zorder=10)
     ax.add_patch(rect)
+    pulse_length = instrument["pulse_length"].value
+    pulse_length_unit = str(instrument["pulse_length"].unit)
     ax.text(x0.value,
             -psize,
-            "Source pulse (2.86 ms)",
+            f"Source pulse ({pulse_length} {pulse_length_unit})",
             ha="left",
             va="top",
             fontsize=6)
