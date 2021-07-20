@@ -32,7 +32,7 @@ extends:
     noarch: true
     config:
       linux:
-        py_versions: ['3.7']
+        py_versions: ['3.7', '3.8']
         conda_env: 'ess-developer-stable.yml'
     deploy: true
     conda_label: 'main'
