@@ -9,6 +9,7 @@ import normalization
 def to_wavelength(data, transmission, direct_beam, direct_beam_transmission,
                   masks, wavelength_bins):
     data = data.copy()
+    #TODO: transmission returns NANs
     transmission = normalization.transmission_fraction(transmission,
                                          direct_beam_transmission,
                                          wavelength_bins)
@@ -18,11 +19,10 @@ def to_wavelength(data, transmission, direct_beam, direct_beam_transmission,
     data = sc.rebin(data, 'wavelength', wavelength_bins)
 
     monitor = data.attrs['monitor2'].value
-    monitor = normalization.subtract_background_mean(monitor, 'tof', 85000.0 * sc.units.us,
-                                       98000.0 * sc.units.us)
-
+    monitor = monitor - sc.mean(monitor['tof', 85000.0 * sc.units.us:98000.0 * sc.units.us], 'tof')
     monitor = scn.convert(monitor, 'tof', 'wavelength', out=monitor, scatter=False)
     monitor = sc.rebin(monitor, 'wavelength', wavelength_bins)
+
 
     direct_beam = contrib.map_to_bins(direct_beam, 'wavelength',
                                       monitor.coords['wavelength'])
