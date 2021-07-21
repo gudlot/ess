@@ -14,7 +14,7 @@ resources:
     name: scipp/pipelines
     type: github
     endpoint: scipp
-    ref: allow_for_ess_pipeline # TODO update
+    ref: main
 
 trigger:
   branches:

@@ -14,7 +14,7 @@ resources:
     name: scipp/pipelines
     type: github
     endpoint: scipp
-    ref: allow_for_ess_pipeline # TODO update
+    ref: main
 
 trigger:
   tags:
@@ -32,7 +32,7 @@ extends:
     noarch: true
     config:
       linux:
-        py_versions: ['3.7', '3.8']
+        py_versions: ['3.7']
         conda_env: 'ess-developer-stable.yml'
     deploy: true
     conda_label: 'main'
