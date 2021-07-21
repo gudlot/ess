@@ -36,7 +36,6 @@ build:
   noarch: python
   script:
     - python setup.py install
-#    - python tools/build_conda.py
 
 about:
   home: https://github.com/scipp/ess
