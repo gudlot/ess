@@ -60,7 +60,6 @@ def _single_chopper_beamline(window_opening_t,
                              pulse_length,
                              window_size=np.pi / 4 * sc.units.rad,
                              phase=None):
-
     instrument = _common_beamline(chopper_z_offsets=[5.0],
                                   pulse_length=pulse_length)
     # We now set out to engineer a single cutout to deliver a specified
@@ -102,24 +101,27 @@ def _make_chopper_phases(pulse_length, window_opening_t, window_size,
     return phases
 
 
-def _test_single_chopper_single_cutout(offset, padding, pulse_length,
-                                       window_opening_t, window_size):
-    phase = _make_chopper_phases(pulse_length=pulse_length,
-                                 window_opening_t=window_opening_t,
-                                 window_size=window_size,
-                                 start_chopper_padding_t=padding,
-                                 n_choppers=1)
+def _test_single_chopper_single_cutout(offset, pulse_chopper_padding_t,
+                                       pulse_length, window_opening_t,
+                                       window_size):
+    phase = _make_chopper_phases(
+        pulse_length=pulse_length,
+        window_opening_t=window_opening_t,
+        window_size=window_size,
+        start_chopper_padding_t=pulse_chopper_padding_t,
+        n_choppers=1)
     source_to_chopper_distance = 5.0 * sc.units.m
     source_to_pixel_distance = 10.0 * sc.units.m
     max_gradient = source_to_chopper_distance / (
-        padding)  # 5.0 is source - chopper distance
+        pulse_chopper_padding_t)  # 5.0 is source - chopper distance
     l_edge_predicted = (source_to_pixel_distance /
                         max_gradient) + (offset + pulse_length)
-    min_gradient = source_to_pixel_distance / (pulse_length + padding +
-                                               window_opening_t)
-    r_edge_predicted = (source_to_pixel_distance / min_gradient) + (
-        offset + pulse_length + padding + window_opening_t)
-    shift_predicted = window_opening_t / 2.0 + offset + pulse_length + padding
+    chopper_start_t = offset + pulse_length + pulse_chopper_padding_t
+    min_gradient = source_to_pixel_distance / (
+        pulse_length + pulse_chopper_padding_t + window_opening_t)
+    r_edge_predicted = (source_to_pixel_distance /
+                        min_gradient) + (chopper_start_t + window_opening_t)
+    shift_predicted = window_opening_t / 2.0 + chopper_start_t
     instrument = _single_chopper_beamline(window_opening_t=window_opening_t,
                                           pulse_length=pulse_length,
                                           window_size=window_size,
@@ -164,9 +166,9 @@ def test_frames_analytical_one_chopper_one_cutout_different_pulse_offset():
     offset += 1.0 * sc.units.us
     b = _test_single_chopper_single_cutout(offset, padding, pulse_length,
                                            window_opening_t, window_size)
-    assert sc.all(b['left_edges'].data > a['left_edges'].data).value
+    assert allclose(b['left_edges'].data,
+                    a['left_edges'].data + 1.0 * sc.units.us)
     assert sc.all(b['right_edges'].data > a['right_edges'].data).value
-    assert sc.all(b['shifts'].data > a['shifts'].data).value
     assert allclose(b['shifts'].data, a['shifts'].data + 1.0 * sc.units.us)
 
 
@@ -177,12 +179,18 @@ def test_frames_analytical_with_different_window_times():
     window_size = (np.pi / 4.0) * sc.units.rad  # 45 degree opening
 
     padding = 1.0 * sc.units.us
-    a = _test_single_chopper_single_cutout(offset, padding, pulse_length,
-                                           window_opening_t, window_size)
+    a = _test_single_chopper_single_cutout(offset=offset,
+                                           pulse_chopper_padding_t=padding,
+                                           pulse_length=pulse_length,
+                                           window_opening_t=window_opening_t,
+                                           window_size=window_size)
     # increase opening times on second pass
-    b = _test_single_chopper_single_cutout(offset, padding, pulse_length,
-                                           window_opening_t + window_opening_t,
-                                           window_size)
+    b = _test_single_chopper_single_cutout(offset=offset,
+                                           pulse_chopper_padding_t=padding,
+                                           pulse_length=pulse_length,
+                                           window_opening_t=window_opening_t +
+                                           window_opening_t,
+                                           window_size=window_size)
     assert allclose(b['shifts'].data,
                     a['shifts'].data + (window_opening_t / 2.0))
 
