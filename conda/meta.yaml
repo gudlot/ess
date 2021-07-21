@@ -7,16 +7,13 @@ source:
 
 requirements:
   build:
-    - python {{ python }}
     - sphinx>=1.6
     - sphinx_rtd_theme
     - gitpython
   run:
-    - python {{ python }}
     - scippneutron {{ scippneutron }}
     - tifffile
     - astropy
-    - scipy
     - matplotlib
     - ipywidgets
     - scipy
