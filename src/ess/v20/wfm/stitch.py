@@ -31,13 +31,6 @@ def _stitch_item(item=None, dim=None, frames=None, target=None, plot=True):
     return target
 
 
-def items(x):
-    if isinstance(x, sc.Dataset):
-        return (i for i in x.items())
-    else:
-        return (i for i in [(x.name, x)])
-
-
 def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
 
     # TODO dim would be expected to be time-based and have
