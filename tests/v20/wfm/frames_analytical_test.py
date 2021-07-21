@@ -168,7 +168,8 @@ def test_frames_analytical_one_chopper_one_cutout_different_pulse_offset():
                                            window_opening_t, window_size)
     assert allclose(b['left_edges'].data,
                     a['left_edges'].data + 1.0 * sc.units.us)
-    assert sc.all(b['right_edges'].data > a['right_edges'].data).value
+    assert allclose(b['right_edges'].data,
+                    a['right_edges'].data + 1.0 * sc.units.us)
     assert allclose(b['shifts'].data, a['shifts'].data + 1.0 * sc.units.us)
 
 

@@ -6,6 +6,7 @@ def _to_angular_frequency(f):
     return (2.0 * np.pi) * f
 
 
+# TODO replace with sc.allclose after 0.8 scipp release
 def allclose(x, y):
     return sc.all(sc.isclose(x, y)).value
 
