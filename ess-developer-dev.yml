@@ -1,4 +1,4 @@
-name: ess-developer-next
+name: ess-developer-dev
 
 channels:
   - conda-forge
@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   # Build
-  - scipp/label/next::scippneutron
+  - scippneutron
   - gitpython
 
   # Run

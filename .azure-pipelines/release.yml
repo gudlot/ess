@@ -17,15 +17,11 @@ resources:
     ref: main
 
 trigger:
-  branches:
-    exclude:
-      - '*'
-
-pr:
-  autoCancel: true
-  branches:
+  tags:
     include:
-      - '*'
+      - '*.*.*'
+
+pr: none
 
 extends:
   template: stages.yml@SharedPipelines
@@ -38,3 +34,6 @@ extends:
       linux:
         py_versions: ['3.7']
         conda_env: 'ess-developer-stable.yml'
+    deploy: true
+    conda_label: 'main'
+    publish_docs: true
