@@ -4,7 +4,7 @@ import scippneutron as scn
 def solid_angle(data):
     # TODO proper solid angle
     # [0.0117188,0.0075,0.0075] bounding box size
-    pixel_size = 0.055 * sc.units.m
+    pixel_size = 0.055604405491402636 * sc.units.m
     #1.05m / 512 pixels
     pixel_length = 0.004 * sc.units.m
     L2 = scn.L2(data)
@@ -18,8 +18,7 @@ def transmission_fraction(sample, direct, wavelength_bins):
     def setup(data, begin, end, scatter):
         background = data - sc.mean(data['tof', begin:end], 'tof')
         background = scn.convert(background, 'tof', 'wavelength', scatter=scatter)
-        #TODO: check rebining
-        background = sc.rebin(background.copy(), 'wavelength', wavelength_bins)
+        background = sc.rebin(background, 'wavelength', wavelength_bins)
         return background
 
     us = sc.units.us
