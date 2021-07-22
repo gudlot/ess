@@ -85,6 +85,11 @@ def frames_analytical(instrument, plot=False, offset=None):
         slopes_min = (dist - y0).values / (xend - x0).values
         slopes_max = (dist - y0).values / (xstart - x1).values
 
+        # TODO (1) this should constrain all slopes to pass through
+        #  all frame gaps
+        # TODO (2) negative slopes are possible
+        # TODO (3) no constraint made by moderator energies
+
         # Find largest of the minimum slopes
         imin = np.argmax(slopes_min)
         # Find smallest of the maximum slopes
@@ -94,15 +99,21 @@ def frames_analytical(instrument, plot=False, offset=None):
         intercept_min = y0 - (slopes_min[imin] * x0.value * y0.unit)
         intercept_max = y0 - (slopes_max[imax] * x1.value * y0.unit)
 
+        def _make_edge(dims, x, unit, **kwargs):
+            if dims:
+                return sc.array(dims=dims, values=x, unit=unit, **kwargs)
+            else:
+                return sc.scalar(value=x, unit=unit, **kwargs)
+
         # Frame edges for each pixel
-        frames["right_edges"]["frame", i] = sc.array(
+        frames["right_edges"]["frame", i] = _make_edge(
             dims=pos_norm.dims,
-            values=((pos_norm - intercept_min).values / slopes_min[imin]),
-            unit=sc.units.us)
-        frames["left_edges"]["frame", i] = sc.array(
+            unit=sc.units.us,
+            x=(pos_norm - intercept_min).values / slopes_min[imin])
+        frames["left_edges"]["frame", i] = _make_edge(
             dims=pos_norm.dims,
-            values=((pos_norm - intercept_max).values / slopes_max[imax]),
-            unit=sc.units.us)
+            unit=sc.units.us,
+            x=(pos_norm - intercept_max).values / slopes_max[imax])
         # Frame shifts
         frames["shifts"]["frame", i] = sc.mean(
             sc.concatenate(xstart["chopper", 0:2], xend["chopper", 0:2],
@@ -141,9 +152,11 @@ def _plot(instrument, frames, offset):
                      hatch="////",
                      zorder=10)
     ax.add_patch(rect)
+    pulse_length = instrument["pulse_length"].value
+    pulse_length_unit = str(instrument["pulse_length"].unit)
     ax.text(x0.value,
             -psize,
-            "Source pulse (2.86 ms)",
+            f"Source pulse ({pulse_length} {pulse_length_unit})",
             ha="left",
             va="top",
             fontsize=6)
