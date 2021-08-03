@@ -100,9 +100,6 @@ def stitch(data, dim, frames, nbins=256, plot=False):
 
     # Make sure to shift the position of the source to the midpoint between the
     # WFM choppers
-    chopper_distances = data.meta["choppers"].value["distance"].data
-    stitched.meta['source_position'] += sc.mean(
-        sc.concatenate(chopper_distances["chopper", 0:2],
-                       chopper_distances["chopper", 0:2], "none"))
+    stitched.meta['source_position'] += frames["wfm_chopper_mid_point"].data
 
     return stitched
