@@ -58,8 +58,8 @@ def _load_fits(image_dir):
         print(f"Loading {nfiles}'")
         for filename in filenames:
             count += 1
-            print('\r{0}: Image {1}, of {2}'.format(filename[path_length:],
-                                                    count, nfiles),
+            print('\r{0}: Image {1}, of {2}'.format(filename[path_length:], count,
+                                                    nfiles),
                   end="")
             img = None
             handle = fits.open(filename, mode='readonly')
@@ -75,8 +75,7 @@ def _load_tiffs(tiff_dir):
     return _load_images(tiff_dir, 'tiff', lambda f: tifffile.imread(f))
 
 
-def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len,
-                      tof_values):
+def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len, tof_values):
     to_save = dataset[key]
 
     num_bins = 1 if len(to_save.shape) == 1 else to_save.shape[0]
@@ -130,10 +129,7 @@ def _image_to_variable(image_dir,
     return var
 
 
-def tiffs_to_variable(image_dir,
-                      dtype=np.float64,
-                      with_variances=True,
-                      reshape=False):
+def tiffs_to_variable(image_dir, dtype=np.float64, with_variances=True, reshape=False):
     """
     Loads all tiff images from the directory into a scipp Variable.
     """
@@ -144,10 +140,7 @@ def tiffs_to_variable(image_dir,
                               reshape=reshape)
 
 
-def fits_to_variable(fits_dir,
-                     dtype=np.float64,
-                     with_variances=True,
-                     reshape=False):
+def fits_to_variable(fits_dir, dtype=np.float64, with_variances=True, reshape=False):
     """
     Loads all fits images from the directory into a scipp Variable.
     """
@@ -162,9 +155,7 @@ def make_detector_groups(nx_original, ny_original, nx_target, ny_target):
     element_width_x = nx_original // nx_target
     element_width_y = ny_original // ny_target
 
-    x = sc.Variable(dims=['x'],
-                    values=np.arange(nx_original) // element_width_x)
-    y = sc.Variable(dims=['y'],
-                    values=np.arange(ny_original) // element_width_y)
+    x = sc.Variable(dims=['x'], values=np.arange(nx_original) // element_width_x)
+    y = sc.Variable(dims=['y'], values=np.arange(ny_original) // element_width_y)
     grid = x + nx_target * y
     return sc.Variable(["spectrum"], values=np.ravel(grid.values))

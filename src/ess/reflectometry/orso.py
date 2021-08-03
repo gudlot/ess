@@ -149,11 +149,7 @@ class Measurement(Header):
         wavelength (:py:class:`orso.ValueScalar` or :py:class:`orso.ValueRange`, optional): The measured wavelength value or range. Optional, defaults to :code:`'None'`.
         polarisation (:py:attr:`str`, optional): The polarisation present, typically as a :code:`'+'` or :code:`'-'` or combination. Optional, defaults to :code:`'None'`.
     """
-    def __init__(self,
-                 scheme=None,
-                 omega=None,
-                 wavelength=None,
-                 polarisation=None):
+    def __init__(self, scheme=None, omega=None, wavelength=None, polarisation=None):
         if scheme is not None:
             self.scheme = scheme
         if omega is not None:

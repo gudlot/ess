@@ -30,7 +30,6 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
         high = wavelength_bands['wavelength', i + 1]
         band = sc.histogram(data['wavelength', low:high], q_bins)
         band = reducer(band)
-        bands = sc.concatenate(bands, band,
-                               'wavelength') if bands is not None else band
+        bands = sc.concatenate(bands, band, 'wavelength') if bands is not None else band
     bands.coords['wavelength'] = wavelength_bands
     return bands

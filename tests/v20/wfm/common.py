@@ -14,6 +14,5 @@ def allclose(x, y):
 def _chopper_ang_freq(window_opening_t, window_size):
     ratio_of_window = window_size / (np.pi * 2)
     # Required operational frequency of chopper
-    chopper_frequency = _to_angular_frequency(ratio_of_window /
-                                              window_opening_t)
+    chopper_frequency = _to_angular_frequency(ratio_of_window / window_opening_t)
     return chopper_frequency

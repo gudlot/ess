@@ -30,8 +30,9 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id":
-        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32),
+        "detector_id": sc.Variable(dims=["event"],
+                                   values=DETECTORS,
+                                   dtype=sc.dtype.int32),
     },
 )
 
@@ -65,8 +66,7 @@ BINNED.bins.constituents['data'].coords["tof"] = sc.linspace(dim="event",
                                                              stop=10,
                                                              num=N,
                                                              unit=sc.units.us)
-BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
-                                                       0. * sc.units.m,
+BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m, 0. * sc.units.m,
                                                        0. * sc.units.m)
 BINNED.attrs['instrument_name'] = sc.scalar(value='AMOR')
 BINNED.attrs['experiment_title'] = sc.scalar(value='test')
@@ -80,13 +80,12 @@ class TestWrite(unittest.TestCase):
                                            stop=10,
                                            num=N,
                                            unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
-            dim="event",
-            start=0.1,
-            stop=1.0,
-            num=N,
-            unit=sc.Unit('1/angstrom'),
-            dtype=sc.dtype.float64)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(dim="event",
+                                                       start=0.1,
+                                                       stop=1.0,
+                                                       num=N,
+                                                       unit=sc.Unit('1/angstrom'),
+                                                       dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"],
                                             values=DETECTORS.astype(float))
         bins = sc.linspace(dim='qz',
@@ -100,8 +99,7 @@ class TestWrite(unittest.TestCase):
             assert_almost_equal(written_data[0],
                                 bins.values[:-1] + np.diff(bins.values))
             assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
-            assert_almost_equal(written_data[2],
-                                np.sqrt(np.array([3, 3, 3]) / 81))
+            assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
             assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
             f = open(file_path, 'r')
             assert_equal(f.readline(), '# hello\n')
@@ -109,10 +107,9 @@ class TestWrite(unittest.TestCase):
 
     def test_write_wavelength_theta(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -133,18 +130,16 @@ class TestWrite(unittest.TestCase):
 
     def test_write_wavelength_theta_norm(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         q = data.ReflData(BINNED.copy())
-        q.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        q.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         q.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -166,10 +161,9 @@ class TestWrite(unittest.TestCase):
 
     def test_write_wavelength_theta_header(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -186,8 +180,7 @@ class TestWrite(unittest.TestCase):
                                 unit=sc.Unit('deg'))
             write.wavelength_theta(
                 p, file_path, (bins1, bins2),
-                orso.Orso(orso.Creator(), orso.DataSource(), orso.Reduction(),
-                          []))
+                orso.Orso(orso.Creator(), orso.DataSource(), orso.Reduction(), []))
             written_data = np.loadtxt(file_path, unpack=True)
             assert_equal(written_data.shape, (11, 9))
             f = open(file_path, 'r')

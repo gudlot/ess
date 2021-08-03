@@ -45,8 +45,7 @@ def test_simple_case_any_naming():
     projection = sc.array(dims=['v', 'w'], values=np.ones((5, 5))) * 4
     expected_data = sc.concatenate(projection, projection, dim='u')
     assert sc.all(
-        sc.isclose(grouped['a'].data, expected_data,
-                   atol=1e-14 * sc.units.one)).value
+        sc.isclose(grouped['a'].data, expected_data, atol=1e-14 * sc.units.one)).value
 
 
 def test_groupby2d_different_output_size():

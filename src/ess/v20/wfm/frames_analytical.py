@@ -21,12 +21,10 @@ def _get_frame(frame_number, instrument, offset):
     dist = sc.norm(instrument["distance"].data)
     tstart = _angular_frame_edge_to_time(
         instrument["angular_frequency"],
-        instrument["frame_start"]["frame",
-                                  frame_number], instrument["phase"], offset)
-    tend = _angular_frame_edge_to_time(
-        instrument["angular_frequency"], instrument["frame_end"]["frame",
-                                                                 frame_number],
-        instrument["phase"], offset)
+        instrument["frame_start"]["frame", frame_number], instrument["phase"], offset)
+    tend = _angular_frame_edge_to_time(instrument["angular_frequency"],
+                                       instrument["frame_end"]["frame", frame_number],
+                                       instrument["phase"], offset)
     return dist, tstart, tend
 
 
@@ -69,10 +67,10 @@ def frames_analytical(instrument, plot=False, offset=None):
 
     # Now find frame boundaries
     frames = sc.Dataset()
-    frames["left_edges"] = sc.zeros(
-        dims=["frame"] + instrument["position"].dims,
-        shape=[instrument.sizes["frame"]] + instrument["position"].shape,
-        unit=sc.units.us)
+    frames["left_edges"] = sc.zeros(dims=["frame"] + instrument["position"].dims,
+                                    shape=[instrument.sizes["frame"]] +
+                                    instrument["position"].shape,
+                                    unit=sc.units.us)
     frames["right_edges"] = frames["left_edges"].copy()
     frames["shifts"] = sc.zeros(dims=["frame"],
                                 shape=[instrument.sizes["frame"]],
@@ -116,8 +114,7 @@ def frames_analytical(instrument, plot=False, offset=None):
             x=(pos_norm - intercept_max).values / slopes_max[imax])
         # Frame shifts
         frames["shifts"]["frame", i] = sc.mean(
-            sc.concatenate(xstart["chopper", 0:2], xend["chopper", 0:2],
-                           "none"))
+            sc.concatenate(xstart["chopper", 0:2], xend["chopper", 0:2], "none"))
 
     # Make figure if required
     if plot:
@@ -170,8 +167,7 @@ def _plot(instrument, frames, offset):
                     [dist["chopper", j].value] * 2,
                     color="C{}".format(i))
             if i == instrument.sizes["frame"] - 1:
-                ax.text((2.0 * xend["chopper", j].data -
-                         xstart["chopper", j]).value,
+                ax.text((2.0 * xend["chopper", j].data - xstart["chopper", j]).value,
                         dist["chopper", j].value,
                         instrument["choppers"]["chopper", j].value,
                         ha="left",
@@ -189,20 +185,15 @@ def _plot(instrument, frames, offset):
                 [y0.value, y0.value, pos.value, pos.value],
                 alpha=0.3,
                 color=col)
-        ax.plot([x0.value, right_edge.value], [y0.value, pos.value],
-                color=col,
-                lw=1)
-        ax.plot([x1.value, left_edge.value], [y0.value, pos.value],
-                color=col,
-                lw=1)
+        ax.plot([x0.value, right_edge.value], [y0.value, pos.value], color=col, lw=1)
+        ax.plot([x1.value, left_edge.value], [y0.value, pos.value], color=col, lw=1)
         ax.text(0.5 * (left_edge + right_edge).value,
                 pos.value,
                 "Frame {}".format(i + 1),
                 ha="center",
                 va="top")
 
-    ax.plot([0, sc.max(frames["right_edges"].data).value],
-            [det_last.value] * 2,
+    ax.plot([0, sc.max(frames["right_edges"].data).value], [det_last.value] * 2,
             lw=3,
             color='grey')
     ax.text(0.0, det_last.value, "Detector", va="bottom", ha="left")

@@ -87,10 +87,8 @@ def mean_from_adj_pixels(data):
     container['neighbor', 2] = _shift(data, "x", False, fill)
     container['neighbor', 3] = _shift(data, "y", True, fill)
     container['neighbor', 4] = _shift(data, "y", False, fill)
-    container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True,
-                                        fill)
-    container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False,
-                                        fill)
+    container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True, fill)
+    container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False, fill)
 
     edges_mask = container <= sc.Variable(value=fill, unit=data.unit)
     da = sc.DataArray(data=container, masks={'edges': edges_mask})
@@ -98,9 +96,7 @@ def mean_from_adj_pixels(data):
 
 
 def _median(neighbors, edges_mask, dim):
-    masked_values = np.ma.array(neighbors.values,
-                                mask=edges_mask.values,
-                                copy=False)
+    masked_values = np.ma.array(neighbors.values, mask=edges_mask.values, copy=False)
     masked_median_v = np.ma.median(masked_values, axis=0)
     if neighbors.variances is not None:
         masked_median_var = np.ma.median(neighbors.variances, axis=0)
@@ -134,10 +130,8 @@ def median_from_adj_pixels(data):
     container['neighbor', 2] = _shift(data, "x", False, fill)
     container['neighbor', 3] = _shift(data, "y", True, fill)
     container['neighbor', 4] = _shift(data, "y", False, fill)
-    container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True,
-                                        fill)
-    container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False,
-                                        fill)
+    container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True, fill)
+    container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False, fill)
 
     edges_mask = container <= sc.Variable(value=fill, variance=fill)
     return _median(container, edges_mask, dim='neighbor')
@@ -148,10 +142,8 @@ def groupby2D(data, nx_target, ny_target, x='x', y='y', z='wavelength'):
     element_width_x = data.sizes[x] // nx_target
     element_width_y = data.sizes[y] // ny_target
 
-    xx = sc.Variable(dims=[x],
-                     values=np.arange(data.sizes[x]) // element_width_x)
-    yy = sc.Variable(dims=[y],
-                     values=np.arange(data.sizes[y]) // element_width_y)
+    xx = sc.Variable(dims=[x], values=np.arange(data.sizes[x]) // element_width_x)
+    yy = sc.Variable(dims=[y], values=np.arange(data.sizes[y]) // element_width_y)
     grid = xx + nx_target * yy
     spectrum_mapping = sc.Variable(["spectrum"],
                                    values=np.ravel(grid.values, order='F'))
