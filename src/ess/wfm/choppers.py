@@ -28,13 +28,6 @@ class Chopper:
         self.opening_angles_close = opening_angles_close
 
 
-# def _deg_to_rad(x):
-#     """
-#     Convert degrees to radians.
-#     """
-#     return x * (np.pi * sc.units.rad / (180.0 * sc.units.deg))
-
-
 def _to_angular_frequency(f):
     """
     Convert frequency in Hz to angular frequency.
@@ -57,27 +50,12 @@ def choppers(beamline):
     """
     Create a description of a chopper cascade using a supplied description of
     beamline components.
-
-    To override the default chopper parameters, you can supply a dict
-    containing the chopper name ("WFM1" or "FOL2") and a sub-dict of parameters
-    such as frequency or tdc.
-    For example:
-        choppers({"WFM1": {"frequency": 17., "phase": 55.}})
-    Frequencies are in Hz and angles are in degrees.
-    For components positions, we assume that the origin is the source double
-    chopper, and the direction of the beam is along `z`.
     """
 
-    # inventory = {key: [] for key in list(default_choppers.values())[0]}
-    # inventory = {}
     for chopper in beamline.choppers.values():
         if chopper.opening_angles_open is None and chopper.opening_angles_close is None:
             chopper.opening_angles_open = chopper.opening_angles_center - 0.5 * chopper.opening_angles_width
             chopper.opening_angles_close = chopper.opening_angles_center + 0.5 * chopper.opening_angles_width
-        # for key, value in chopper.items():
-        #     if key not in inventory:
-        #         inventory[key] = []
-        #     inventory[key].append(value)
 
     ds = sc.Dataset()
 

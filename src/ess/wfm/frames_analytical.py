@@ -28,7 +28,7 @@ def _get_frame(frame):
     return dist, tstart, tend
 
 
-def frames_analytical(data, plot=False):
+def frames_analytical(data, wfm_chopper_names=["WFMC1", "WFMC2"]):
     """
     Compute analytical frame boundaries and shifts based on chopper
     parameters and detector pixel positions.
@@ -36,10 +36,6 @@ def frames_analytical(data, plot=False):
     The frame shifts are the same for all pixels.
     See https://www.sciencedirect.com/science/article/pii/S0168900220308640
     for a description of the procedure.
-
-    If `plot` is `True`, make a plot of the time-distance diagram.
-    If `plot` is a string, make the plot and save it to a file whose name will
-    be the same a `plot`.
 
     TODO: This currently ignores scattering paths, only the distance from
     source to pixel.
@@ -67,13 +63,33 @@ def frames_analytical(data, plot=False):
                                 shape=[nframes],
                                 unit=sc.units.us)
 
+    # Identify the position of the WFM choppers in the array of choppers
+    chopper_names = list(data.meta["choppers"].value["names"].values)
+    wfm_chopper_indices = [
+        chopper_names.index(name) for name in wfm_chopper_names
+    ]
+
+    # Order the WFM chopper indices from the chopper closest to the source to the
+    # furthest away
+    wfm_chopper_distances = [
+        sc.norm(data.meta["choppers"].value["position"]["chopper",
+                                                        ind].data).value
+        for ind in wfm_chopper_indices
+    ]
+    wfm_chopper_indices = np.array(wfm_chopper_indices)[np.argsort(
+        wfm_chopper_distances)]
+
     # Distance between WFM choppers
     dz_wfm = sc.norm(
-        data.meta["choppers"].value["position"]["chopper", 1].data -
-        data.meta["choppers"].value["position"]["chopper", 0].data)
+        data.meta["choppers"].value["position"]["chopper",
+                                                wfm_chopper_indices[1]].data -
+        data.meta["choppers"].value["position"]["chopper",
+                                                wfm_chopper_indices[0]].data)
     z_wfm = 0.5 * sc.norm(
-        data.meta["choppers"].value["position"]["chopper", 0].data +
-        data.meta["choppers"].value["position"]["chopper", 1].data)
+        data.meta["choppers"].value["position"]["chopper",
+                                                wfm_chopper_indices[0]].data +
+        data.meta["choppers"].value["position"]["chopper",
+                                                wfm_chopper_indices[1]].data)
 
     for i in range(nframes):
 
@@ -83,23 +99,21 @@ def frames_analytical(data, plot=False):
 
         # Find deltat for the min and max wavelengths:
         # - dt_max is equal to the time width of the WFM choppers windows
-        dt_max = tend['chopper', 0] - tstart['chopper', 0]
+        dt_max = tend['chopper',
+                      wfm_chopper_indices[0]] - tstart['chopper',
+                                                       wfm_chopper_indices[0]]
 
         # - dt_min is found from the relation between lambda_min and lambda_max:
         # equation (3) in
         # https://www.sciencedirect.com/science/article/pii/S0168900220308640
         tmax = (dt_max / dz_wfm) * (pos_norm - z_wfm)
-        tmin = tmax * (sc.norm(frame["position"]["chopper", 1].data) /
-                       sc.norm(frame["position"]["chopper", 0].data)
-                       ) - data.meta["pulse_length"] * (pos_norm / sc.norm(
-                           frame["position"]["chopper", 0].data))
-
+        tmin = tmax * (
+            sc.norm(frame["position"]["chopper",
+                                      wfm_chopper_indices[1]].data) /
+            sc.norm(frame["position"]["chopper", wfm_chopper_indices[0]].data)
+        ) - data.meta["pulse_length"] * (pos_norm / sc.norm(
+            frame["position"]["chopper", wfm_chopper_indices[0]].data))
         dt_min = dz_wfm * tmin / (pos_norm - z_wfm)
-
-        # # For left edge of frame, find rightmost chopper leading edge
-        # tstart_max = sc.max(tstart)
-        # # For right edge of frame, find leftmost chopper closing edge
-        # tend_min = sc.min(tend)
 
         # Compute slopes
         origin_lambda_min = data.meta["pulse_t_0"] + data.meta[
@@ -119,18 +133,12 @@ def frames_analytical(data, plot=False):
         frames["right_dt"]["frame", i] = dt_max
 
         # Compute line equation intercept y = slope*x + intercept
-        # intercept_lambda_min = source_pos - (
-        #     slope_lambda_min * (origin_lambda_min + 0.5 * dt_min.data))
-        # intercept_lambda_max = source_pos - (
-        #     slope_lambda_max * (origin_lambda_max - 0.5 * dt_max.data))
         intercept_lambda_min = source_pos - (slope_lambda_min *
                                              origin_lambda_min)
         intercept_lambda_max = source_pos - (slope_lambda_max *
                                              origin_lambda_max)
 
-        # print(intercept_lambda_min, pos_norm)
         # Frame edges for each pixel
-
         frames["left_edges"]["frame",
                              i] = (pos_norm -
                                    intercept_lambda_min) / slope_lambda_min
@@ -138,42 +146,18 @@ def frames_analytical(data, plot=False):
                               i] = (pos_norm -
                                     intercept_lambda_max) / slope_lambda_max
 
-        # def make_edge(dims, x):
-        #     kwargs = {'unit': sc.units.us}
-        #     if dims:
-        #         return sc.array(dims=dims, values=x, **kwargs)
-        #     else:
-        #         return sc.scalar(value=x, **kwargs)
-
-        # # Frame edges for each pixel
-        # frames["right_edges"]["frame", i] = make_edge(
-        #     pos_norm.dims,
-        #     (pos_norm - intercept_min).values / slopes_min[imin])
-        # frames["left_edges"]["frame", i] = make_edge(
-        #     pos_norm.dims,
-        #     (pos_norm - intercept_max).values / slopes_max[imax])
-
-        # # # Frame edges for each pixel
-        # frames["right_edges"]["frame", i] = sc.array(
-        #     dims=pos_norm.dims,
-        #     values=((pos_norm - intercept_min).values / slopes_min[imin]),
-        #     unit=sc.units.us)
-        # frames["left_edges"]["frame", i] = sc.array(
-        #     dims=pos_norm.dims,
-        #     values=((pos_norm - intercept_max).values / slopes_max[imax]),
-        #     unit=sc.units.us)
         # Frame shifts
-        frames["shifts"]["frame", i] = sc.mean(
-            sc.concatenate(tstart["chopper", 0:2], tend["chopper", 0:2],
-                           "none"))
+        frames["shifts"]["frame", i] = tstart["chopper",
+                                              wfm_chopper_indices[1]]
+        # sc.mean(
+        #     sc.concatenate(tstart["chopper", 0:2], tend["chopper", 0:2],
+        #                    "none"))
 
-    # print(frames)
-
-    # Make figure if required
-    if plot:
-        fig = _plot(data, frames)
-        if isinstance(plot, str):
-            fig.savefig(plot, bbox_inches='tight')
+    # # Make figure if required
+    # if plot:
+    #     fig = _plot(data, frames)
+    #     if isinstance(plot, str):
+    #         fig.savefig(plot, bbox_inches='tight')
 
     return frames
 

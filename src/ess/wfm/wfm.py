@@ -4,7 +4,7 @@ from .frames_analytical import frames_analytical
 # from .frames_peakfinding import frames_peakfinding
 
 
-def get_frames(data, plot=False, **kwargs):
+def get_frames(data, **kwargs):
     """
     For a supplied instrument chopper cascade and detector positions, find
     the locations in microseconds of the WFM frames.
@@ -21,4 +21,4 @@ def get_frames(data, plot=False, **kwargs):
     #                               **kwargs)
     # else:
 
-    return frames_analytical(data=data, plot=plot, **kwargs)
+    return frames_analytical(data=data, **kwargs)
