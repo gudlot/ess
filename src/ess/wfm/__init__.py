@@ -6,3 +6,4 @@ from .choppers import choppers
 from .stitch import stitch
 from .tools import *
 from .wfm import get_frames
+from . import plot

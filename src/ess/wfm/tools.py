@@ -26,3 +26,25 @@ def to_bin_edges(x, dim):
         left = center[dim, 0:1] - (x[dim, 1] - x[dim, 0])
         right = center[dim, -1] + (x[dim, -1] - x[dim, -2])
         return sc.concatenate(sc.concatenate(left, center, dim), right, dim)
+
+
+def _angular_frame_edge_to_time(angular_frequency, angle, phase):
+    """
+    Convert an angle on a rotating chopper to a time point (in microseconds).
+    """
+    div = angular_frequency * (1.0 * sc.units.s)
+    return (angle + phase) / div * (1.0e6 * sc.units.us)
+
+
+def get_frame_properties(frame):
+    """
+    Get coordinates of a chopper frame opening in time and distance.
+    """
+    pos = sc.norm(frame["position"])
+    tstart = _angular_frame_edge_to_time(frame["angular_frequency"],
+                                         frame["opening_angles_open"],
+                                         frame["phase"])
+    tend = _angular_frame_edge_to_time(frame["angular_frequency"],
+                                       frame["opening_angles_close"],
+                                       frame["phase"])
+    return pos, tstart, tend
