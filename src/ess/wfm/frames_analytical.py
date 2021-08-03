@@ -18,23 +18,14 @@ def _get_frame(frame):
     """
     Get coordinates of a chopper frame opening in time and distance.
     """
-    dist = sc.norm(frame["distance"])
+    dist = sc.norm(frame["position"])
     tstart = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                         frame["frame_start"], frame["phase"])
+                                         frame["opening_angles_open"],
+                                         frame["phase"])
     tend = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                       frame["frame_end"], frame["phase"])
+                                       frame["opening_angles_close"],
+                                       frame["phase"])
     return dist, tstart, tend
-
-
-# def _get_source_pulse(pulse_length, t_0):
-#     """
-#     Define source pulse start and end.
-#     By default, the source pulse is at distance 0.
-#     """
-#     x0 = (0.0 * sc.units.us) + t_0
-#     x1 = pulse_length + t_0
-#     y0 = 0.0 * sc.units.m
-#     return x0, x1, y0
 
 
 def frames_analytical(data, plot=False):
@@ -56,21 +47,12 @@ def frames_analytical(data, plot=False):
     use l1 + l2 in the future.
     """
 
-    # if offset is None:
-    #     offset = 0.0 * sc.units.us
-    # neutron_mass = sc.scalar(1.67492749804e-27, unit='kg')
-    # planck_constant = sc.scalar(6.62607004e-34, unit='m*m*kg/s')
-    # alpha = neutron_mass / planck_constant
-
     # Compute distances for each pixel
     pos_norm = sc.norm(data.meta["position"])
     source_pos = sc.norm(data.meta["source_position"])
 
-    # # Define source pulse
-    # x0, x1, y0 = _get_source_pulse(instrument["pulse_length"],
-    #                                instrument["pulse_t_0"])
-
-    nframes = data.meta["choppers"].value["frame_start"].sizes["frame"]
+    # Get the number of WFM frames
+    nframes = data.meta["choppers"].value["opening_angles_open"].sizes["frame"]
 
     # Now find frame boundaries
     frames = sc.Dataset()
@@ -87,11 +69,11 @@ def frames_analytical(data, plot=False):
 
     # Distance between WFM choppers
     dz_wfm = sc.norm(
-        data.meta["choppers"].value["distance"]["chopper", 1].data -
-        data.meta["choppers"].value["distance"]["chopper", 0].data)
+        data.meta["choppers"].value["position"]["chopper", 1].data -
+        data.meta["choppers"].value["position"]["chopper", 0].data)
     z_wfm = 0.5 * sc.norm(
-        data.meta["choppers"].value["distance"]["chopper", 0].data +
-        data.meta["choppers"].value["distance"]["chopper", 1].data)
+        data.meta["choppers"].value["position"]["chopper", 0].data +
+        data.meta["choppers"].value["position"]["chopper", 1].data)
 
     for i in range(nframes):
 
@@ -103,22 +85,14 @@ def frames_analytical(data, plot=False):
         # - dt_max is equal to the time width of the WFM choppers windows
         dt_max = tend['chopper', 0] - tstart['chopper', 0]
 
-        # - dt_min is found from the relation between lambda_min and lambda_max
+        # - dt_min is found from the relation between lambda_min and lambda_max:
+        # equation (3) in
+        # https://www.sciencedirect.com/science/article/pii/S0168900220308640
         tmax = (dt_max / dz_wfm) * (pos_norm - z_wfm)
-        # lambda_min = (tmax * sc.norm(instrument["WFMC2"].distance.data) /
-        #               pos_norm - instrument["pulse_length"]) / (
-        #                   alpha * sc.norm(instrument["WFMC1"].distance.data))
-        # print(tmax * (sc.norm(instrument["distance"]["chopper", 1].data) /
-        #               sc.norm(instrument["distance"]["chopper", 0].data)))
-        # tmin = tmax * (sc.norm(instrument["distance"]["chopper", 1].data) /
-        #                sc.norm(instrument["distance"]["chopper", 0].data)
-        #                ) - instrument["pulse_length"] * (pos_norm / sc.norm(
-        #                    instrument["distance"]["chopper", 0].data))
-
-        tmin = tmax * (sc.norm(frame["distance"]["chopper", 1].data) /
-                       sc.norm(frame["distance"]["chopper", 0].data)
+        tmin = tmax * (sc.norm(frame["position"]["chopper", 1].data) /
+                       sc.norm(frame["position"]["chopper", 0].data)
                        ) - data.meta["pulse_length"] * (pos_norm / sc.norm(
-                           frame["distance"]["chopper", 0].data))
+                           frame["position"]["chopper", 0].data))
 
         dt_min = dz_wfm * tmin / (pos_norm - z_wfm)
 
@@ -254,18 +228,19 @@ def _plot(data, frames):
             va="top",
             fontsize=6)
 
-    for i in range(data.meta["choppers"].value["frame_start"].sizes["frame"]):
+    for i in range(
+            data.meta["choppers"].value["opening_angles_open"].sizes["frame"]):
 
         dist, xstart, xend = _get_frame(data.meta["choppers"].value["frame",
                                                                     i])
         # dist, xstart, xend = _get_frame(i, instrument)
 
-        for j in range(
-                data.meta["choppers"].value["frame_start"].sizes["chopper"]):
+        for j in range(data.meta["choppers"].value["opening_angles_open"].
+                       sizes["chopper"]):
             ax.plot([xstart["chopper", j].value, xend["chopper", j].value],
                     [dist["chopper", j].value] * 2,
                     color="C{}".format(i))
-            if i == data.meta["choppers"].value["frame_start"].sizes[
+            if i == data.meta["choppers"].value["opening_angles_open"].sizes[
                     "frame"] - 1:
                 ax.text((2.0 * xend["chopper", j].data -
                          xstart["chopper", j]).value,

@@ -13,19 +13,19 @@ class Beamline:
 class Chopper:
     def __init__(self,
                  frequency,
-                 distance,
+                 position,
                  phase=None,
-                 frame_center=None,
-                 frame_width=None,
-                 frame_start=None,
-                 frame_end=None):
+                 opening_angles_center=None,
+                 opening_angles_width=None,
+                 opening_angles_open=None,
+                 opening_angles_close=None):
         self.frequency = frequency
-        self.distance = distance
+        self.position = position
         self.phase = phase
-        self.frame_center = frame_center
-        self.frame_width = frame_width
-        self.frame_start = frame_start
-        self.frame_end = frame_end
+        self.opening_angles_center = opening_angles_center
+        self.opening_angles_width = opening_angles_width
+        self.opening_angles_open = opening_angles_open
+        self.opening_angles_close = opening_angles_close
 
 
 # def _deg_to_rad(x):
@@ -64,16 +64,16 @@ def choppers(beamline):
     For example:
         choppers({"WFM1": {"frequency": 17., "phase": 55.}})
     Frequencies are in Hz and angles are in degrees.
-    For components distances, we assume that the origin is the source double
+    For components positions, we assume that the origin is the source double
     chopper, and the direction of the beam is along `z`.
     """
 
     # inventory = {key: [] for key in list(default_choppers.values())[0]}
     # inventory = {}
     for chopper in beamline.choppers.values():
-        if chopper.frame_start is None and chopper.frame_end is None:
-            chopper.frame_start = chopper.frame_center - 0.5 * chopper.frame_width
-            chopper.frame_end = chopper.frame_center + 0.5 * chopper.frame_width
+        if chopper.opening_angles_open is None and chopper.opening_angles_close is None:
+            chopper.opening_angles_open = chopper.opening_angles_center - 0.5 * chopper.opening_angles_width
+            chopper.opening_angles_close = chopper.opening_angles_center + 0.5 * chopper.opening_angles_width
         # for key, value in chopper.items():
         #     if key not in inventory:
         #         inventory[key] = []
@@ -94,21 +94,14 @@ def choppers(beamline):
                                  key="phase",
                                  dim="chopper"), 'rad')
 
-    ds["distance"] = _extract_and_concatenate(container=beamline.choppers,
-                                              key="distance",
+    ds["position"] = _extract_and_concatenate(container=beamline.choppers,
+                                              key="position",
                                               dim="chopper")
 
-    # tdc_array = np.array(inventory["tdc"]).reshape(
-    #     ds["choppers"].sizes["chopper"], 1)
-
-    for key in ["frame_start", "frame_end"]:
+    for key in ["opening_angles_open", "opening_angles_close"]:
         ds[key] = sc.to_unit(
             _extract_and_concatenate(container=beamline.choppers,
                                      key=key,
                                      dim="chopper"), 'rad')
-
-    # ds["pulse_length"] = beamline.source["pulse_length"]
-    # ds["pulse_t_0"] = beamline.source["pulse_t_0"]
-    # ds["source_position"] = beamline.source["distance"]
 
     return ds, beamline.source
