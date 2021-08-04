@@ -110,22 +110,15 @@ def frames_analytical(data, wfm_chopper_names=["WFMC1", "WFMC2"]):
         frames["right_edges"]["frame",
                               i] = (pos_norm - intercept_lambda_max) / slope_lambda_max
 
-        # Frame shifts
+        # Frame shifts: these are the mid-time point between the WFM choppers,
+        # which is the same as the opening edge of the second WFM chopper in the case
+        # of optically blind choppers.
         frames["shifts"]["frame", i] = tstart["chopper", wfm_chopper_indices[1]]
-        # sc.mean(
-        #     sc.concatenate(tstart["chopper", 0:2], tend["chopper", 0:2],
-        #                    "none"))
 
     frames["wfm_chopper_mid_point"] = sc.mean(
         sc.concatenate(
             data.meta["choppers"].value["position"]["chopper", wfm_chopper_indices[0]],
             data.meta["choppers"].value["position"]["chopper",
                                                     wfm_chopper_indices[1]], 'none'))
-
-    # # Make figure if required
-    # if plot:
-    #     fig = _plot(data, frames)
-    #     if isinstance(plot, str):
-    #         fig.savefig(plot, bbox_inches='tight')
 
     return frames
