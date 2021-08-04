@@ -10,8 +10,7 @@ from scipy.ndimage import gaussian_filter1d
 
 
 def _tof_shifts(pscdata, psc_frequency=0):
-    cut_out_centre = np.reshape(pscdata * 180.0 / np.pi,
-                                (len(pscdata) // 2, 2)).mean(1)
+    cut_out_centre = np.reshape(pscdata * 180.0 / np.pi, (len(pscdata) // 2, 2)).mean(1)
     cut_out_diffs = np.ediff1d(cut_out_centre)
     return cut_out_diffs / (360.0 * psc_frequency)
 
@@ -26,11 +25,11 @@ def _get_frame_shifts(instrument):
 
     # Factor of 0.5 * 1.0e6 comes from taking mean and converting to
     # microseconds
-    relative_shifts = (_tof_shifts(
-        instrument["choppers"]["WFM1"].openings,
-        psc_frequency=instrument["choppers"]["WFM1"].frequency) + _tof_shifts(
-            instrument["choppers"]["WFM2"].openings,
-            psc_frequency=instrument["choppers"]["WFM2"].frequency)) * 5.0e+05
+    relative_shifts = (
+        _tof_shifts(instrument["choppers"]["WFM1"].openings,
+                    psc_frequency=instrument["choppers"]["WFM1"].frequency) +
+        _tof_shifts(instrument["choppers"]["WFM2"].openings,
+                    psc_frequency=instrument["choppers"]["WFM2"].frequency)) * 5.0e+05
     return -relative_shifts
 
 
@@ -58,8 +57,7 @@ def _make_frame_shifts(initial_shift, other_shifts=None):
     """
     frame_shift_increments = [initial_shift] + list(other_shifts)
     frame_shifts = [
-        sum(frame_shift_increments[:i + 1])
-        for i in range(len(frame_shift_increments))
+        sum(frame_shift_increments[:i + 1]) for i in range(len(frame_shift_increments))
     ]
 
     print("The frame_shifts are:", frame_shifts)
@@ -86,8 +84,7 @@ def frames_peakfinding(data=None,
 
     """
 
-    frame_shifts = _make_frame_shifts(initial_shift,
-                                      _get_frame_shifts(instrument))
+    frame_shifts = _make_frame_shifts(initial_shift, _get_frame_shifts(instrument))
 
     if "events" in data:
         # Find min and max in event time-of-arrival (TOA)
@@ -160,8 +157,8 @@ def frames_peakfinding(data=None,
     for p in range(len(peaks)):
         if y[peaks[p]] > threshold:
             print("Removed peak number {} at x,y = {},{} because the y value "
-                  "exceeds the threshold {}".format(p, x[peaks[p]],
-                                                    y[peaks[p]], threshold))
+                  "exceeds the threshold {}".format(p, x[peaks[p]], y[peaks[p]],
+                                                    threshold))
             to_be_removed.append(p)
     # Actually remove the peaks
     peaks = np.delete(peaks, to_be_removed)
@@ -169,8 +166,8 @@ def frames_peakfinding(data=None,
     if len(peaks) != instrument["info"]["nframes"] - 1:
         raise RuntimeError("The number of valleys found does not match the "
                            "required number of frames. Expected "
-                           "{}, got {}.".format(
-                               instrument["info"]["nframes"] - 1, len(peaks)))
+                           "{}, got {}.".format(instrument["info"]["nframes"] - 1,
+                                                len(peaks)))
 
     frame_gaps = x[peaks]
     print("The frame_gaps are:", frame_gaps)

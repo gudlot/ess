@@ -29,8 +29,9 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id":
-        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32)
+        "detector_id": sc.Variable(dims=["event"],
+                                   values=DETECTORS,
+                                   dtype=sc.dtype.int32)
     },
 )
 
@@ -80,15 +81,11 @@ class TestData(unittest.TestCase):
         p = data.ReflData(BINNED.copy())
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
         assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
-        assert_almost_equal(p.data.coords["position"].fields.x.values,
-                            X.values)
-        assert_almost_equal(p.data.coords["position"].fields.y.values,
-                            Y.values)
-        assert_almost_equal(p.data.coords["position"].fields.z.values,
-                            Z.values)
+        assert_almost_equal(p.data.coords["position"].fields.x.values, X.values)
+        assert_almost_equal(p.data.coords["position"].fields.y.values, Y.values)
+        assert_almost_equal(p.data.coords["position"].fields.z.values, Z.values)
         assert_almost_equal(
-            np.sort(
-                p.data.bins.constituents["data"].coords["detector_id"].values),
+            np.sort(p.data.bins.constituents["data"].coords["detector_id"].values),
             np.sort(DETECTORS),
         )
         assert_almost_equal(
@@ -117,9 +114,7 @@ class TestData(unittest.TestCase):
         assert_equal(isinstance(p.event, sc._scipp.core.DataArray), True)
         assert_almost_equal(np.sort(p.event.coords["detector_id"].values),
                             np.sort(DETECTORS))
-        assert_almost_equal(np.sort(p.event.values),
-                            np.sort(VALUES),
-                            decimal=5)
+        assert_almost_equal(np.sort(p.event.values), np.sort(VALUES), decimal=5)
         assert_almost_equal(
             np.sort(p.event.variances),
             np.sort(np.ones_like(VALUES)),
@@ -165,15 +160,10 @@ class TestData(unittest.TestCase):
                                                        start=0.1,
                                                        stop=1.0,
                                                        num=N,
-                                                       unit=(1 /
-                                                             sc.units.m).unit,
+                                                       unit=(1 / sc.units.m).unit,
                                                        dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
-        bins = sc.linspace(dim='qz',
-                           start=0,
-                           stop=11,
-                           num=4,
-                           unit=sc.Unit('1/m'))
+        bins = sc.linspace(dim='qz', start=0, stop=11, num=4, unit=sc.Unit('1/m'))
         b = p.q_bin(bins)
         assert_almost_equal(b.coords["qz"].values, bins.values)
         assert_almost_equal(b.coords["sigma_qz_by_qz"].values,
@@ -187,8 +177,7 @@ class TestData(unittest.TestCase):
                                                        start=0.1,
                                                        stop=1.0,
                                                        num=N,
-                                                       unit=(1 /
-                                                             sc.units.m).unit,
+                                                       unit=(1 / sc.units.m).unit,
                                                        dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace(dim='qz',
@@ -224,13 +213,12 @@ class TestData(unittest.TestCase):
                                            stop=10,
                                            num=N,
                                            unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
-            dim="event",
-            start=0.1,
-            stop=1.0,
-            num=N,
-            unit=sc.Unit('1/angstrom'),
-            dtype=sc.dtype.float64)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(dim="event",
+                                                       start=0.1,
+                                                       stop=1.0,
+                                                       num=N,
+                                                       unit=sc.Unit('1/angstrom'),
+                                                       dtype=sc.dtype.float64)
         bins = sc.linspace(dim='qz',
                            start=0.,
                            stop=11.,
@@ -359,8 +347,8 @@ class TestData(unittest.TestCase):
         assert_almost_equal(
             p.event.coords["theta"].values,
             [
-                44.9999641, 44.9998564, 63.4349452, 63.4349452, 63.4348914,
-                63.4349345, 63.4348914, 63.4349345, 63.4348914
+                44.9999641, 44.9998564, 63.4349452, 63.4349452, 63.4348914, 63.4349345,
+                63.4348914, 63.4349345, 63.4348914
             ],
         )
         assert_almost_equal(
@@ -416,8 +404,7 @@ class TestData(unittest.TestCase):
                 0.21914643,
             ],
         )
-        assert_almost_equal(p.event.coords["sigma_qz_by_qz"].values,
-                            np.zeros(9))
+        assert_almost_equal(p.event.coords["sigma_qz_by_qz"].values, np.zeros(9))
 
     def test_find_qz_with_resolution(self):
         p = data.ReflData(BINNED.copy())
@@ -433,8 +420,9 @@ class TestData(unittest.TestCase):
             dtype=sc.dtype.float64,
             unit=sc.units.angstrom,
         )
-        p.event.coords["sigma_theta_by_theta"] = sc.Variable(
-            dims=["event"], values=DETECTORS * 0.1, dtype=sc.dtype.float64)
+        p.event.coords["sigma_theta_by_theta"] = sc.Variable(dims=["event"],
+                                                             values=DETECTORS * 0.1,
+                                                             dtype=sc.dtype.float64)
         p.data.coords["sigma_lambda_by_lamdba"] = sc.Variable(
             dims=["detector_id"],
             values=np.arange(1, 5) * 0.1,
@@ -576,8 +564,7 @@ class TestData(unittest.TestCase):
     def test_detector_masking_z_max(self):
         p = data.ReflData(BINNED.copy())
         p.detector_masking(z_max=1 * sc.units.m)
-        assert_equal(p.data.masks["z_mask"].values,
-                     [False, False, False, False])
+        assert_equal(p.data.masks["z_mask"].values, [False, False, False, False])
         assert_equal(p.data.masks["y_mask"].values, [False] * 4)
         assert_equal(p.data.masks["x_mask"].values, [False] * 4)
 
@@ -675,13 +662,12 @@ class TestData(unittest.TestCase):
                                            stop=10,
                                            num=N,
                                            unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
-            dim="event",
-            start=0.1,
-            stop=1.0,
-            num=N,
-            unit=sc.Unit('1/angstrom'),
-            dtype=sc.dtype.float64)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(dim="event",
+                                                       start=0.1,
+                                                       stop=1.0,
+                                                       num=N,
+                                                       unit=sc.Unit('1/angstrom'),
+                                                       dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace(dim='qz',
                            start=0,
@@ -700,13 +686,12 @@ class TestData(unittest.TestCase):
                                            stop=10,
                                            num=N,
                                            unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace(
-            dim="event",
-            start=0.1,
-            stop=1.0,
-            num=N,
-            unit=sc.Unit('1/angstrom'),
-            dtype=sc.dtype.float64)
+        p.event.coords["sigma_qz_by_qz"] = sc.linspace(dim="event",
+                                                       start=0.1,
+                                                       stop=1.0,
+                                                       num=N,
+                                                       unit=sc.Unit('1/angstrom'),
+                                                       dtype=sc.dtype.float64)
         p.event.coords["tof"] = sc.Variable(dims=["event"], values=DETECTORS)
         bins = sc.linspace(dim='qz',
                            start=0,
@@ -719,16 +704,14 @@ class TestData(unittest.TestCase):
             assert_almost_equal(written_data[0],
                                 bins.values[:-1] + np.diff(bins.values))
             assert_almost_equal(written_data[1], np.array([3, 3, 3]) / 9)
-            assert_almost_equal(written_data[2],
-                                np.sqrt(np.array([3, 3, 3]) / 81))
+            assert_almost_equal(written_data[2], np.sqrt(np.array([3, 3, 3]) / 81))
             assert_almost_equal(written_data[3], np.linspace(0.325, 1.0, 3))
 
     def test_write_wavelength_theta(self):
         p = data.ReflData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -737,11 +720,7 @@ class TestData(unittest.TestCase):
                             stop=100,
                             num=10,
                             unit=sc.units.angstrom)
-        bins2 = sc.linspace(dim='theta',
-                            start=0,
-                            stop=100,
-                            num=10,
-                            unit=sc.units.deg)
+        bins2 = sc.linspace(dim='theta', start=0, stop=100, num=10, unit=sc.units.deg)
         with file_location("test1.txt") as file_path:
             p.write_wavelength_theta(file_path, (bins1, bins2))
             written_data = np.loadtxt(file_path, unpack=True)

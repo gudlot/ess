@@ -28,8 +28,8 @@ def angle_with_gravity(data, pixel_position, sample_position):
     # (where this is data.bins.constituents['data'].coords['wavelength'].astype(sc.dtype.float64) or similar)
     # instead of data
     velocity = sc.to_unit(
-        HDM / data.bins.constituents["data"].coords["wavelength"].astype(
-            sc.dtype.float64),
+        HDM /
+        data.bins.constituents["data"].coords["wavelength"].astype(sc.dtype.float64),
         "m/s",
     )
     data.bins.constituents["data"].coords["velocity"] = velocity
@@ -42,8 +42,7 @@ def angle_with_gravity(data, pixel_position, sample_position):
     y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
     intercept = y_origin - y_dash * z_origin
     y_true = z_measured * y_dash + intercept
-    angle = sc.to_unit(
-        sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
+    angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
     return angle
 
 
@@ -100,7 +99,5 @@ def illumination_of_sample(beam_size, sample_size, theta):
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:
-        beam_on_sample = sc.broadcast(sample_size,
-                                      shape=theta.shape,
-                                      dims=theta.dims)
+        beam_on_sample = sc.broadcast(sample_size, shape=theta.shape, dims=theta.dims)
     return beam_on_sample

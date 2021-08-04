@@ -113,12 +113,10 @@ class TestOrso(unittest.TestCase):
         assert_equal(c.sample.name, 'nickel')
 
     def test_datasource(self):
-        c1 = orso.Measurement('energy-dispersive',
-                              orso.ValueScalar(0.5, 'deg'),
+        c1 = orso.Measurement('energy-dispersive', orso.ValueScalar(0.5, 'deg'),
                               orso.ValueRange(2.5, 10., 'angstrom'))
         c2 = orso.Experiment('Amor', 'neutron', orso.Sample('nickel'))
-        c = orso.DataSource('andrew', 'ess', '123', '2021-04-20', 'experiment',
-                            c2, c1)
+        c = orso.DataSource('andrew', 'ess', '123', '2021-04-20', 'experiment', c2, c1)
         assert_equal(c.owner, 'andrew')
         assert_equal(c.facility, 'ess')
         assert_equal(c.experiment_id, '123')
@@ -128,13 +126,11 @@ class TestOrso(unittest.TestCase):
 
     def test_file(self):
         c = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
-        assert_equal(c.file,
-                     os.path.dirname(__file__) + os.sep + 'data_test.py')
+        assert_equal(c.file, os.path.dirname(__file__) + os.sep + 'data_test.py')
 
     def test_file_not_exist(self):
         with self.assertRaises(FileNotFoundError):
-            c = orso.File(
-                os.path.dirname(__file__) + os.sep + 'data_test_sadaoi.py')
+            c = orso.File(os.path.dirname(__file__) + os.sep + 'data_test_sadaoi.py')
 
     def test_files(self):
         f = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
@@ -146,56 +142,48 @@ class TestOrso(unittest.TestCase):
 
     def test_files_with_ref(self):
         f1 = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
-        f2 = orso.File(
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        f2 = orso.File(os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         c = orso.Files([f1], [f2])
         assert_equal(c.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
-        assert_equal(
-            c.reference_files[0].file,
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        assert_equal(c.reference_files[0].file,
+                     os.path.dirname(__file__) + os.sep + 'corrections_test.py')
 
     def test_reduction(self):
         f1 = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
-        f2 = orso.File(
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        f2 = orso.File(os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction('a_script.py', f)
         assert_equal(c.software, f'ess-{VERSION}')
         assert_equal(c.script, 'a_script.py')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
-        assert_equal(
-            c.input_files.reference_files[0].file,
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        assert_equal(c.input_files.reference_files[0].file,
+                     os.path.dirname(__file__) + os.sep + 'corrections_test.py')
 
     def test_reduction_comment(self):
         f1 = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
-        f2 = orso.File(
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        f2 = orso.File(os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction('a_script.py', f, 'hi')
         assert_equal(c.software, f'ess-{VERSION}')
         assert_equal(c.script, 'a_script.py')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
-        assert_equal(
-            c.input_files.reference_files[0].file,
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        assert_equal(c.input_files.reference_files[0].file,
+                     os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         assert_equal(c.comment, 'hi')
 
     def test_reduction_noscript(self):
         f1 = orso.File(os.path.dirname(__file__) + os.sep + 'data_test.py')
-        f2 = orso.File(
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        f2 = orso.File(os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         f = orso.Files([f1], [f2])
         c = orso.Reduction(None, f, 'hi')
         assert_equal(c.software, f'ess-{VERSION}')
         assert_equal(c.input_files.data_files[0].file,
                      os.path.dirname(__file__) + os.sep + 'data_test.py')
-        assert_equal(
-            c.input_files.reference_files[0].file,
-            os.path.dirname(__file__) + os.sep + 'corrections_test.py')
+        assert_equal(c.input_files.reference_files[0].file,
+                     os.path.dirname(__file__) + os.sep + 'corrections_test.py')
         assert_equal(c.comment, 'hi')
 
     def test_column(self):

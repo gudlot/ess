@@ -125,10 +125,9 @@ class ReflData:
         From the time-of-flight data, find the wavelength for each neutron event.
         """
         scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
-        self.data.bins.constituents["data"].coords["wavelength"] = (
-            scn.convert(
-                self.data, origin="tof", target="wavelength",
-                scatter=True).bins.constituents["data"].coords["wavelength"])
+        self.data.bins.constituents["data"].coords["wavelength"] = (scn.convert(
+            self.data, origin="tof", target="wavelength",
+            scatter=True).bins.constituents["data"].coords["wavelength"])
 
     def find_theta(self):
         """
@@ -150,10 +149,10 @@ class ReflData:
             # Find the range of possible positions that the neutron could
             # strike, this range of theta values is taken to be the full
             # width half maximum for the theta distribution
-            offset_positive = resolution.z_offset(
-                self.data.attrs["sample_position"], half_beam_on_sample)
-            offset_negative = resolution.z_offset(
-                self.data.attrs["sample_position"], half_beam_on_sample)
+            offset_positive = resolution.z_offset(self.data.attrs["sample_position"],
+                                                  half_beam_on_sample)
+            offset_negative = resolution.z_offset(self.data.attrs["sample_position"],
+                                                  half_beam_on_sample)
             self.data.bins.constituents['data'].attrs[
                 'offset_positive'] = offset_positive
             self.data.bins.constituents['data'].attrs[
@@ -176,15 +175,12 @@ class ReflData:
             # due to the detector's spatial resolution, which we will call
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
-                self.detector_spatial_resolution,
-                self.data.coords["position"].fields.z,
+                self.detector_spatial_resolution, self.data.coords["position"].fields.z,
                 self.data.attrs["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
-                (self.data.attrs["sigma_gamma"] /
-                 self.data.bins.coords["theta"]) *
-                (self.data.attrs["sigma_gamma"] /
-                 self.data.bins.coords["theta"]) +
+                (self.data.attrs["sigma_gamma"] / self.data.bins.coords["theta"]) *
+                (self.data.attrs["sigma_gamma"] / self.data.bins.coords["theta"]) +
                 (self.data.bins.attrs["sigma_theta_position"] /
                  self.data.bins.coords["theta"]) *
                 (self.data.bins.attrs["sigma_theta_position"] /
@@ -199,8 +195,7 @@ class ReflData:
         Calculate the scattering vector (and resolution).
         """
         self.data.bins.constituents["data"].coords["qz"] = (
-            4.0 * np.pi *
-            sc.sin(self.data.bins.constituents["data"].coords["theta"]) /
+            4.0 * np.pi * sc.sin(self.data.bins.constituents["data"].coords["theta"]) /
             self.data.bins.constituents["data"].coords["wavelength"])
         self.data.coords["s_qz_bins"] = sc.zeros(
             dims=self.data.coords["detector_id"].dims,
@@ -227,12 +222,11 @@ class ReflData:
         """
         Perform illumination correction.
         """
-        self.event.coords[
-            "illumination"] = corrections.illumination_correction(
-                self.beam_size,
-                self.sample_size,
-                self.event.coords["theta"],
-            )
+        self.event.coords["illumination"] = corrections.illumination_correction(
+            self.beam_size,
+            self.sample_size,
+            self.event.coords["theta"],
+        )
         self.data /= self.data.bins.coords["illumination"]
 
     def detector_masking(
@@ -283,29 +277,23 @@ class ReflData:
             theta_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
         """
         if theta_min is None:
-            theta_min = sc.min(
-                self.data.bins.constituents['data'].coords["theta"])
+            theta_min = sc.min(self.data.bins.constituents['data'].coords["theta"])
         if theta_max is None:
-            theta_max = sc.max(
-                self.data.bins.constituents['data'].coords["theta"])
-        theta_max = sc.to_unit(
-            theta_max,
-            self.data.bins.constituents['data'].coords['theta'].unit)
+            theta_max = sc.max(self.data.bins.constituents['data'].coords["theta"])
+        theta_max = sc.to_unit(theta_max,
+                               self.data.bins.constituents['data'].coords['theta'].unit)
         wavelength_min = sc.to_unit(
-            theta_min,
-            self.data.bins.constituents['data'].coords['theta'].unit)
+            theta_min, self.data.bins.constituents['data'].coords['theta'].unit)
         range = [
             sc.min(self.data.bins.constituents['data'].coords['theta']).value,
             theta_min.value, theta_max.value,
             sc.max(self.data.bins.constituents['data'].coords['theta']).value
         ]
-        theta = sc.array(
-            dims=['theta'],
-            unit=self.data.bins.constituents['data'].coords['theta'].unit,
-            values=range)
+        theta = sc.array(dims=['theta'],
+                         unit=self.data.bins.constituents['data'].coords['theta'].unit,
+                         values=range)
         self.data = sc.bin(self.data, edges=[theta])
-        self.data.masks['theta'] = sc.array(dims=['theta'],
-                                            values=[True, False, True])
+        self.data.masks['theta'] = sc.array(dims=['theta'], values=[True, False, True])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -328,10 +316,9 @@ class ReflData:
             wavelength_min,
             self.data.bins.constituents['data'].coords['wavelength'].unit)
         range = [
-            sc.min(self.data.bins.constituents['data'].coords['wavelength']).
-            value, wavelength_min.value, wavelength_max.value,
-            sc.max(
-                self.data.bins.constituents['data'].coords['wavelength']).value
+            sc.min(self.data.bins.constituents['data'].coords['wavelength']).value,
+            wavelength_min.value, wavelength_max.value,
+            sc.max(self.data.bins.constituents['data'].coords['wavelength']).value
         ]
         wavelength = sc.array(
             dims=['wavelength'],

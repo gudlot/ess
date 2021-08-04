@@ -40,10 +40,10 @@ def stitch(data=None, dim=None, frames=None, nbins=256, plot=False):
     # sc.to_unit(frames['left_edges'], sc.units.us)
     #
 
-    values = np.linspace((frames["left_edges"]["frame", 0] -
-                          frames["shifts"]["frame", 0]).value,
-                         (frames["right_edges"]["frame", -1] -
-                          frames["shifts"]["frame", -1]).value, nbins + 1)
+    values = np.linspace(
+        (frames["left_edges"]["frame", 0] - frames["shifts"]["frame", 0]).value,
+        (frames["right_edges"]["frame", -1] - frames["shifts"]["frame", -1]).value,
+        nbins + 1)
     # TODO use sc.linspace.
     # Assumes edges in frames are sorted. TODO check
     tof_coord = sc.Variable(dims=["tof"], unit=sc.units.us, values=values)

@@ -47,8 +47,8 @@ def wavelength_theta(data, filename, bins, header=None):
         header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
     try:
-        binned = data.sample.wavelength_theta_bin(bins).bins.sum(
-        ) / data.reference.wavelength_theta_bin(bins).bins.sum()
+        binned = data.sample.wavelength_theta_bin(
+            bins).bins.sum() / data.reference.wavelength_theta_bin(bins).bins.sum()
     except AttributeError:
         binned = data.wavelength_theta_bin(bins).bins.sum()
     theta_c = binned.coords['theta'].values[:-1] + np.diff(
@@ -61,9 +61,8 @@ def wavelength_theta(data, filename, bins, header=None):
         new_orso = copy.copy(header)
     c1 = orso.Column('wavelength', str(binned.coords['wavelength'].unit))
     c2 = orso.Column('theta', str(binned.coords['theta'].unit))
-    c3 = orso.Column(
-        'Reflectivity', 'dimensionless',
-        'A 2D map with theta in horizontal and wavelength in vertical')
+    c3 = orso.Column('Reflectivity', 'dimensionless',
+                     'A 2D map with theta in horizontal and wavelength in vertical')
     new_orso.columns = [c1, c2, c3]
     out_array = np.zeros((binned.shape[0] + 2, binned.shape[1]))
     out_array[0] = wavelength_c

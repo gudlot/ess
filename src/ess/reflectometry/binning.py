@@ -27,19 +27,16 @@ def q_bin(data, bins):
     """
     if 'qz' in data.events.coords and 'tof' in data.events.coords:
         erase = ['tof'] + data.dims
-        data.events.coords['qz'] = sc.to_unit(data.events.coords['qz'],
-                                              bins.unit)
+        data.events.coords['qz'] = sc.to_unit(data.events.coords['qz'], bins.unit)
         binned = sc.bin(data, erase=erase, edges=[bins])
         if 'sigma_qz_by_qz' in data.events.coords:
             qzr = np.array([])
             for i in binned.data.values:
                 try:
-                    qzr = np.append(qzr,
-                                    i.coords['sigma_qz_by_qz'].values.max())
+                    qzr = np.append(qzr, i.coords['sigma_qz_by_qz'].values.max())
                 except ValueError:
                     qzr = np.append(qzr, 0)
-            binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr,
-                                                          dims=['qz'])
+            binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr, dims=['qz'])
     else:
         raise sc.NotFoundError('qz or tof coordinate cannot be found.')
     return binned / (data.events.shape[0] * sc.units.dimensionless)
@@ -58,6 +55,6 @@ def two_dimensional_bin(data, bins):
     :rtype: scipp._scipp.core.DataArray 
     """
     for i in bins:
-        data.events.coords[i.dims[0]] = sc.to_unit(
-            data.events.coords[i.dims[0]], i.unit)
+        data.events.coords[i.dims[0]] = sc.to_unit(data.events.coords[i.dims[0]],
+                                                   i.unit)
     return sc.bin(data.bins.concatenate('detector_id'), edges=list(bins))
