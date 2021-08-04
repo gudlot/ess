@@ -7,16 +7,13 @@ source:
 
 requirements:
   build:
-    - python {{ python }}
     - sphinx>=1.6
     - sphinx_rtd_theme
     - gitpython
   run:
-    - python {{ python }}
     - scippneutron {{ scippneutron }}
     - tifffile
     - astropy
-    - scipy
     - matplotlib
     - ipywidgets
     - scipy
@@ -36,6 +33,9 @@ test:
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
+  noarch: python
+  script:
+    - python setup.py install
 
 about:
   home: https://github.com/scipp/ess
@@ -43,4 +43,4 @@ about:
   summary: Neutron scattering tools for the European Spallation Source (ESS)
   description: Neutron scattering tools for Data Reduction bespoke to ESS facility and instruments
   dev_url: https://github.com/scipp/ess
-  doc_url:
+  doc_url: https://scipp.github.io/ess

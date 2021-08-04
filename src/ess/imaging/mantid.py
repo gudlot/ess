@@ -33,15 +33,10 @@ def load_component_info_to_2d(geometry_file, sizes, advanced_geometry=False):
     pos_shape = pos.shape[0]
     reshape_volume = reduce(operator.mul, sizes.values(), 1)
     if not pos_shape == reshape_volume:
-        raise ValueError(
-            f'file contains {pos_shape} spectra, but you are attempting\
+        raise ValueError(f'file contains {pos_shape} spectra, but you are attempting\
             to reshape to an output with volume\
             {reshape_volume} via sizes argument')
-    fold_args = {
-        'dim': 'spectrum',
-        'dims': sizes.keys(),
-        'shape': sizes.values()
-    }
+    fold_args = {'dim': 'spectrum', 'dims': sizes.keys(), 'shape': sizes.values()}
     pos2d = sc.fold(pos, **fold_args)
     geometry["position"] = pos2d
     if rot is not None:

@@ -68,7 +68,7 @@ class ReflData:
         """
         return self.data.bins.constituents["data"]
 
-    def q_bin(self, bins=None, unit=sc.Unit('1/angstrom')):
+    def q_bin(self, bins):
         """
         Return data that has been binned in the q-bins passed.
 
@@ -79,70 +79,55 @@ class ReflData:
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
         """
-        return binning.q_bin(self, bins, unit).bins.sum()
+        return binning.q_bin(self.data, bins).bins.sum()
 
-    def wavelength_theta_bin(self,
-                             bins=None,
-                             units=(sc.units.angstrom, sc.units.deg)):
+    def wavelength_theta_bin(self, bins):
         """
         Return data that has been binned in the wavelength and theta bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`(Å, deg)`.
-
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :param bins: wavelength and theta edges
+        :type bins: Tuple(scipp._scipp.core.Variable)
+        
+        :return: Data array binned into wavelength and theta
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['wavelength', 'theta'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
-    def q_theta_bin(self,
-                    bins=None,
-                    units=(sc.Unit('1/angstrom'), sc.units.deg)):
+    def q_theta_bin(self, bins):
         """
-        Return data that has been binned in the wavelength and theta bins passed.
+        Return data that has been binned in the q and theta bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å^{-1}, deg]`.
+        :param bins: q and theta edges
+        :type: Tuple(scipp._scipp.core.Variable)
 
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :return: Data array binned into q and theta
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['qz', 'theta'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
-    def wavelength_q_bin(
-            self,
-            bins=None,
-            units=(sc.units.angstrom, sc.Unit('1/angstrom')),
-    ):
+    def wavelength_q_bin(self, bins):
         """
-        Return data that has been binned in the wavelength and theta bins passed.
+        Return data that has been binned in the wavelength and q bins passed.
 
-        Args:
-            bins (:py:attr:`tuple` of :py:attr:`array_like`): wavelength and theta edges.
-            unit (:py:attr:`tuple` of :py:class:`scipp._scipp.core.Unit`): Units for wavelength and theta. Defaults to :code:`[Å, Å^{-1}]`.
+        :param bins: q and theta edges
+        :type: Tuple(scipp._scipp.core.Variable)
 
-        Returns:
-            (:py:class:`scipp._scipp.core.DataArray`): Data array binned into wavelength and theta.
+        :return: Data array binned into wavelength and q
+        :rtype: scipp._scipp.core.DataArray
         """
         return binning.two_dimensional_bin(
-            self, ['wavelength', 'qz'], bins,
-            units) / (self.event.shape[0] * sc.units.dimensionless)
+            self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
     def find_wavelength(self):
         """
         From the time-of-flight data, find the wavelength for each neutron event.
         """
         scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
-        self.data.bins.constituents["data"].coords["wavelength"] = (
-            scn.convert(
-                self.data, origin="tof", target="wavelength",
-                scatter=True).bins.constituents["data"].coords["wavelength"])
+        self.data.bins.constituents["data"].coords["wavelength"] = (scn.convert(
+            self.data, origin="tof", target="wavelength",
+            scatter=True).bins.constituents["data"].coords["wavelength"])
 
     def find_theta(self):
         """
@@ -164,10 +149,10 @@ class ReflData:
             # Find the range of possible positions that the neutron could
             # strike, this range of theta values is taken to be the full
             # width half maximum for the theta distribution
-            offset_positive = resolution.z_offset(
-                self.data.attrs["sample_position"], half_beam_on_sample)
-            offset_negative = resolution.z_offset(
-                self.data.attrs["sample_position"], half_beam_on_sample)
+            offset_positive = resolution.z_offset(self.data.attrs["sample_position"],
+                                                  half_beam_on_sample)
+            offset_negative = resolution.z_offset(self.data.attrs["sample_position"],
+                                                  half_beam_on_sample)
             self.data.bins.constituents['data'].attrs[
                 'offset_positive'] = offset_positive
             self.data.bins.constituents['data'].attrs[
@@ -190,15 +175,12 @@ class ReflData:
             # due to the detector's spatial resolution, which we will call
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
-                self.detector_spatial_resolution,
-                self.data.coords["position"].fields.z,
+                self.detector_spatial_resolution, self.data.coords["position"].fields.z,
                 self.data.attrs["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
-                (self.data.attrs["sigma_gamma"] /
-                 self.data.bins.coords["theta"]) *
-                (self.data.attrs["sigma_gamma"] /
-                 self.data.bins.coords["theta"]) +
+                (self.data.attrs["sigma_gamma"] / self.data.bins.coords["theta"]) *
+                (self.data.attrs["sigma_gamma"] / self.data.bins.coords["theta"]) +
                 (self.data.bins.attrs["sigma_theta_position"] /
                  self.data.bins.coords["theta"]) *
                 (self.data.bins.attrs["sigma_theta_position"] /
@@ -213,8 +195,7 @@ class ReflData:
         Calculate the scattering vector (and resolution).
         """
         self.data.bins.constituents["data"].coords["qz"] = (
-            4.0 * np.pi *
-            sc.sin(self.data.bins.constituents["data"].coords["theta"]) /
+            4.0 * np.pi * sc.sin(self.data.bins.constituents["data"].coords["theta"]) /
             self.data.bins.constituents["data"].coords["wavelength"])
         self.data.coords["s_qz_bins"] = sc.zeros(
             dims=self.data.coords["detector_id"].dims,
@@ -241,12 +222,11 @@ class ReflData:
         """
         Perform illumination correction.
         """
-        self.event.coords[
-            "illumination"] = corrections.illumination_correction(
-                self.beam_size,
-                self.sample_size,
-                self.event.coords["theta"],
-            )
+        self.event.coords["illumination"] = corrections.illumination_correction(
+            self.beam_size,
+            self.sample_size,
+            self.event.coords["theta"],
+        )
         self.data /= self.data.bins.coords["illumination"]
 
     def detector_masking(
@@ -297,29 +277,23 @@ class ReflData:
             theta_max (:py:class:`scipp._scipp.core.Variable`, optional): Maximum theta to be used. Optional, default no maximum mask.
         """
         if theta_min is None:
-            theta_min = sc.min(
-                self.data.bins.constituents['data'].coords["theta"])
+            theta_min = sc.min(self.data.bins.constituents['data'].coords["theta"])
         if theta_max is None:
-            theta_max = sc.max(
-                self.data.bins.constituents['data'].coords["theta"])
-        theta_max = sc.to_unit(
-            theta_max,
-            self.data.bins.constituents['data'].coords['theta'].unit)
+            theta_max = sc.max(self.data.bins.constituents['data'].coords["theta"])
+        theta_max = sc.to_unit(theta_max,
+                               self.data.bins.constituents['data'].coords['theta'].unit)
         wavelength_min = sc.to_unit(
-            theta_min,
-            self.data.bins.constituents['data'].coords['theta'].unit)
+            theta_min, self.data.bins.constituents['data'].coords['theta'].unit)
         range = [
             sc.min(self.data.bins.constituents['data'].coords['theta']).value,
             theta_min.value, theta_max.value,
             sc.max(self.data.bins.constituents['data'].coords['theta']).value
         ]
-        theta = sc.array(
-            dims=['theta'],
-            unit=self.data.bins.constituents['data'].coords['theta'].unit,
-            values=range)
+        theta = sc.array(dims=['theta'],
+                         unit=self.data.bins.constituents['data'].coords['theta'].unit,
+                         values=range)
         self.data = sc.bin(self.data, edges=[theta])
-        self.data.masks['theta'] = sc.array(dims=['theta'],
-                                            values=[True, False, True])
+        self.data.masks['theta'] = sc.array(dims=['theta'], values=[True, False, True])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -342,10 +316,9 @@ class ReflData:
             wavelength_min,
             self.data.bins.constituents['data'].coords['wavelength'].unit)
         range = [
-            sc.min(self.data.bins.constituents['data'].coords['wavelength']).
-            value, wavelength_min.value, wavelength_max.value,
-            sc.max(
-                self.data.bins.constituents['data'].coords['wavelength']).value
+            sc.min(self.data.bins.constituents['data'].coords['wavelength']).value,
+            wavelength_min.value, wavelength_max.value,
+            sc.max(self.data.bins.constituents['data'].coords['wavelength']).value
         ]
         wavelength = sc.array(
             dims=['wavelength'],
@@ -355,7 +328,7 @@ class ReflData:
         self.data.masks['wavelength'] = sc.array(dims=['wavelength'],
                                                  values=[True, False, True])
 
-    def write_reflectometry(self, filename, bin_kwargs=None, header=None):
+    def write_reflectometry(self, filename, bins, header=None):
         """
         Write the reflectometry intensity data to a file.
 
@@ -364,7 +337,7 @@ class ReflData:
             bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
             header (:py:class:`ess.reflectometry.Orso`, optional): ORSO-compatible header object. Optional defaults to :py:attr:`ReflData.orso`.
         """
-        write.reflectometry(self, filename, bin_kwargs, header)
+        write.reflectometry(self, filename, bins, header)
 
     def write_wavelength_theta(self, filename, bins, header=None):
         """

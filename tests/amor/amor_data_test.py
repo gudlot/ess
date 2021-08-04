@@ -29,8 +29,9 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id":
-        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32),
+        "detector_id": sc.Variable(dims=["event"],
+                                   values=DETECTORS,
+                                   dtype=sc.dtype.int32),
     },
 )
 
@@ -59,13 +60,12 @@ Z = sc.Variable(
     unit=sc.units.m,
 )
 BINNED.coords["position"] = sc.geometry.position(X, Y, Z)
-BINNED.bins.constituents['data'].coords["tof"] = sc.Variable(
-    dims=["event"],
-    values=np.linspace(1, 10, N),
-    unit=sc.units.us,
-)
-BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
-                                                       0. * sc.units.m,
+BINNED.events.coords["tof"] = sc.linspace(dim="event",
+                                          start=1,
+                                          stop=10,
+                                          num=N,
+                                          unit=sc.units.us)
+BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m, 0. * sc.units.m,
                                                        0. * sc.units.m)
 BINNED.attrs['instrument_name'] = sc.scalar(value='AMOR')
 BINNED.attrs['experiment_title'] = sc.scalar(value='test')
@@ -113,8 +113,7 @@ class TestAmorData(unittest.TestCase):
                                reduction_file='my_notebook.ipynb',
                                chopper_phase=-5 * sc.units.deg,
                                chopper_chopper_distance=0.3 * sc.units.m,
-                               chopper_detector_distance=18e10 *
-                               sc.units.angstrom,
+                               chopper_detector_distance=18e10 * sc.units.angstrom,
                                wavelength_cut=2.0 * sc.units.angstrom)
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
         assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
@@ -205,8 +204,7 @@ class TestAmorReference(unittest.TestCase):
         """
         Testing the default initialisation of the AmorReference objects.
         """
-        p = amor_data.AmorReference(BINNED.copy(),
-                                    m_value=4 * sc.units.dimensionless)
+        p = amor_data.AmorReference(BINNED.copy(), m_value=4 * sc.units.dimensionless)
         assert_equal(isinstance(p.data, sc._scipp.core.DataArray), True)
         assert_equal(isinstance(p.data.data, sc._scipp.core.Variable), True)
         assert_equal(p.m_value.value, 4)
@@ -234,18 +232,16 @@ class TestNormalisation(unittest.TestCase):
 
     def test_q_bin_norm(self):
         p = amor_data.AmorData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         q = amor_data.AmorData(BINNED.copy())
-        q.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        q.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         q.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -256,18 +252,16 @@ class TestNormalisation(unittest.TestCase):
 
     def test_write_reflectometry_norm(self):
         p = amor_data.AmorData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         q = amor_data.AmorData(BINNED.copy())
-        q.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        q.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         q.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
@@ -279,46 +273,56 @@ class TestNormalisation(unittest.TestCase):
 
     def test_binwavelength_theta_norm(self):
         p = amor_data.AmorData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         q = amor_data.AmorData(BINNED.copy())
-        q.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        q.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         q.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
-        bins = np.linspace(0, 100, 10)
-        k = z.wavelength_theta_bin((bins, bins))
+        bins1 = sc.linspace(dim='wavelength',
+                            start=0,
+                            stop=100,
+                            num=10,
+                            unit=sc.units.angstrom)
+        bins2 = sc.linspace(dim='theta', start=0, stop=100, num=10, unit=sc.units.deg)
+        k = z.wavelength_theta_bin((bins1, bins2))
         assert_equal(k.shape, (9, 9))
 
     def test_write_wavelength_theta_norm(self):
         p = amor_data.AmorData(BINNED.copy())
-        p.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        p.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         p.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         q = amor_data.AmorData(BINNED.copy())
-        q.event.coords["wavelength"] = sc.Variable(
-            dims=["event"],
-            values=DETECTORS.astype(float),
-            unit=sc.units.angstrom)
+        q.event.coords["wavelength"] = sc.Variable(dims=["event"],
+                                                   values=DETECTORS.astype(float),
+                                                   unit=sc.units.angstrom)
         q.event.coords["theta"] = sc.Variable(dims=["event"],
                                               values=DETECTORS.astype(float),
                                               unit=sc.units.deg)
         z = amor_data.Normalisation(p, q)
         with file_location("test1.txt") as file_path:
-            bins = np.linspace(0, 100, 10)
-            z.write_wavelength_theta(file_path, (bins, bins))
+            bins1 = sc.linspace(dim='wavelength',
+                                start=0,
+                                stop=100,
+                                num=10,
+                                unit=sc.units.angstrom)
+            bins2 = sc.linspace(dim='theta',
+                                start=0,
+                                stop=100,
+                                num=10,
+                                unit=sc.units.deg)
+            z.write_wavelength_theta(file_path, (bins1, bins2))
             written_data = np.loadtxt(file_path, unpack=True)
             assert_equal(written_data.shape, (11, 9))

@@ -12,73 +12,49 @@ import scipp as sc
 import scippneutron as scn
 
 
-def q_bin(data, bins=None, unit=None):
+def q_bin(data, bins):
     """
     Return data that has been binned in the q-bins passed.
 
-    Args:
-        data (:py:class:`ess.reflectometry.ReflData` or :py:class:`ess.amor.AmorData` or :py:class:`ess.amor.AmorReference`): data to be binned.
-        bins (:py:attr:`array_like`, optional): q-bin edges. Defaults to 200 bins between max and min q.
-        unit (:py:class:`scipp._scipp.core.Unit`, optional): Unit of q bins. Defaults to 1/Å.
+    :param data: reflectometry data to be binned
+    :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
+    :param bins: q-bin edges 
+    :type bins: scipp._scipp.core.Variable 
 
-    Returns:
-        (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
+    :return: Data array binned into qz with resolution
+    :rtype: scipp._scipp.core.DataArray 
+    :raises: NotFoundError is qz or tof coordinate cannot be found 
     """
-    if "qz" in data.event.coords and "tof" in data.event.coords:
-        if unit is None:
-            unit = data.event.coords['qz'].unit
-        erase = ['tof'] + data.data.dims
-        q_z_vector = sc.to_unit(data.event.coords["qz"], unit)
-        if bins is None:
-            bins = np.linspace(
-                sc.min(q_z_vector).values,
-                sc.max(q_z_vector).values, 200)
-        data.event.coords["qz"] = q_z_vector
-        edges = sc.array(dims=["qz"], unit=unit, values=bins)
-        binned = sc.bin(data.data, erase=erase, edges=[edges])
-        if "sigma_qz_by_qz" in data.event.coords:
-            qzr = []
+    if 'qz' in data.events.coords and 'tof' in data.events.coords:
+        erase = ['tof'] + data.dims
+        data.events.coords['qz'] = sc.to_unit(data.events.coords['qz'], bins.unit)
+        binned = sc.bin(data, erase=erase, edges=[bins])
+        if 'sigma_qz_by_qz' in data.events.coords:
+            qzr = np.array([])
             for i in binned.data.values:
                 try:
-                    qzr.append(i.coords["sigma_qz_by_qz"].values.max())
+                    qzr = np.append(qzr, i.coords['sigma_qz_by_qz'].values.max())
                 except ValueError:
-                    qzr.append(0)
-            qzr = np.array(qzr)
-            binned.coords["sigma_qz_by_qz"] = sc.Variable(values=qzr,
-                                                          dims=["qz"])
+                    qzr = np.append(qzr, 0)
+            binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr, dims=['qz'])
     else:
-        raise sc.NotFoundError("qz or tof coordinate cannot be found.")
-    return binned / (data.event.shape[0] * sc.units.dimensionless)
+        raise sc.NotFoundError('qz or tof coordinate cannot be found.')
+    return binned / (data.events.shape[0] * sc.units.dimensionless)
 
 
-def two_dimensional_bin(data, dims, bins=None, units=None):
+def two_dimensional_bin(data, bins):
     """
     Perform some arbitrary two-dimensional binning.
 
-    Args:
-        data (:py:class:`ess.reflectometry.ReflData` or :py:class:`ess.amor.AmorData` or :py:class:`ess.amor.AmorReference`): data to be binned.
-        dims (:py:attr:`tuple` of :py:attr:`str`): The dimensions to be binned
-        bins (:py:attr:`tuple` of :py:attr:`array_like`, optional): Bin edges. Optional, defaults to min and max with 50 bins in each dim.
-        unit (:py:class:`scipp._scipp.core.Unit`): Unit of bins. Optional, defaults to units of coord.
-
-    Returns:
-        (:py:class:`scipp._scipp.core.DataArray`): Data array binned into qz with resolution.
+    :param data: reflectometry data to be binned
+    :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
+    :param bins: Bin edges
+    :type bins: Tuple[scipp._scipp.core.Variable]
+    
+    :return: Data array binned into given bin edges
+    :rtype: scipp._scipp.core.DataArray 
     """
-    for d in dims:
-        if d not in list(data.event.coords):
-            raise sc.NotFoundError(f'dim {d} not found in coords')
-    if bins is None:
-        bins = []
-        for d in dims:
-            vals = data.event.coords[d].values
-            bins.append(np.linspace(vals.min(), vals.max(), 50))
-    if units is None:
-        units = []
-        for d in dims:
-            units.append(data.event.coords[d].unit)
-    bin_edges = []
-    for i, d in enumerate(dims):
-        unit_change = sc.to_unit(data.event.coords[d], units[i])
-        data.event.coords[d] = unit_change
-        bin_edges.append(sc.array(dims=[d], unit=units[i], values=bins[i]))
-    return sc.bin(data.data.bins.concatenate('detector_id'), edges=bin_edges)
+    for i in bins:
+        data.events.coords[i.dims[0]] = sc.to_unit(data.events.coords[i.dims[0]],
+                                                   i.unit)
+    return sc.bin(data.bins.concatenate('detector_id'), edges=list(bins))

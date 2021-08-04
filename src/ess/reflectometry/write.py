@@ -12,19 +12,18 @@ import numpy as np
 from ess.reflectometry import orso
 
 
-def reflectometry(data, filename, bin_kwargs=None, header=None):
+def reflectometry(data, filename, bins, header=None):
     """
     Write the reflectometry intensity data to a file.
 
-    Args:
-        filename (:py:attr:`str`): The file path for the file to be saved to.
-        bin_kwargs (:py:attr:`dict`, optional): A dictionary of keyword arguments to be passed to the :py:func:`q_bin` class method. Optional, default is that default :py:func:`q_bin` keywords arguments are used.
-        header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
+    :param filename: The file path for the file to be saved to
+    :type filename: str
+    :param bins: bin edges for qz
+    :type bins: scipp._scipp.core.Variable
+    :param header: ORSO-compatible header object
+    :type: ess.reflectometry.Orso
     """
-    if bin_kwargs is None:
-        binned = data.q_bin()
-    else:
-        binned = data.q_bin(**bin_kwargs)
+    binned = data.q_bin(bins)
     q_z_edges = binned.coords["qz"].values
     q_z_vector = q_z_edges[:-1] + np.diff(q_z_edges)
     dq_z_vector = binned.coords["sigma_qz_by_qz"].values
@@ -48,8 +47,8 @@ def wavelength_theta(data, filename, bins, header=None):
         header (:py:class:`ess.reflectometry.Orso`): ORSO-compatible header object.
     """
     try:
-        binned = data.sample.wavelength_theta_bin(bins).bins.sum(
-        ) / data.reference.wavelength_theta_bin(bins).bins.sum()
+        binned = data.sample.wavelength_theta_bin(
+            bins).bins.sum() / data.reference.wavelength_theta_bin(bins).bins.sum()
     except AttributeError:
         binned = data.wavelength_theta_bin(bins).bins.sum()
     theta_c = binned.coords['theta'].values[:-1] + np.diff(
@@ -62,9 +61,8 @@ def wavelength_theta(data, filename, bins, header=None):
         new_orso = copy.copy(header)
     c1 = orso.Column('wavelength', str(binned.coords['wavelength'].unit))
     c2 = orso.Column('theta', str(binned.coords['theta'].unit))
-    c3 = orso.Column(
-        'Reflectivity', 'dimensionless',
-        'A 2D map with theta in horizontal and wavelength in vertical')
+    c3 = orso.Column('Reflectivity', 'dimensionless',
+                     'A 2D map with theta in horizontal and wavelength in vertical')
     new_orso.columns = [c1, c2, c3]
     out_array = np.zeros((binned.shape[0] + 2, binned.shape[1]))
     out_array[0] = wavelength_c
