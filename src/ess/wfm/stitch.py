@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 
 def _stitch_item(item, dim, frames, merge_frames, nbins):
 
-    # if plot:
-    #     fig, ax = plt.subplots()
-
     if merge_frames:
         # Make empty data container
         dims = []
@@ -40,8 +37,7 @@ def _stitch_item(item, dim, frames, merge_frames, nbins):
         for group in ["coords", "attrs"]:
             for key in getattr(item, group):
                 if key != dim:
-                    getattr(out, group)[key] = getattr(item, group)[key]
-        out.meta['source_position'] += frames["wfm_chopper_mid_point"].data
+                    getattr(out, group)[key] = getattr(item, group)[key].copy()
     else:
         out = {}
 
@@ -57,24 +53,11 @@ def _stitch_item(item, dim, frames, merge_frames, nbins):
             section.meta['source_position'] += frames[
                 "wfm_chopper_mid_point"].data
             out[f"frame{i}"] = section
-        # if plot:
-        #     section.name = "frame-{}".format(i)
-        #     # TODO: we manually remove the 2d coord here, but this should be
-        #     # made into a generic check
-        #     if "position" in section.coords:
-        #         del section.coords["position"]
-        #     elif "position" in section.attrs:
-        #         del section.attrs["position"]
-        #     for dim_ in list(set(section.dims) - {'tof'}):
-        #         section = sc.sum(section, dim_)
-        #     section.plot(ax=ax, color="C{}".format(i))
 
-    # if plot:
-    #     ax.autoscale(True)
-    #     ax.relim()
-    #     ax.autoscale_view()
-    # if merge_frames:
-    #     out.meta['source_position'] += frames["wfm_chopper_mid_point"].data
+    # Note: we need to do the modification here because if not there is a coordinate
+    # mismatch between `out` and `section`
+    if merge_frames:
+        out.meta['source_position'] += frames["wfm_chopper_mid_point"].data
 
     return out
 
@@ -90,47 +73,11 @@ def stitch(data, dim, frames, merge_frames=True, nbins=256):
     # TODO: for now, if frames depend on positions, we take the mean along the
     # position dimensions. We should implement the position-dependent stitching
     # in the future.
+    frames = frames.copy()
     dims_to_reduce = list(set(frames.dims) - {'frame'})
     for _dim in dims_to_reduce:
         frames["left_edges"] = sc.mean(frames["left_edges"], _dim)
         frames["right_edges"] = sc.mean(frames["right_edges"], _dim)
-
-    # tof_coord = sc.linspace(
-    #     dim="tof",
-    #     start=(frames["left_edges"]["frame", 0] -
-    #            frames["shifts"]["frame", 0]).value,
-    #     stop=(frames["right_edges"]["frame", -1] -
-    #           frames["shifts"]["frame", -1]).value,
-    #     num=nbins + 1,
-    #     unit=frames["left_edges"].unit,
-    # )
-
-    is_dataset = sc.is_dataset(data)
-
-    # if is_dataset:
-    #     key = list(data.keys())[0]
-    #     dims = data[key].dims
-    #     shape = data[key].shape
-    # else:
-    #     dims = data.dims
-    #     shape = data.shape
-    # dims.remove(dim)
-    # shape.remove(data.sizes[dim])
-
-    # if merge_frames:
-    #     # Make empty data container
-    #     empty = sc.DataArray(data=sc.zeros(dims=["tof"] + dims,
-    #                                        shape=[nbins] + shape,
-    #                                        variances=True,
-    #                                        unit=sc.units.counts),
-    #                          coords={"tof": tof_coord})
-    #     for key in data.coords:
-    #         if key != dim:
-    #             empty.coords[key] = data.coords[key]
-    #     if is_dataset:
-    #         stitched = sc.Dataset()
-    # else:
-    #     stitched = {}
 
     if sc.is_dataset(data):
         if merge_frames:
@@ -138,10 +85,6 @@ def stitch(data, dim, frames, merge_frames=True, nbins=256):
         else:
             stitched = {}
         for i, (key, item) in enumerate(data.items()):
-            # if merge_frames:
-            #     for attr in item.attrs:
-            #         if attr != dim:
-            #             empty.attrs[attr] = item.attrs[attr]
             stitched[key] = _stitch_item(item=item,
                                          dim=dim,
                                          frames=frames,
@@ -153,9 +96,5 @@ def stitch(data, dim, frames, merge_frames=True, nbins=256):
                                 frames=frames,
                                 merge_frames=merge_frames,
                                 nbins=nbins)
-
-    # Make sure to shift the position of the source to the midpoint between the
-    # WFM choppers
-    stitched.meta['source_position'] += frames["wfm_chopper_mid_point"].data
 
     return stitched
