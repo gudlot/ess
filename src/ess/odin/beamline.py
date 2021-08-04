@@ -7,6 +7,14 @@ from ..wfm.choppers import Chopper
 
 
 def make_beamline():
+    """
+    ODIN chopper cascade and component positions.
+    Chopper opening angles taken from Schmakat et al. (2020)
+    https://www.sciencedirect.com/science/article/pii/S0168900220308640
+
+    Note that there is a typo in the paper for the FOC1 opening angles.
+    These have been corrected here.
+    """
 
     dim = 'frame'
     hz = sc.units.one / sc.units.s
