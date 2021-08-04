@@ -4,12 +4,6 @@ import numpy as np
 import scipp as sc
 
 
-class Beamline:
-    def __init__(self, choppers, source):
-        self.choppers = choppers
-        self.source = source
-
-
 class Chopper:
     def __init__(self,
                  frequency,
@@ -46,7 +40,7 @@ def _extract_and_concatenate(container, key, dim):
     return array
 
 
-def choppers(beamline):
+def make_chopper_cascade(beamline):
     """
     Create a description of a chopper cascade using a supplied description of
     beamline components.
@@ -82,4 +76,4 @@ def choppers(beamline):
                                      key=key,
                                      dim="chopper"), 'rad')
 
-    return ds, beamline.source
+    return ds
