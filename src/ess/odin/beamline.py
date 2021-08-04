@@ -5,7 +5,7 @@ from ..wfm.beamline import Beamline
 from ..wfm.choppers import Chopper
 
 
-def make_beamline():
+def make_beamline() -> Beamline:
     """
     ODIN chopper cascade and component positions.
     Chopper opening angles taken from Schmakat et al. (2020)

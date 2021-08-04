@@ -2,17 +2,18 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
+from .beamline import Beamline
 
 
 class Chopper:
     def __init__(self,
-                 frequency,
-                 position,
-                 phase=None,
-                 opening_angles_center=None,
-                 opening_angles_width=None,
-                 opening_angles_open=None,
-                 opening_angles_close=None):
+                 frequency: sc.Variable,
+                 position: sc.Variable,
+                 phase: sc.Variable = None,
+                 opening_angles_center: sc.Variable = None,
+                 opening_angles_width: sc.Variable = None,
+                 opening_angles_open: sc.Variable = None,
+                 opening_angles_close: sc.Variable = None):
         self.frequency = frequency
         self.position = position
         self.phase = phase
@@ -22,14 +23,14 @@ class Chopper:
         self.opening_angles_close = opening_angles_close
 
 
-def _to_angular_frequency(f):
+def _to_angular_frequency(f: sc.Variable) -> sc.Variable:
     """
     Convert frequency in Hz to angular frequency.
     """
     return (2.0 * np.pi * sc.units.rad) * f
 
 
-def _extract_and_concatenate(container, key, dim):
+def _extract_and_concatenate(container: dict, key: str, dim: str) -> sc.Variable:
     array = None
     for item in container.values():
         scalar = getattr(item, key)
@@ -40,7 +41,7 @@ def _extract_and_concatenate(container, key, dim):
     return array
 
 
-def make_chopper_cascade(beamline):
+def make_chopper_cascade(beamline: Beamline) -> sc.Dataset:
     """
     Create a description of a chopper cascade using a supplied description of
     beamline components.

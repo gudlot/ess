@@ -2,10 +2,12 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
+from typing import Union
 from .tools import get_frame_properties
 
 
-def frames_analytical(data, wfm_chopper_names=["WFMC1", "WFMC2"]):
+def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
+                      wfm_chopper_names: list = ["WFMC1", "WFMC2"]) -> sc.Dataset:
     """
     Compute analytical frame boundaries and shifts based on chopper
     parameters and detector pixel positions.

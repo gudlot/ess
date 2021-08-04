@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+import scipp as sc
+from typing import Union
 from .frames_analytical import frames_analytical
 # from .frames_peakfinding import frames_peakfinding
 
 
-def get_frames(data, **kwargs):
+def get_frames(data: Union[sc.DataArray, sc.Dataset], **kwargs) -> sc.Dataset:
     """
     For a supplied instrument chopper cascade and detector positions, find
     the locations in microseconds of the WFM frames.

@@ -4,14 +4,14 @@
 import scipp as sc
 
 
-def to_bin_centers(x, dim):
+def to_bin_centers(x: sc.Variable, dim: str) -> sc.Variable:
     """
     Convert array edges to centers
     """
     return 0.5 * (x[dim, 1:] + x[dim, :-1])
 
 
-def to_bin_edges(x, dim):
+def to_bin_edges(x: sc.Variable, dim: str) -> sc.Variable:
     """
     Convert array centers to edges
     """
@@ -28,7 +28,8 @@ def to_bin_edges(x, dim):
         return sc.concatenate(sc.concatenate(left, center, dim), right, dim)
 
 
-def _angular_frame_edge_to_time(angular_frequency, angle, phase):
+def _angular_frame_edge_to_time(angular_frequency: sc.Variable, angle: sc.Variable,
+                                phase: sc.Variable) -> sc.Variable:
     """
     Convert an angle on a rotating chopper to a time point (in microseconds).
     """
@@ -36,7 +37,7 @@ def _angular_frame_edge_to_time(angular_frequency, angle, phase):
     return (angle + phase) / div * (1.0e6 * sc.units.us)
 
 
-def get_frame_properties(frame):
+def get_frame_properties(frame: sc.DataArray) -> tuple:
     """
     Get coordinates of a chopper frame opening in time and distance.
     """

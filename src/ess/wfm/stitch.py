@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from typing import Union
 
 
-def _stitch_item(item, dim, frames, merge_frames, nbins):
+def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames: bool,
+                 nbins: int) -> Union[sc.DataArray, dict]:
 
     if merge_frames:
         # Make empty data container
@@ -59,7 +61,11 @@ def _stitch_item(item, dim, frames, merge_frames, nbins):
     return out
 
 
-def stitch(data, dim, frames, merge_frames=True, nbins=256):
+def stitch(data: Union[sc.DataArray, sc.Dataset],
+           dim: str,
+           frames: sc.Dataset,
+           merge_frames: bool = True,
+           nbins: int = 256) -> Union[sc.DataArray, sc.Dataset, dict]:
     """
     Convert raw arrival time WFM data to time-of-flight by shifting each frame
     (described by the `frames` argument) by a time offset defined by the position

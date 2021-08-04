@@ -7,7 +7,7 @@ from .wfm import get_frames
 from .tools import get_frame_properties
 
 
-def time_distance_diagram(data, **kwargs):
+def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     """
     Plot the time-distance diagram for a WFM beamline.
     This internally calls the `get_frames` method which is used to compute the
