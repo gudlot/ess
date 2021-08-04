@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import scipp as sc
 from ..wfm.beamline import Beamline
 from ..wfm.choppers import Chopper

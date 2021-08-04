@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc

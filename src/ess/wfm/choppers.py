@@ -48,8 +48,10 @@ def make_chopper_cascade(beamline):
 
     for chopper in beamline.choppers.values():
         if chopper.opening_angles_open is None and chopper.opening_angles_close is None:
-            chopper.opening_angles_open = chopper.opening_angles_center - 0.5 * chopper.opening_angles_width
-            chopper.opening_angles_close = chopper.opening_angles_center + 0.5 * chopper.opening_angles_width
+            chopper.opening_angles_open = (chopper.opening_angles_center -
+                                           0.5 * chopper.opening_angles_width)
+            chopper.opening_angles_close = (chopper.opening_angles_center +
+                                            0.5 * chopper.opening_angles_width)
 
     ds = sc.Dataset()
 
