@@ -42,9 +42,7 @@ def get_frame_properties(frame):
     """
     pos = sc.norm(frame["position"])
     tstart = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                         frame["opening_angles_open"],
-                                         frame["phase"])
+                                         frame["opening_angles_open"], frame["phase"])
     tend = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                       frame["opening_angles_close"],
-                                       frame["phase"])
+                                       frame["opening_angles_close"], frame["phase"])
     return pos, tstart, tend

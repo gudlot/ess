@@ -50,8 +50,7 @@ def _stitch_item(item, dim, frames, merge_frames, nbins):
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])
         else:
-            section.meta['source_position'] += frames[
-                "wfm_chopper_mid_point"].data
+            section.meta['source_position'] += frames["wfm_chopper_mid_point"].data
             out[f"frame{i}"] = section
 
     # Note: we need to do the modification here because if not there is a coordinate

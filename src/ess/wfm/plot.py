@@ -27,14 +27,13 @@ def time_distance_diagram(data, **kwargs):
     psize = det_last.value / 50.0
 
     ax.add_patch(
-        Rectangle(
-            (0, source_pos.value),
-            (2.0 * data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
-            -psize,
-            lw=1,
-            fc='lightgrey',
-            ec='k',
-            zorder=10))
+        Rectangle((0, source_pos.value),
+                  (2.0 * data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
+                  -psize,
+                  lw=1,
+                  fc='lightgrey',
+                  ec='k',
+                  zorder=10))
     ax.add_patch(
         Rectangle((data.meta["pulse_t_0"].value, source_pos.value),
                   data.meta["pulse_length"].value,
@@ -51,24 +50,21 @@ def time_distance_diagram(data, **kwargs):
             va="top",
             fontsize=6)
 
-    for i in range(
-            data.meta["choppers"].value["opening_angles_open"].sizes["frame"]):
+    for i in range(data.meta["choppers"].value["opening_angles_open"].sizes["frame"]):
 
-        dist, xstart, xend = get_frame_properties(
-            data.meta["choppers"].value["frame", i])
+        dist, xstart, xend = get_frame_properties(data.meta["choppers"].value["frame",
+                                                                              i])
 
-        for j in range(data.meta["choppers"].value["opening_angles_open"].
-                       sizes["chopper"]):
+        for j in range(
+                data.meta["choppers"].value["opening_angles_open"].sizes["chopper"]):
             ax.plot([xstart["chopper", j].value, xend["chopper", j].value],
                     [dist["chopper", j].value] * 2,
                     color="C{}".format(i))
             if i == data.meta["choppers"].value["opening_angles_open"].sizes[
                     "frame"] - 1:
-                ax.text((2.0 * xend["chopper", j].data -
-                         xstart["chopper", j]).value,
+                ax.text((2.0 * xend["chopper", j].data - xstart["chopper", j]).value,
                         dist["chopper", j].value,
-                        data.meta["choppers"].value["names"]["chopper",
-                                                             j].value,
+                        data.meta["choppers"].value["names"]["chopper", j].value,
                         ha="left",
                         va="center")
 
@@ -82,8 +78,7 @@ def time_distance_diagram(data, **kwargs):
                  (data.meta["pulse_t_0"] + data.meta["pulse_length"] -
                   frame["left_dt"]).value,
                  (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
-                 (frame["right_edges"] -
-                  (0.5 * frame["right_dt"].data)).value],
+                 (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value],
                 [source_pos.value, source_pos.value, pos.value, pos.value],
                 alpha=0.3,
                 color=col)
@@ -124,22 +119,19 @@ def time_distance_diagram(data, **kwargs):
                 color=col,
                 lw=1)
         ax.plot([(data.meta["pulse_t_0"] + frame["right_dt"]).value,
-                 (frame["right_edges"] +
-                  (0.5 * frame["right_dt"].data)).value],
+                 (frame["right_edges"] + (0.5 * frame["right_dt"].data)).value],
                 [source_pos.value, pos.value],
                 color=col,
                 lw=1)
 
         ax.text(sc.mean(
-            sc.concatenate(frame["left_edges"], frame["right_edges"],
-                           'none')).value,
+            sc.concatenate(frame["left_edges"], frame["right_edges"], 'none')).value,
                 det_last.value,
                 "Frame {}".format(i + 1),
                 ha="center",
                 va="top")
 
-    ax.plot([0, sc.max(frames["right_edges"].data).value],
-            [det_last.value] * 2,
+    ax.plot([0, sc.max(frames["right_edges"].data).value], [det_last.value] * 2,
             lw=3,
             color='grey')
     ax.text(0.0, det_last.value, "Detector", va="bottom", ha="left")

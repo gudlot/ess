@@ -53,8 +53,7 @@ def make_chopper_cascade(beamline):
 
     ds = sc.Dataset()
 
-    ds["names"] = sc.array(dims=["chopper"],
-                           values=list(beamline.choppers.keys()))
+    ds["names"] = sc.array(dims=["chopper"], values=list(beamline.choppers.keys()))
 
     ds["angular_frequency"] = _to_angular_frequency(
         _extract_and_concatenate(container=beamline.choppers,

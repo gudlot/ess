@@ -60,13 +60,10 @@ def make_beamline():
         Chopper(frequency=sc.scalar(42.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
                 position=sc.vector(value=[0, 0, 12.20], unit='m'),
-                opening_angles_center=sc.array(dims=[dim],
-                                               values=[
-                                                   106.57, 174.42, 238.04,
-                                                   297.53, 353.48,
-                                                   46.65 + 360.0
-                                               ],
-                                               unit='deg'),
+                opening_angles_center=sc.array(
+                    dims=[dim],
+                    values=[106.57, 174.42, 238.04, 297.53, 353.48, 46.65 + 360.0],
+                    unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[32.90, 33.54, 34.15, 34.37, 34.89, 34.31],
@@ -75,13 +72,10 @@ def make_beamline():
         Chopper(frequency=sc.scalar(28.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
                 position=sc.vector(value=[0, 0, 17.0], unit='m'),
-                opening_angles_center=sc.array(dims=[dim],
-                                               values=[
-                                                   92.47, 155.52, 214.65,
-                                                   270.09, 322.08,
-                                                   11.39 + 360.0
-                                               ],
-                                               unit='deg'),
+                opening_angles_center=sc.array(
+                    dims=[dim],
+                    values=[92.47, 155.52, 214.65, 270.09, 322.08, 11.39 + 360.0],
+                    unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[40.32, 39.61, 38.94, 38.31, 37.72, 36.05],
