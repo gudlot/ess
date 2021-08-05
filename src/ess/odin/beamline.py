@@ -53,7 +53,7 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[32.90, 33.54, 34.15, 34.37, 34.89, 34.31],
+                    values=[11.06, 13.06, 14.94, 16.71, 18.36, 16.72],
                     unit='deg')),
         "FOC2":
         Chopper(frequency=sc.scalar(42.0, unit=hz),

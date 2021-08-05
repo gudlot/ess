@@ -20,7 +20,7 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
                 shape.append(nbins)
         out = sc.DataArray(data=sc.zeros(dims=dims,
                                          shape=shape,
-                                         variances=item.variances is not None,
+                                         with_variances=item.variances is not None,
                                          unit=item.unit),
                            coords={
                                "tof":
@@ -44,8 +44,9 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
     for i in range(frames.sizes["frame"]):
         section = item[dim, frames["left_edges"].data[
             "frame", i]:frames["right_edges"].data["frame", i]].copy()
-        section.meta[dim] -= frames["shifts"].data["frame", i]
-        section.rename_dims({dim: 'tof'})
+        section.coords['tof'] = section.meta[dim] - frames["shifts"].data["frame", i]
+        del section.meta[dim]
+        section = section.rename_dims({dim: 'tof'})
 
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])
@@ -82,7 +83,7 @@ def stitch(data: Union[sc.DataArray, sc.Dataset],
         frames["left_edges"] = sc.mean(frames["left_edges"], _dim)
         frames["right_edges"] = sc.mean(frames["right_edges"], _dim)
 
-    if sc.is_dataset(data):
+    if isinstance(data, sc.Dataset):
         if merge_frames:
             stitched = sc.Dataset()
         else:

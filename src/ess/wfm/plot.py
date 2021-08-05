@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
@@ -73,55 +74,43 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
         for dim in data.meta["position"].dims:
             frame = frame[dim, 0]
             pos = pos[dim, 0]
-        ax.fill([(data.meta["pulse_t_0"] + frame["right_dt"]).value,
-                 (data.meta["pulse_t_0"] + data.meta["pulse_length"] -
-                  frame["left_dt"]).value,
-                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
-                 (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value],
-                [source_pos.value, source_pos.value, pos.value, pos.value],
-                alpha=0.3,
-                color=col)
-        ax.fill([
-            data.meta["pulse_t_0"].value,
-            (data.meta["pulse_t_0"] + frame["right_dt"]).value,
-            (frame["right_edges"] + (0.5 * frame["right_dt"].data)).value,
-            (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
-        ], [source_pos.value, source_pos.value, pos.value, pos.value],
-                alpha=0.15,
-                color=col)
-        ax.fill([(data.meta["pulse_t_0"] + data.meta["pulse_length"] -
-                  frame["left_dt"]).value,
-                 (data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
-                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value,
-                 (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
-                [source_pos.value, source_pos.value, pos.value, pos.value],
-                alpha=0.15,
-                color=col)
 
         # Minimum wavelength
-        ax.plot([(data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
-                 (frame["left_edges"] + (0.5 * frame["left_dt"].data)).value],
-                [source_pos.value, pos.value],
-                color=col,
-                lw=1)
-        ax.plot([(data.meta["pulse_t_0"] + data.meta["pulse_length"] -
-                  frame['left_dt']).value,
-                 (frame["left_edges"] - (0.5 * frame["left_dt"].data)).value],
-                [source_pos.value, pos.value],
-                color=col,
-                lw=1)
+        lambda_min = np.array([[
+            (data.meta["pulse_t_0"] + data.meta["pulse_length"] -
+             frame['left_dt']).value, source_pos.value
+        ], [(data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
+            source_pos.value],
+                               [(frame["left_edges"] + frame["left_dt"]).value,
+                                pos.value], [frame["left_edges"].value, pos.value]])
+
         # Maximum wavelength
-        ax.plot([
-            data.meta["pulse_t_0"].value,
-            (frame["right_edges"] - (0.5 * frame["right_dt"].data)).value
-        ], [source_pos.value, pos.value],
+        lambda_max = np.array([[data.meta["pulse_t_0"].value, source_pos.value],
+                               [(data.meta["pulse_t_0"] + frame['right_dt']).value,
+                                source_pos.value],
+                               [frame["right_edges"].value, pos.value],
+                               [(frame["right_edges"] - frame["right_dt"]).value,
+                                pos.value]])
+
+        ax.plot(np.concatenate((lambda_min[:, 0], lambda_min[0:1, 0])),
+                np.concatenate((lambda_min[:, 1], lambda_min[0:1, 1])),
                 color=col,
                 lw=1)
-        ax.plot([(data.meta["pulse_t_0"] + frame["right_dt"]).value,
-                 (frame["right_edges"] + (0.5 * frame["right_dt"].data)).value],
-                [source_pos.value, pos.value],
+
+        ax.plot(np.concatenate((lambda_max[:, 0], lambda_max[0:1, 0])),
+                np.concatenate((lambda_max[:, 1], lambda_max[0:1, 1])),
                 color=col,
                 lw=1)
+
+        ax.fill(
+            [lambda_max[0, 0], lambda_max[-1, 0], lambda_min[2, 0], lambda_min[1, 0]],
+            [lambda_max[0, 1], lambda_max[-1, 1], lambda_min[2, 1], lambda_min[1, 1]],
+            alpha=0.3,
+            color=col,
+            zorder=-5)
+
+        ax.fill(lambda_min[:, 0], lambda_min[:, 1], color='w', zorder=-4)
+        ax.fill(lambda_max[:, 0], lambda_max[:, 1], color='w', zorder=-4)
 
         ax.text(sc.mean(
             sc.concatenate(frame["left_edges"], frame["right_edges"], 'none')).value,

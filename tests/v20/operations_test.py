@@ -13,7 +13,7 @@ class OperationsTest(unittest.TestCase):
         test_input = np.array(val_in)
 
         # Flatten to 1D input for the moment
-        test_input = sc.Variable(["y", "x"], values=test_input)
+        test_input = sc.Variable(dims=["y", "x"], values=test_input)
         return operations.mask_from_adj_pixels(test_input)
 
     def test_center_true(self):
@@ -62,7 +62,7 @@ class OperationsTest(unittest.TestCase):
         bulk_value = 1
         test_value = 4
         data = np.array([bulk_value] * 9 * 9 * 4, dtype=np.float64).reshape(9, 9, 4)
-        data = sc.Variable(['y', 'x', 'z'], values=data)
+        data = sc.Variable(dims=['y', 'x', 'z'], values=data)
         data['z', 1]['x', 4]['y', 4].value = test_value  # centre at z == 1
         data['z', 2]['x', 4]['y', 0].value = test_value  # edge at z == 3
         data['z', 3]['x', 0]['y', 0].value = test_value  # corner at z == 2
@@ -77,14 +77,17 @@ class OperationsTest(unittest.TestCase):
 
         assert sc.identical(
             mean['z', 1]['y', 3:6]['x', 3:6],
-            sc.Variable(['y', 'x'], values=np.array([centre_mean] * 9).reshape(3, 3)))
+            sc.Variable(dims=['y', 'x'],
+                        values=np.array([centre_mean] * 9).reshape(3, 3)))
 
         assert sc.identical(
             mean['z', 2]['y', 0:1]['x', 3:6],
-            sc.Variable(['y', 'x'], values=np.array([edge_mean] * 3).reshape(1, 3)))
+            sc.Variable(dims=['y', 'x'], values=np.array([edge_mean] * 3).reshape(1,
+                                                                                  3)))
         assert sc.identical(
             mean['z', 2]['y', 1:2]['x', 3:6],
-            sc.Variable(['y', 'x'], values=np.array([centre_mean] * 3).reshape(1, 3)))
+            sc.Variable(dims=['y', 'x'],
+                        values=np.array([centre_mean] * 3).reshape(1, 3)))
 
         assert mean['z', 3]['y', 0]['x', 0].value == corner_mean
 
@@ -92,7 +95,7 @@ class OperationsTest(unittest.TestCase):
         bulk_value = 1.0
         test_value = 4.0
         data = np.array([bulk_value] * 9 * 9 * 4, dtype=np.float64).reshape(9, 9, 4)
-        data = sc.Variable(['y', 'x', 'z'], values=data)
+        data = sc.Variable(dims=['y', 'x', 'z'], values=data)
         data['z', 1]['x', 4]['y', 4].value = test_value  # centre at z == 1
 
         data['z', 2]['x', 3]['y', 0].value = test_value  # edge at z == 3
@@ -113,11 +116,12 @@ class OperationsTest(unittest.TestCase):
 
         assert sc.identical(
             median['z', 1]['y', 3:6]['x', 3:6],
-            sc.Variable(['y', 'x'], values=np.array([centre_median] * 9).reshape(3, 3)))
+            sc.Variable(dims=['y', 'x'],
+                        values=np.array([centre_median] * 9).reshape(3, 3)))
 
         assert sc.identical(
             median['z', 2]['y', 0:1]['x', 3:6],
-            sc.Variable(['y', 'x'],
+            sc.Variable(dims=['y', 'x'],
                         values=np.array([bulk_value, edge_median,
                                          bulk_value]).reshape(1, 3)))
 
