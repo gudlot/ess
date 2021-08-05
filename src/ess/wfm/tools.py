@@ -37,13 +37,12 @@ def _angular_frame_edge_to_time(angular_frequency: sc.Variable, angle: sc.Variab
     return (angle + phase) / div * (1.0e6 * sc.units.us)
 
 
-def get_frame_properties(frame: sc.DataArray) -> tuple:
+def frame_opening_and_closing_times(frame: sc.DataArray) -> tuple:
     """
     Get coordinates of a chopper frame opening in time and distance.
     """
-    pos = sc.norm(frame["position"])
-    tstart = _angular_frame_edge_to_time(frame["angular_frequency"],
+    t_open = _angular_frame_edge_to_time(frame["angular_frequency"],
                                          frame["opening_angles_open"], frame["phase"])
-    tend = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                       frame["opening_angles_close"], frame["phase"])
-    return pos, tstart, tend
+    t_close = _angular_frame_edge_to_time(frame["angular_frequency"],
+                                          frame["opening_angles_close"], frame["phase"])
+    return t_open, t_close

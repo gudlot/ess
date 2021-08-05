@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
 from .wfm import get_frames
-from .tools import get_frame_properties
+from .tools import frame_opening_and_closing_times
 
 
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
@@ -52,18 +52,20 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
 
     for i in range(data.meta["choppers"].value["opening_angles_open"].sizes["frame"]):
 
-        dist, xstart, xend = get_frame_properties(data.meta["choppers"].value["frame",
-                                                                              i])
+        xstart, xend = frame_opening_and_closing_times(
+            data.meta["choppers"].value["frame", i])
+
+        yframe = sc.norm(data.meta["choppers"].value["frame", i]["position"])
 
         for j in range(
                 data.meta["choppers"].value["opening_angles_open"].sizes["chopper"]):
             ax.plot([xstart["chopper", j].value, xend["chopper", j].value],
-                    [dist["chopper", j].value] * 2,
+                    [yframe["chopper", j].value] * 2,
                     color="C{}".format(i))
             if i == data.meta["choppers"].value["opening_angles_open"].sizes[
                     "frame"] - 1:
                 ax.text((2.0 * xend["chopper", j].data - xstart["chopper", j]).value,
-                        dist["chopper", j].value,
+                        yframe["chopper", j].value,
                         data.meta["choppers"].value["names"]["chopper", j].value,
                         ha="left",
                         va="center")
