@@ -75,7 +75,7 @@ def mean_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.Variable(['neighbor'] + data.dims,
+    container = sc.Variable(dims=['neighbor'] + data.dims,
                             dtype=data.dtype,
                             shape=[
                                 9,
@@ -119,7 +119,7 @@ def median_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.Variable(['neighbor'] + data.dims,
+    container = sc.Variable(dims=['neighbor'] + data.dims,
                             dtype=data.dtype,
                             shape=[
                                 9,
@@ -145,7 +145,7 @@ def groupby2D(data, nx_target, ny_target, x='x', y='y', z='wavelength'):
     xx = sc.Variable(dims=[x], values=np.arange(data.sizes[x]) // element_width_x)
     yy = sc.Variable(dims=[y], values=np.arange(data.sizes[y]) // element_width_y)
     grid = xx + nx_target * yy
-    spectrum_mapping = sc.Variable(["spectrum"],
+    spectrum_mapping = sc.Variable(dims=["spectrum"],
                                    values=np.ravel(grid.values, order='F'))
 
     reshaped = sc.Dataset()

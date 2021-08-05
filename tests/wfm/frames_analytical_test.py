@@ -1,4 +1,4 @@
-from ess.v20.wfm.frames_analytical import frames_analytical
+from ess.wfm.frames_analytical import frames_analytical
 import scipp as sc
 import numpy as np
 import itertools

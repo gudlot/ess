@@ -1,4 +1,4 @@
-from ess.v20.wfm.stitch import stitch
+from ess.wfm.stitch import stitch
 import scipp as sc
 
 
