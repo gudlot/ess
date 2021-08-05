@@ -34,3 +34,6 @@ def test_basic_stitching():
                                      num=nbins + 1,
                                      unit=sc.units.us)
                      }))
+
+
+# TODO: add test with 6 frames and 6 neutrons of known wavelength passing through
