@@ -13,7 +13,8 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
     parameters and detector pixel positions.
     A set of frame boundaries is returned for each pixel.
     The frame shifts are the same for all pixels.
-    See https://www.sciencedirect.com/science/article/pii/S0168900220308640
+    See Schmakat et al. (2020);
+    https://www.sciencedirect.com/science/article/pii/S0168900220308640
     for a description of the procedure.
 
     TODO: This currently ignores scattering paths, only the distance from
@@ -65,14 +66,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
     z_ratio_wfm = (sc.norm(far_wfm_chopper_position) /
                    sc.norm(near_wfm_chopper_position))
 
-    # Frame shifts: these are the mid-time point between the WFM choppers,
-    # which is the same as the opening edge of the second WFM chopper in the case
-    # of optically blind choppers.
-    for i in range(nframes):
-        tstart, tend = frame_opening_and_closing_times(
-            data.meta["choppers"].value["frame", i])
-        frames["shifts"]["frame", i] = tstart["chopper", wfm_chopper_indices[1]]
-
     # Now compute frames opening and closing edges at the detector positions
     for i in range(nframes):
 
@@ -80,42 +73,42 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
         tstart, tend = frame_opening_and_closing_times(
             data.meta["choppers"].value["frame", i])
 
-        # Find deltat for the min and max wavelengths:
-        # - dt_max is equal to the time width of the WFM choppers windows
+        # Frame shifts: these are the mid-time point between the WFM choppers,
+        # which is the same as the opening edge of the second WFM chopper in the case
+        # of optically blind choppers.
+        frames["shifts"]["frame", i] = tstart["chopper", wfm_chopper_indices[1]]
+
+        # Find delta_t for the min and max wavelengths:
+        # dt_lambda_max is equal to the time width of the WFM choppers windows
         dt_lambda_max = tend['chopper',
                              wfm_chopper_indices[0]] - tstart['chopper',
                                                               wfm_chopper_indices[0]]
 
         # t_lambda_max is found from the relation between t and delta_t: equation (2) in
-        # https://www.sciencedirect.com/science/article/pii/S0168900220308640
+        # Schmakat et al. (2020).
         t_lambda_max = (dt_lambda_max / dz_wfm) * (pos_norm - z_wfm)
 
-        # Frame edges and resolutions for each pixel
+        # t_lambda_min is found from the relation between lambda_N and lambda_N+1,
+        # equation (3) in Schmakat et al. (2020).
+        t_lambda_min = t_lambda_max * z_ratio_wfm - data.meta["pulse_length"] * (
+            (pos_norm - z_wfm) / sc.norm(near_wfm_chopper_position))
+
+        # dt_lambda_min is found from the relation between t and delta_t: equation (2)
+        # in Schmakat et al. (2020).
+        dt_lambda_min = dz_wfm * t_lambda_min / (pos_norm - z_wfm)
+
+        # Frame edges and resolutions for each pixel.
+        # The frames do not stop at t_lambda_min and t_lambda_max, they also include the
+        # fuzzy areas (delta_t) at the edges.
+        frames["left_edges"][
+            "frame",
+            i] = t_lambda_min - 0.5 * dt_lambda_min.data + frames["shifts"]["frame", i]
+        frames["left_dt"]["frame", i] = dt_lambda_min
+
         frames["right_edges"][
             "frame",
             i] = t_lambda_max + 0.5 * dt_lambda_max.data + frames["shifts"]["frame", i]
         frames["right_dt"]["frame", i] = dt_lambda_max
-
-        if i < nframes - 1:
-            frames["left_edges"]["frame", i + 1] = frames["right_edges"]["frame", i] + (
-                frames["shifts"]["frame", i + 1] -
-                frames["shifts"]["frame", i]) - dt_lambda_max
-            frames["left_dt"]["frame", i + 1] = dt_lambda_max
-
-    # First frame:
-    # - compute slope from closing time of near WFM chopper to
-    #   end of pulse = t_0 + pulse_duration
-    # - compute t_lambda_min by extrapolating from wfm chopper mid-point to detector
-    #   positions
-    tstart, tend = frame_opening_and_closing_times(data.meta["choppers"].value["frame",
-                                                                               0])
-    slope = sc.norm(near_wfm_chopper_position) / (
-        tend['chopper', wfm_chopper_indices[0]] -
-        (data.meta["pulse_t_0"] + data.meta["pulse_length"]))
-    t_lambda_min = (pos_norm - z_wfm) / slope + tend['chopper', wfm_chopper_indices[0]]
-    dt_lambda_min = dz_wfm * t_lambda_min / (pos_norm - z_wfm)
-    frames["left_edges"]["frame", 0] = t_lambda_min - (0.5 * dt_lambda_min.data)
-    frames["left_dt"]["frame", 0] = dt_lambda_min
 
     frames["wfm_chopper_mid_point"] = sc.mean(
         sc.concatenate(

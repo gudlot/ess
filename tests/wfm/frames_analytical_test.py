@@ -78,8 +78,8 @@ def _make_fake_beamline():
     }
 
     source = {
-        "pulse_length": pulse_length,
-        "pulse_t_0": t_0,
+        "pulse_length": sc.to_unit(pulse_length, 'us'),
+        "pulse_t_0": sc.to_unit(t_0, 'us'),
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 

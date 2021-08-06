@@ -29,7 +29,7 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[5.70, 9.00, 12.00, 14.90, 17.50, 20.00],
+                    values=[5.74, 8.98, 12.01, 14.85, 17.52, 20.02],
                     unit='deg')),
         "WFMC2":
         Chopper(frequency=sc.scalar(56.0, unit=hz),
@@ -41,20 +41,22 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[5.70, 9.00, 12.00, 14.90, 17.50, 20.00],
+                    values=[5.74, 8.98, 12.01, 14.85, 17.52, 20.02],
                     unit='deg')),
         "FOC1":
-        Chopper(frequency=sc.scalar(42.0, unit=hz),
-                phase=sc.scalar(0.0, unit='deg'),
-                position=sc.vector(value=[0, 0, 8.4], unit='m'),
-                opening_angles_center=sc.array(
-                    dims=[dim],
-                    values=[81.12, 127.82, 171.60, 212.66, 251.16, 288.85],
-                    unit='deg'),
-                opening_angles_width=sc.array(
-                    dims=[dim],
-                    values=[11.06, 13.06, 14.94, 16.71, 18.36, 16.72],
-                    unit='deg')),
+        Chopper(
+            frequency=sc.scalar(42.0, unit=hz),
+            phase=sc.scalar(0.0, unit='deg'),
+            position=sc.vector(value=[0, 0, 8.4], unit='m'),
+            opening_angles_center=sc.array(
+                dims=[dim],
+                values=[81.12, 127.82, 171.60, 212.66, 251.16, 288.85],
+                # values=[81.12, 127.82, 171.60, 212.66, 251.16, 287.50],
+                unit='deg'),
+            opening_angles_width=sc.array(
+                dims=[dim],
+                values=[11.06, 13.06, 14.94, 16.70, 18.36, 19.91],
+                unit='deg')),
         "FOC2":
         Chopper(frequency=sc.scalar(42.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -65,7 +67,7 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[32.90, 33.54, 34.15, 34.37, 34.89, 34.31],
+                    values=[32.90, 33.54, 34.15, 34.71, 35.24, 35.74],
                     unit='deg')),
         "FOC3":
         Chopper(frequency=sc.scalar(28.0, unit=hz),
@@ -77,7 +79,7 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[40.32, 39.61, 38.94, 38.31, 37.72, 36.05],
+                    values=[40.32, 39.61, 38.94, 38.31, 37.72, 37.16],
                     unit='deg')),
         "FOC4":
         Chopper(frequency=sc.scalar(14.0, unit=hz),
@@ -89,7 +91,7 @@ def make_beamline() -> Beamline:
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[32.98, 31.82, 30.74, 29.72, 28.77, 26.76],
+                    values=[32.98, 31.82, 30.74, 29.72, 28.77, 27.87],
                     unit='deg')),
         "FOC5":
         Chopper(frequency=sc.scalar(14.0, unit=hz),
@@ -97,17 +99,17 @@ def make_beamline() -> Beamline:
                 position=sc.vector(value=[0, 0, 33.0], unit='m'),
                 opening_angles_center=sc.array(
                     dims=[dim],
-                    values=[81.94, 143.17, 200.11, 254.19, 304.47, 353.76],
+                    values=[82.20, 143.05, 200.44, 254.19, 304.68, 353.46],
                     unit='deg'),
                 opening_angles_width=sc.array(
                     dims=[dim],
-                    values=[50.81, 48.55, 45.49, 41.32, 37.45, 37.74],
+                    values=[50.81, 48.55, 46.42, 44.43, 42.56, 40.80],
                     unit='deg'))
     }
 
     source = {
         "pulse_length": sc.scalar(2.86e+03, unit='us'),
-        "pulse_t_0": sc.scalar(140.0, unit='us'),
+        "pulse_t_0": sc.scalar(130.0, unit='us'),
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 
