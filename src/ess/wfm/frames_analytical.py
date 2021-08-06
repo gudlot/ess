@@ -25,7 +25,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
 
     # Compute distances for each pixel
     pos_norm = sc.norm(data.meta["position"])
-    source_pos = sc.norm(data.meta["source_position"])
 
     # Get the number of WFM frames
     nframes = data.meta["choppers"].value["opening_angles_open"].sizes["frame"]
