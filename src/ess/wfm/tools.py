@@ -33,8 +33,7 @@ def _angular_frame_edge_to_time(angular_frequency: sc.Variable, angle: sc.Variab
     """
     Convert an angle on a rotating chopper to a time point (in microseconds).
     """
-    div = angular_frequency * (1.0 * sc.units.s)
-    return (angle + phase) / div * (1.0e6 * sc.units.us)
+    return sc.to_unit((angle + phase) / angular_frequency, 'us')
 
 
 def frame_opening_and_closing_times(frame: sc.DataArray) -> tuple:
