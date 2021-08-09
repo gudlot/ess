@@ -33,6 +33,7 @@ def _make_fake_beamline(chopper_positions, frequency, lambda_min, pulse_length,
 
     dim = 'frame'
     # Neutron mass to Planck constant ratio
+    # TODO: would be nice to use physical constants in scipp or scippneutron
     alpha = 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))
     omega = (2.0 * np.pi * sc.units.rad) * frequency
 
