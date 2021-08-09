@@ -2,7 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
 import scipp as sc
-from .common import make_coords, make_default_parameters
+from .common import make_coords, make_default_parameters, allclose
 
 
 def _frames_from_slopes(data):
@@ -62,10 +62,18 @@ def _frames_from_slopes(data):
 def _check_against_reference(ds, frames):
     reference = _frames_from_slopes(ds)
     for key in frames:
-        assert sc.allclose(reference[key].data, frames[key].data)
+        # TODO: once scipp 0.8 is released, use sc.allclose here which also works on
+        # vector_3_float64.
+        # assert allclose(reference[key].data, frames[key].data)
+        if frames[key].dtype == sc.dtype.vector_3_float64:
+            for xyz in "xyz":
+                assert allclose(getattr(reference[key].data.fields, xyz),
+                                getattr(frames[key].data.fields, xyz))
+        else:
+            assert allclose(reference[key].data, frames[key].data)
     for i in range(frames.sizes['frame'] - 1):
-        assert sc.allclose(frames["right_dt"]["frame", i].data,
-                           frames["left_dt"]["frame", i + 1].data)
+        assert allclose(frames["right_dt"]["frame", i].data,
+                        frames["left_dt"]["frame", i + 1].data)
 
 
 def test_frames_analytical():
