@@ -46,6 +46,14 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
     else:
         out = {}
 
+    # Determine whether source_position is in coords or attrs
+    coords_or_attrs = None
+    for meta in ["coords", "attrs"]:
+        if "source_position" in getattr(item, meta):
+            coords_or_attrs = meta
+    if coords_or_attrs is None:
+        raise KeyError("'source_position' was not found in metadata.")
+
     for i in range(frames.sizes["frame"]):
         section = item[dim, frames["left_edges"].data[
             "frame", i]:frames["right_edges"].data["frame", i]].copy()
@@ -58,13 +66,16 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])
         else:
-            section.meta['source_position'] += frames["wfm_chopper_mid_point"].data
+            getattr(section, coords_or_attrs
+                    )['source_position'] = frames["wfm_chopper_mid_point"].data
             out[f"frame{i}"] = section
 
     # Note: we need to do the modification here because if not there is a coordinate
     # mismatch between `out` and `section`
     if merge_frames:
-        out.meta['source_position'] += frames["wfm_chopper_mid_point"].data
+        getattr(
+            out,
+            coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
 
     return out
 

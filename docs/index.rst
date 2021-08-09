@@ -23,3 +23,9 @@ Documentation
    :caption: Techniques
 
    techniques/reflectometry
+
+.. toctree::
+   :caption: About
+   :maxdepth: 3
+
+   about/release-notes
