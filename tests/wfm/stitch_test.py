@@ -46,16 +46,11 @@ def test_basic_stitching():
                      }))
 
 
-def test_stitching_on_beamline():
+def _do_stitching_on_beamline(wavelengths):
     # Make beamline parameters for 6 frames
     params = make_default_parameters()
     params["nframes"] = 6
     coords = make_coords(**params)
-
-    # Create 6 neutrons with selected wavelengths, one neutron per frame
-    wavelengths = sc.array(dims=['wavelength'],
-                           values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],
-                           unit='angstrom')
 
     # They are all created half-way through the pulse.
     # Compute their arrival time at the detector.
@@ -82,8 +77,6 @@ def test_stitching_on_beamline():
 
     stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)
 
-    print('stitched is:', stitched)
-
     wav = scn.convert(stitched, origin='tof', target='wavelength', scatter=False)
     rebinned = sc.rebin(wav,
                         dim='wavelength',
@@ -93,19 +86,50 @@ def test_stitching_on_beamline():
                                          num=1001,
                                          unit='angstrom'))
 
-    # Now for each neutron, check that its wavelength lies within delta_lambda of the
-    # original wavelength
-
     near_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 0].data
     far_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 1].data
     # Distance between WFM choppers
     dz_wfm = sc.norm(far_wfm_chopper_position - near_wfm_chopper_position)
     # Delta_lambda  / lambda
-    ratio = dz_wfm / sc.norm(coords['position'] - frames['wfm_chopper_mid_point'].data)
+    dlambda_over_lambda = dz_wfm / sc.norm(coords['position'] -
+                                           frames['wfm_chopper_mid_point'].data)
+
+    return rebinned, dlambda_over_lambda
+
+
+def _check_lambda_inside_resolution(lam, dlam_over_lam, data, check_value=True):
+    dlam = 0.5 * dlam_over_lam * lam
+    assert sc.isclose(
+        sc.sum(data['wavelength', lam - dlam:lam + dlam]).data,
+        1.0 * sc.units.counts).value is check_value
+
+
+def test_stitching_on_beamline():
+    # Create 6 neutrons with selected wavelengths, one neutron per frame
+    wavelengths = sc.array(dims=['wavelength'],
+                           values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],
+                           unit='angstrom')
+    rebinned, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths)
 
     for i in range(len(wavelengths)):
-        lam = wavelengths['wavelength', i]
-        dlam = 0.5 * ratio * lam
-        assert sc.isclose(
-            sc.sum(rebinned['wavelength', lam - dlam:lam + dlam]).data,
-            1.0 * sc.units.counts).value
+        _check_lambda_inside_resolution(wavelengths['wavelength', i],
+                                        dlambda_over_lambda, rebinned)
+
+
+def test_stitching_on_beamline_bad_wavelength():
+    # Create 6 neutrons. The first wavelength is in this case too short to pass through
+    # the WFM choppers.
+    wavelengths = sc.array(dims=['wavelength'],
+                           values=[1.5, 3.2, 4.5, 6.0, 7.0, 8.25],
+                           unit='angstrom')
+    rebinned, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths)
+
+    # The first wavelength should fail the check, since anything not passing through
+    # the choppers won't satisfy the dlambda/lambda condition.
+    _check_lambda_inside_resolution(wavelengths['wavelength', 0],
+                                    dlambda_over_lambda,
+                                    rebinned,
+                                    check_value=False)
+    for i in range(1, len(wavelengths)):
+        _check_lambda_inside_resolution(wavelengths['wavelength', i],
+                                        dlambda_over_lambda, rebinned)
