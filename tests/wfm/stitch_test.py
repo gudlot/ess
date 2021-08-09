@@ -54,7 +54,7 @@ def test_stitching_on_beamline():
 
     # Create 6 neutrons with selected wavelengths, one neutron per frame
     wavelengths = sc.array(dims=['wavelength'],
-                           values=[1.5, 3.0, 4.5, 6.0, 7.0, 8.25],
+                           values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],
                            unit='angstrom')
 
     # They are all created half-way through the pulse.
@@ -80,7 +80,7 @@ def test_stitching_on_beamline():
     # Find location of frames
     frames = wfm.get_frames(da)
 
-    stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=1001)
+    stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)
 
     print('stitched is:', stitched)
 
@@ -89,15 +89,23 @@ def test_stitching_on_beamline():
                         dim='wavelength',
                         bins=sc.linspace(dim='wavelength',
                                          start=1.0,
-                                         stop=11.0,
+                                         stop=10.0,
                                          num=1001,
                                          unit='angstrom'))
 
-    print(rebinned['wavelength', 49])
-    print(rebinned['wavelength', 50])
-    print(rebinned['wavelength', 51])
+    # Now for each neutron, check that its wavelength lies within delta_lambda of the
+    # original wavelength
 
-    # # Make a dataset that contains a beamline
-    # ds = sc.Dataset(coords=make_coords(**make_default_parameters()))
-    # #
-    assert True == False
+    near_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 0].data
+    far_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 1].data
+    # Distance between WFM choppers
+    dz_wfm = sc.norm(far_wfm_chopper_position - near_wfm_chopper_position)
+    # Delta_lambda  / lambda
+    ratio = dz_wfm / sc.norm(coords['position'] - frames['wfm_chopper_mid_point'].data)
+
+    for i in range(len(wavelengths)):
+        lam = wavelengths['wavelength', i]
+        dlam = 0.5 * ratio * lam
+        assert sc.isclose(
+            sc.sum(rebinned['wavelength', lam - dlam:lam + dlam]).data,
+            1.0 * sc.units.counts).value
