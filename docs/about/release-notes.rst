@@ -15,7 +15,7 @@ Breaking changes
 
 * Large refactor of the wave-frame multiplication submodule `#42 <https://github.com/scipp/ess/pull/42>`_:
 
-  * It was moved out of the ``v20`` submodule and into its own submodule.
+  * It was moved out of the ``v20`` submodule and into its own ``wfm`` submodule.
   * The ``get_frames`` function now operates on a dataset that contains the data and the instrument geometry.
   * The mechanism for finding the frames has changed and is now using the full description in `Schmakat et al. (2020) <https://www.sciencedirect.com/science/article/pii/S0168900220308640>`_.
   * The plotting inside ``get_frames`` has been moved into its own function ``wfm.plot.time_distance_diagram()`` which then calls ``get_frames`` internally.
