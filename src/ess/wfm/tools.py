@@ -40,8 +40,10 @@ def frame_opening_and_closing_times(frame: sc.DataArray) -> tuple:
     """
     Get coordinates of a chopper frame opening in time and distance.
     """
-    t_open = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                         frame["opening_angles_open"], frame["phase"])
-    t_close = _angular_frame_edge_to_time(frame["angular_frequency"],
-                                          frame["opening_angles_close"], frame["phase"])
+    t_open = _angular_frame_edge_to_time(frame["angular_frequency"].data,
+                                         frame["opening_angles_open"].data,
+                                         frame["phase"].data)
+    t_close = _angular_frame_edge_to_time(frame["angular_frequency"].data,
+                                          frame["opening_angles_close"].data,
+                                          frame["phase"].data)
     return t_open, t_close

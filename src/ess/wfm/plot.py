@@ -64,7 +64,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
                     color="C{}".format(i))
             if i == data.meta["choppers"].value["opening_angles_open"].sizes[
                     "frame"] - 1:
-                ax.text((2.0 * xend["chopper", j].data - xstart["chopper", j]).value,
+                ax.text((2.0 * xend["chopper", j] - xstart["chopper", j]).value,
                         yframe["chopper", j].value,
                         data.meta["choppers"].value["names"]["chopper", j].value,
                         ha="left",

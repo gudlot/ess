@@ -20,7 +20,7 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
                 shape.append(nbins)
         out = sc.DataArray(data=sc.zeros(dims=dims,
                                          shape=shape,
-                                         with_variances=item.variances is not None,
+                                         variances=item.variances is not None,
                                          unit=item.unit),
                            coords={
                                "tof":
@@ -46,7 +46,9 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
             "frame", i]:frames["right_edges"].data["frame", i]].copy()
         section.coords['tof'] = section.meta[dim] - frames["shifts"].data["frame", i]
         del section.meta[dim]
-        section = section.rename_dims({dim: 'tof'})
+        # TODO: when scipp 0.8 is released, rename_dims will create a new object.
+        # section = section.rename_dims({dim: 'tof'})
+        section.rename_dims({dim: 'tof'})
 
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])

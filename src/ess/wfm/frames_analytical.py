@@ -101,12 +101,12 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
         # fuzzy areas (delta_t) at the edges.
         frames["left_edges"][
             "frame",
-            i] = t_lambda_min - 0.5 * dt_lambda_min.data + frames["shifts"]["frame", i]
+            i] = t_lambda_min - 0.5 * dt_lambda_min + frames["shifts"]["frame", i]
         frames["left_dt"]["frame", i] = dt_lambda_min
 
         frames["right_edges"][
             "frame",
-            i] = t_lambda_max + 0.5 * dt_lambda_max.data + frames["shifts"]["frame", i]
+            i] = t_lambda_max + 0.5 * dt_lambda_max + frames["shifts"]["frame", i]
         frames["right_dt"]["frame", i] = dt_lambda_max
 
     frames["wfm_chopper_mid_point"] = sc.mean(

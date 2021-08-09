@@ -80,7 +80,7 @@ def mean_from_adj_pixels(data):
                          shape=[
                              9,
                          ] + data.shape,
-                         with_variances=has_variances,
+                         variances=has_variances,
                          unit=data.unit)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
@@ -124,7 +124,7 @@ def median_from_adj_pixels(data):
                          shape=[
                              9,
                          ] + data.shape,
-                         with_variances=has_variances)
+                         variances=has_variances)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
     container['neighbor', 2] = _shift(data, "x", False, fill)
