@@ -30,7 +30,12 @@ Contributors
 ~~~~~~~~~~~~
 
 Owen Arnold :sup:`b, c`\ ,
+Simon Heybrock :sup:`a`\ ,
+Matthew D. Jones :sup:`b, c`\ ,
+Andrew McCluskey :sup:`a`\ ,
 Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`\
+
 
 Contributing Organizations
 --------------------------
