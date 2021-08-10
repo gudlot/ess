@@ -2,7 +2,6 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
-from .beamline import Beamline
 
 
 class Chopper:
@@ -41,13 +40,13 @@ def _extract_and_concatenate(container: dict, key: str, dim: str) -> sc.Variable
     return array
 
 
-def make_chopper_cascade(beamline: Beamline) -> sc.Dataset:
+def make_chopper_cascade(choppers: dict) -> sc.Dataset:
     """
     Create a description of a chopper cascade using a supplied description of
     beamline components.
     """
 
-    for chopper in beamline.choppers.values():
+    for chopper in choppers.values():
         if chopper.opening_angles_open is None and chopper.opening_angles_close is None:
             chopper.opening_angles_open = (chopper.opening_angles_center -
                                            0.5 * chopper.opening_angles_width)
@@ -56,26 +55,20 @@ def make_chopper_cascade(beamline: Beamline) -> sc.Dataset:
 
     ds = sc.Dataset()
 
-    ds["names"] = sc.array(dims=["chopper"], values=list(beamline.choppers.keys()))
+    ds["names"] = sc.array(dims=["chopper"], values=list(choppers.keys()))
 
     ds["angular_frequency"] = _to_angular_frequency(
-        _extract_and_concatenate(container=beamline.choppers,
-                                 key="frequency",
-                                 dim="chopper"))
+        _extract_and_concatenate(container=choppers, key="frequency", dim="chopper"))
 
     ds["phase"] = sc.to_unit(
-        _extract_and_concatenate(container=beamline.choppers,
-                                 key="phase",
-                                 dim="chopper"), 'rad')
+        _extract_and_concatenate(container=choppers, key="phase", dim="chopper"), 'rad')
 
-    ds["position"] = _extract_and_concatenate(container=beamline.choppers,
+    ds["position"] = _extract_and_concatenate(container=choppers,
                                               key="position",
                                               dim="chopper")
 
     for key in ["opening_angles_open", "opening_angles_close"]:
         ds[key] = sc.to_unit(
-            _extract_and_concatenate(container=beamline.choppers,
-                                     key=key,
-                                     dim="chopper"), 'rad')
+            _extract_and_concatenate(container=choppers, key=key, dim="chopper"), 'rad')
 
     return ds

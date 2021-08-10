@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ..wfm.beamline import Beamline
 from ..wfm.choppers import Chopper
 
 
-def make_beamline() -> Beamline:
+def make_beamline() -> dict:
     """
     ODIN chopper cascade and component positions.
     Chopper opening angles taken from Schmakat et al. (2020)
@@ -113,4 +112,4 @@ def make_beamline() -> Beamline:
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 
-    return Beamline(choppers=choppers, source=source)
+    return {"choppers": choppers, "source": source}

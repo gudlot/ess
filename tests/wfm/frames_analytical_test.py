@@ -2,7 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
 import scipp as sc
-from .common import make_coords, make_default_parameters, allclose
+from .common import allclose
 
 
 def _frames_from_slopes(data):
@@ -77,49 +77,43 @@ def _check_against_reference(ds, frames):
 
 
 def test_frames_analytical():
-    ds = sc.Dataset(coords=make_coords(**make_default_parameters()))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline())
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_large_dz_wfm():
-    params = make_default_parameters()
-    params["chopper_positions"] = {
-        "WFMC1": sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
-        "WFMC2": sc.vector(value=[0.0, 0.0, 8.0], unit='m')
-    }
-    ds = sc.Dataset(coords=make_coords(**params))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline(
+        chopper_positions={
+            "WFMC1": sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
+            "WFMC2": sc.vector(value=[0.0, 0.0, 8.0], unit='m')
+        }))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_short_pulse():
-    params = make_default_parameters()
-    params["pulse_length"] = sc.to_unit(sc.scalar(1.86e+03, unit='us'), 's')
-    ds = sc.Dataset(coords=make_coords(**params))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline(
+        pulse_length=sc.to_unit(sc.scalar(1.86e+03, unit='us'), 's')))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_large_t_0():
-    params = make_default_parameters()
-    params["pulse_t_0"] = sc.to_unit(sc.scalar(300., unit='us'), 's')
-    ds = sc.Dataset(coords=make_coords(**params))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline(
+        pulse_t_0=sc.to_unit(sc.scalar(300., unit='us'), 's')))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_6_frames():
-    params = make_default_parameters()
-    params["nframes"] = 6
-    ds = sc.Dataset(coords=make_coords(**params))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline(nframes=6))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
 
 def test_frames_analytical_short_lambda_min():
-    params = make_default_parameters()
-    params["lambda_min"] = sc.scalar(0.5, unit='angstrom')
-    ds = sc.Dataset(coords=make_coords(**params))
+    ds = sc.Dataset(coords=wfm.make_fake_beamline(
+        lambda_min=sc.scalar(0.5, unit='angstrom')))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)

@@ -2,6 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 # flake8: noqa
 
+from .beamline import make_fake_beamline
 from .choppers import make_chopper_cascade
 from .stitch import stitch
 from .tools import *

@@ -4,7 +4,6 @@ import ess.wfm as wfm
 import numpy as np
 import scipp as sc
 import scippneutron as scn
-from .common import make_coords, make_default_parameters
 
 
 def test_basic_stitching():
@@ -48,9 +47,7 @@ def test_basic_stitching():
 
 def _do_stitching_on_beamline(wavelengths):
     # Make beamline parameters for 6 frames
-    params = make_default_parameters()
-    params["nframes"] = 6
-    coords = make_coords(**params)
+    coords = wfm.make_fake_beamline(nframes=6)
 
     # They are all created half-way through the pulse.
     # Compute their arrival time at the detector.
