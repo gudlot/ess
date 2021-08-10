@@ -31,13 +31,21 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
 
     # Now find frame boundaries
     frames = sc.Dataset()
-    frames["left_edges"] = sc.zeros(dims=["frame"] + data.meta["position"].dims,
-                                    shape=[nframes] + data.meta["position"].shape,
-                                    unit=sc.units.us)
-    frames["right_edges"] = sc.zeros_like(frames["left_edges"])
-    frames["left_dt"] = sc.zeros_like(frames["left_edges"])
-    frames["right_dt"] = sc.zeros_like(frames["left_edges"])
-    frames["shifts"] = sc.zeros(dims=["frame"], shape=[nframes], unit=sc.units.us)
+    frames["time_min"] = sc.zeros(dims=["frame"] + data.meta["position"].dims,
+                                  shape=[nframes] + data.meta["position"].shape,
+                                  unit=sc.units.us)
+    frames["time_max"] = sc.zeros_like(frames["time_min"])
+    frames["delta_time_min"] = sc.zeros_like(frames["time_min"])
+    frames["delta_time_max"] = sc.zeros_like(frames["time_min"])
+    frames["wavelength_min"] = sc.zeros_like(frames["time_min"])
+    frames["wavelength_min"].unit = sc.units.angstrom
+    frames["wavelength_max"] = sc.zeros_like(frames["wavelength_min"])
+    frames["delta_wavelength_min"] = sc.zeros_like(frames["wavelength_min"])
+    frames["delta_wavelength_max"] = sc.zeros_like(frames["wavelength_min"])
+
+    frames["time_correction"] = sc.zeros(dims=["frame"],
+                                         shape=[nframes],
+                                         unit=sc.units.us)
 
     # Identify the position of the WFM choppers in the array of choppers
     chopper_names = list(data.meta["choppers"].value["names"].values)
@@ -65,6 +73,10 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
     z_ratio_wfm = (sc.norm(far_wfm_chopper_position) /
                    sc.norm(near_wfm_chopper_position))
 
+    # Neutron mass to Planck constant ratio
+    # TODO: would be nice to use physical constants in scipp or scippneutron
+    alpha = 2.5278e+2 * (sc.Unit('us') / sc.Unit('angstrom') / sc.Unit('m'))
+
     # Now compute frames opening and closing edges at the detector positions
     for i in range(nframes):
 
@@ -72,10 +84,11 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
         tstart, tend = frame_opening_and_closing_times(
             data.meta["choppers"].value["frame", i])
 
-        # Frame shifts: these are the mid-time point between the WFM choppers,
+        # Frame time corrections: these are the mid-time point between the WFM choppers,
         # which is the same as the opening edge of the second WFM chopper in the case
         # of optically blind choppers.
-        frames["shifts"]["frame", i] = tstart["chopper", wfm_chopper_indices[1]]
+        frames["time_correction"]["frame", i] = tstart["chopper",
+                                                       wfm_chopper_indices[1]]
 
         # Find delta_t for the min and max wavelengths:
         # dt_lambda_max is equal to the time width of the WFM choppers windows
@@ -96,23 +109,33 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset],
         # in Schmakat et al. (2020).
         dt_lambda_min = dz_wfm * t_lambda_min / (pos_norm - z_wfm)
 
+        # Compute wavelength information
+        lambda_min = t_lambda_min / (alpha * (pos_norm - z_wfm))
+        lambda_max = t_lambda_max / (alpha * (pos_norm - z_wfm))
+        dlambda_min = dz_wfm * lambda_min / (pos_norm - z_wfm)
+        dlambda_max = dz_wfm * lambda_max / (pos_norm - z_wfm)
+
         # Frame edges and resolutions for each pixel.
         # The frames do not stop at t_lambda_min and t_lambda_max, they also include the
         # fuzzy areas (delta_t) at the edges.
-        frames["left_edges"][
+        frames["time_min"][
             "frame",
-            i] = t_lambda_min - 0.5 * dt_lambda_min + frames["shifts"]["frame", i]
-        frames["left_dt"]["frame", i] = dt_lambda_min
+            i] = t_lambda_min - 0.5 * dt_lambda_min + frames["time_correction"]["frame",
+                                                                                i]
+        frames["delta_time_min"]["frame", i] = dt_lambda_min
 
-        frames["right_edges"][
+        frames["time_max"][
             "frame",
-            i] = t_lambda_max + 0.5 * dt_lambda_max + frames["shifts"]["frame", i]
-        frames["right_dt"]["frame", i] = dt_lambda_max
+            i] = t_lambda_max + 0.5 * dt_lambda_max + frames["time_correction"]["frame",
+                                                                                i]
+        frames["delta_time_max"]["frame", i] = dt_lambda_max
+        frames["wavelength_min"]["frame", i] = lambda_min
+        frames["wavelength_max"]["frame", i] = lambda_max
+        frames["delta_wavelength_min"]["frame", i] = dlambda_min
+        frames["delta_wavelength_max"]["frame", i] = dlambda_max
 
     frames["wfm_chopper_mid_point"] = sc.mean(
-        sc.concatenate(
-            data.meta["choppers"].value["position"]["chopper", wfm_chopper_indices[0]],
-            data.meta["choppers"].value["position"]["chopper",
-                                                    wfm_chopper_indices[1]], 'none'))
+        sc.concatenate(data.meta["choppers"].value["position"]["chopper", 0],
+                       data.meta["choppers"].value["position"]["chopper", 1], 'none'))
 
     return frames

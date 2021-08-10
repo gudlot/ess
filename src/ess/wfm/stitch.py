@@ -12,17 +12,15 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
         if isinstance(bins, int):
             tof_coord = sc.linspace(
                 dim="tof",
-                start=(frames["left_edges"]["frame", 0] -
-                       frames["shifts"]["frame", 0]).value,
-                stop=(frames["right_edges"]["frame", -1] -
-                      frames["shifts"]["frame", -1]).value,
+                start=(frames["time_min"]["frame", 0] -
+                       frames["time_correction"]["frame", 0]).value,
+                stop=(frames["time_max"]["frame", -1] -
+                      frames["time_correction"]["frame", -1]).value,
                 num=bins + 1,
-                unit=frames["left_edges"].unit,
+                unit=frames["time_min"].unit,
             )
         else:
             tof_coord = bins
-
-        print('tof_coord', tof_coord)
 
         dims = []
         shape = []
@@ -55,9 +53,12 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
         raise KeyError("'source_position' was not found in metadata.")
 
     for i in range(frames.sizes["frame"]):
-        section = item[dim, frames["left_edges"].data[
-            "frame", i]:frames["right_edges"].data["frame", i]].copy()
-        section.coords['tof'] = section.meta[dim] - frames["shifts"].data["frame", i]
+        section = item[dim,
+                       frames["time_min"].data["frame",
+                                               i]:frames["time_max"].data["frame",
+                                                                          i]].copy()
+        section.coords['tof'] = section.meta[dim] - frames["time_correction"].data[
+            "frame", i]
         del section.meta[dim]
         # TODO: when scipp 0.8 is released, rename_dims will create a new object.
         # section = section.rename_dims({dim: 'tof'})
@@ -99,8 +100,8 @@ def stitch(
     frames = frames.copy()
     dims_to_reduce = list(set(frames.dims) - {'frame'})
     for _dim in dims_to_reduce:
-        frames["left_edges"] = sc.mean(frames["left_edges"], _dim)
-        frames["right_edges"] = sc.mean(frames["right_edges"], _dim)
+        frames["time_min"] = sc.mean(frames["time_min"], _dim)
+        frames["time_max"] = sc.mean(frames["time_max"], _dim)
 
     if isinstance(data, sc.Dataset):
         if merge_frames:

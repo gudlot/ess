@@ -80,18 +80,18 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
         # Minimum wavelength
         lambda_min = np.array([[
             (data.meta["pulse_t_0"] + data.meta["pulse_length"] -
-             frame['left_dt']).value, source_pos.value
+             frame['delta_time_min']).value, source_pos.value
         ], [(data.meta["pulse_t_0"] + data.meta["pulse_length"]).value,
             source_pos.value],
-                               [(frame["left_edges"] + frame["left_dt"]).value,
-                                pos.value], [frame["left_edges"].value, pos.value]])
+                               [(frame["time_min"] + frame["delta_time_min"]).value,
+                                pos.value], [frame["time_min"].value, pos.value]])
 
         # Maximum wavelength
         lambda_max = np.array([[data.meta["pulse_t_0"].value, source_pos.value],
-                               [(data.meta["pulse_t_0"] + frame['right_dt']).value,
+                               [(data.meta["pulse_t_0"] + frame['delta_time_max']).value,
                                 source_pos.value],
-                               [frame["right_edges"].value, pos.value],
-                               [(frame["right_edges"] - frame["right_dt"]).value,
+                               [frame["time_max"].value, pos.value],
+                               [(frame["time_max"] - frame["delta_time_max"]).value,
                                 pos.value]])
 
         ax.plot(np.concatenate((lambda_min[:, 0], lambda_min[0:1, 0])),
@@ -115,13 +115,13 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
         ax.fill(lambda_max[:, 0], lambda_max[:, 1], color='w', zorder=-4)
 
         ax.text(sc.mean(
-            sc.concatenate(frame["left_edges"], frame["right_edges"], 'none')).value,
+            sc.concatenate(frame["time_min"], frame["time_max"], 'none')).value,
                 det_last.value,
                 "Frame {}".format(i + 1),
                 ha="center",
                 va="top")
 
-    ax.plot([0, sc.max(frames["right_edges"].data).value], [det_last.value] * 2,
+    ax.plot([0, sc.max(frames["time_max"].data).value], [det_last.value] * 2,
             lw=3,
             color='grey')
     ax.text(0.0, det_last.value, "Detector", va="bottom", ha="left")

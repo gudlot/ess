@@ -9,9 +9,11 @@ import scippneutron as scn
 def test_basic_stitching():
     frames = sc.Dataset()
     shift = -5.0
-    frames['left_edges'] = sc.array(dims=['frame'], values=[0.0], unit=sc.units.us)
-    frames['right_edges'] = sc.array(dims=['frame'], values=[10.0], unit=sc.units.us)
-    frames['shifts'] = sc.array(dims=['frame'], values=[shift], unit=sc.units.us)
+    frames['time_min'] = sc.array(dims=['frame'], values=[0.0], unit=sc.units.us)
+    frames['time_max'] = sc.array(dims=['frame'], values=[10.0], unit=sc.units.us)
+    frames['time_correction'] = sc.array(dims=['frame'],
+                                         values=[shift],
+                                         unit=sc.units.us)
     frames["wfm_chopper_mid_point"] = sc.vector(value=[0., 0., 2.0], unit='m')
 
     data = sc.DataArray(data=sc.ones(dims=['t'], shape=[100], unit=sc.units.counts),
