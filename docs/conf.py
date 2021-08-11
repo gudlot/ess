@@ -17,7 +17,6 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import doctest
-import os
 
 html_show_sourcelink = True
 nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercontent.com/scipp/scipp/main/docs/{{ env.doc2path(env.docname, base=None) }}>`_

@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-import numpy as np
 import scipp as sc
 from typing import Union
 from .choppers import ChopperKind
@@ -47,9 +46,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # Compute distances for each detector pixel
     # detector_pos_norm = sc.norm(data.meta["position"])
     detector_positions = data.meta["position"]
-
-    # Get the number of WFM frames
-    nframes = near_wfm_chopper.opening_angles_open.shape[0]
 
     # Now find frame boundaries
     frames = sc.Dataset()
