@@ -3,6 +3,9 @@
 
 import scipp as sc
 
+# TODO: this should disappear once we have a dedicated module in scipp to deal with
+# bin centers and bin edges; see https://github.com/scipp/scipp/issues/1802
+
 
 def to_bin_centers(x: sc.Variable, dim: str) -> sc.Variable:
     """

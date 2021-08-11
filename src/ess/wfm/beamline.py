@@ -34,16 +34,19 @@ def make_fake_beamline(
     opening_angles_width = None
 
     for i in range(nframes):
+        # Equation (3) in Schmakat et al. (2020)
         lambda_max = (pulse_length +
                       alpha * lambda_min * sc.norm(chopper_positions["WFMC1"])) / (
                           alpha * sc.norm(chopper_positions["WFMC2"]))
+        # Equation (4) in Schmakat et al. (2020)
         theta = omega * (
             pulse_length + alpha *
             (lambda_min - lambda_max) * sc.norm(chopper_positions["WFMC1"]))
-
+        # Equation (5) in Schmakat et al. (2020)
         phi_wfm_1 = omega * (
             pulse_t_0 + 0.5 * pulse_length + 0.5 * alpha *
             (lambda_min + lambda_max) * sc.norm(chopper_positions["WFMC1"]))
+        # Equation (6) in Schmakat et al. (2020)
         phi_wfm_2 = omega * (pulse_t_0 + 1.5 * pulse_length + 0.5 * alpha * (
             (3.0 * lambda_min) - lambda_max) * sc.norm(chopper_positions["WFMC1"]))
 

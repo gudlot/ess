@@ -10,6 +10,8 @@ from .wfm import get_frames
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     """
     Plot the time-distance diagram for a WFM beamline.
+    The expected input is a Dataset or DataArray containing the chopper cascade
+    information as well as the description of the source pulse.
     This internally calls the `get_frames` method which is used to compute the
     frame properties for stitching.
     """

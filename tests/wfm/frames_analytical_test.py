@@ -45,14 +45,8 @@ def _frames_from_slopes(data):
     near_t_open = near_wfm_chopper.time_open
     near_t_close = near_wfm_chopper.time_close
     far_t_open = far_wfm_chopper.time_open
-    far_t_close = far_wfm_chopper.time_close
-
-    # start, tend = wfm.frame_opening_and_closing_times(
-    #     data.meta["choppers"].value["frame", i])
 
     for i in range(nframes):
-        # tstart, tend = wfm.frame_opening_and_closing_times(
-        #     data.meta["choppers"].value["frame", i])
         dt_lambda_max = near_t_close["frame", i] - near_t_open["frame", i]
         slope_lambda_max = dz_wfm / dt_lambda_max
         intercept_lambda_max = sc.norm(

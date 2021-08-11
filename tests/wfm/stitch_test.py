@@ -87,8 +87,6 @@ def _do_stitching_on_beamline(wavelengths):
                                          unit='angstrom'))
 
     choppers = da.meta["choppers"].value
-    # near_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 0].data
-    # far_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 1].data
     # Distance between WFM choppers
     dz_wfm = sc.norm(choppers["WFMC2"].position - choppers["WFMC1"].position)
     # Delta_lambda  / lambda

@@ -47,7 +47,7 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # detector_pos_norm = sc.norm(data.meta["position"])
     detector_positions = data.meta["position"]
 
-    # Now find frame boundaries
+    # Container for frames information
     frames = sc.Dataset()
 
     # Distance between WFM choppers
