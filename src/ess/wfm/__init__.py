@@ -3,7 +3,6 @@
 # flake8: noqa
 
 from .beamline import make_fake_beamline
-# from .choppers import make_chopper_cascade
 from .stitch import stitch
 from .tools import *
 from .wfm import get_frames

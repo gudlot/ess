@@ -79,21 +79,10 @@ def make_fake_beamline(
                 kind=ChopperKind.WFM),
     }
 
-    # source = {
-    #     "pulse_length": sc.to_unit(pulse_length, 'us'),
-    #     "pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
-    #     "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
-    # }
-
-    # chopper_cascade = make_chopper_cascade(choppers)
-    # chopper_cascade = sc.Dataset({})
-    coords = {
+    return {
         'choppers': sc.scalar(choppers),
         'position': sc.vector(value=[0., 0., 60.], unit='m'),
         "source_pulse_length": sc.to_unit(pulse_length, 'us'),
         "source_pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
-    # for key, value in source.items():
-    #     coords[key] = value
-    return coords

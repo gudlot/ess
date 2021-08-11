@@ -10,8 +10,8 @@ def make_beamline() -> dict:
     Chopper opening angles taken from Schmakat et al. (2020)
     https://www.sciencedirect.com/science/article/pii/S0168900220308640
 
-    Note that there is a typo in the paper for the FOC1 opening angles.
-    These have been corrected here.
+    Note that the values listed in the paper for the FOC1 opening angles are wrong.
+    The correct values are used here.
     """
 
     dim = 'frame'
@@ -45,20 +45,18 @@ def make_beamline() -> dict:
                     unit='deg'),
                 kind=ChopperKind.WFM),
         "FOC1":
-        Chopper(
-            frequency=sc.scalar(42.0, unit=hz),
-            phase=sc.scalar(0.0, unit='deg'),
-            position=sc.vector(value=[0, 0, 8.4], unit='m'),
-            opening_angles_center=sc.array(
-                dims=[dim],
-                values=[81.12, 127.82, 171.60, 212.66, 251.16, 288.85],
-                # values=[81.12, 127.82, 171.60, 212.66, 251.16, 287.50],
-                unit='deg'),
-            opening_angles_width=sc.array(
-                dims=[dim],
-                values=[11.06, 13.06, 14.94, 16.70, 18.36, 19.91],
-                unit='deg'),
-            kind=ChopperKind.FRAME_OVERLAP),
+        Chopper(frequency=sc.scalar(42.0, unit=hz),
+                phase=sc.scalar(0.0, unit='deg'),
+                position=sc.vector(value=[0, 0, 8.4], unit='m'),
+                opening_angles_center=sc.array(
+                    dims=[dim],
+                    values=[81.12, 127.82, 171.60, 212.66, 251.16, 288.85],
+                    unit='deg'),
+                opening_angles_width=sc.array(
+                    dims=[dim],
+                    values=[11.06, 13.06, 14.94, 16.70, 18.36, 19.91],
+                    unit='deg'),
+                kind=ChopperKind.FRAME_OVERLAP),
         "FOC2":
         Chopper(frequency=sc.scalar(42.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),

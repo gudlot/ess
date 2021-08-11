@@ -23,6 +23,7 @@ Documentation
    :caption: Techniques
 
    techniques/reflectometry
+   techniques/wfm
 
 .. toctree::
    :caption: About

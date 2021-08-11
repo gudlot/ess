@@ -17,6 +17,13 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import doctest
+import os
+
+html_show_sourcelink = True
+nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercontent.com/scipp/scipp/main/docs/{{ env.doc2path(env.docname, base=None) }}>`_
+
+----
+"""  # noqa: E501
 
 # -- Project information -----------------------------------------------------
 
@@ -44,13 +51,42 @@ extensions = [
     'nbsphinx',
 ]
 
+# autodocs includes everything, even irrelevant API internals. autosummary
+# looks more suitable in the long run when the API grows.
+# For a nice example see how xarray handles its API documentation.
+autosummary_generate = True
+
 templates_path = ['_templates']
 
+# The suffix(es) of source filenames.
+# You can specify multiple suffix as a list of string:
+#
+# source_suffix = ['.rst', '.md']
+source_suffix = '.rst'
+
+# The master toctree document.
+master_doc = 'index'
+
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'sphinx'
+
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = False
 
 # -- Options for HTML output -------------------------------------------------
 # Should only use this theme on READTHEDOCS. TODO.
 html_theme = 'sphinx_rtd_theme'
+
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+#
+html_theme_options = {'logo_only': True}
+
+html_logo = "_static/logo-large-v4.png"
+html_favicon = "_static/favicon.ico"
 
 html_static_path = ['_static']
 
@@ -66,3 +102,10 @@ import scipp as sc
 doctest_default_flags = doctest.ELLIPSIS | doctest.IGNORE_EXCEPTION_DETAIL | \
                         doctest.DONT_ACCEPT_TRUE_FOR_1 | \
                         doctest.NORMALIZE_WHITESPACE
+
+# -- Options for linkcheck ------------------------------------------------
+
+linkcheck_ignore = [
+    # Specific lines in Github blobs cannot be found by linkcheck.
+    r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#'
+]

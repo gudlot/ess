@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
 from .wfm import get_frames
-# from .tools import frame_opening_and_closing_times
 
 
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
