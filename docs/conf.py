@@ -84,7 +84,7 @@ html_theme = 'sphinx_rtd_theme'
 #
 html_theme_options = {'logo_only': True}
 
-html_logo = "_static/logo-large-v4.png"
+html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 
 html_static_path = ['_static']
