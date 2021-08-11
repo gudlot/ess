@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ..wfm.choppers import Chopper
+from ..wfm.choppers import Chopper, ChopperKind
 
 
 def make_beamline() -> dict:
@@ -29,7 +29,8 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[5.74, 8.98, 12.01, 14.85, 17.52, 20.02],
-                    unit='deg')),
+                    unit='deg'),
+                kind=ChopperKind.WFM),
         "WFMC2":
         Chopper(frequency=sc.scalar(56.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -41,7 +42,8 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[5.74, 8.98, 12.01, 14.85, 17.52, 20.02],
-                    unit='deg')),
+                    unit='deg'),
+                kind=ChopperKind.WFM),
         "FOC1":
         Chopper(
             frequency=sc.scalar(42.0, unit=hz),
@@ -55,7 +57,8 @@ def make_beamline() -> dict:
             opening_angles_width=sc.array(
                 dims=[dim],
                 values=[11.06, 13.06, 14.94, 16.70, 18.36, 19.91],
-                unit='deg')),
+                unit='deg'),
+            kind=ChopperKind.FRAME_OVERLAP),
         "FOC2":
         Chopper(frequency=sc.scalar(42.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -67,7 +70,8 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[32.90, 33.54, 34.15, 34.71, 35.24, 35.74],
-                    unit='deg')),
+                    unit='deg'),
+                kind=ChopperKind.FRAME_OVERLAP),
         "FOC3":
         Chopper(frequency=sc.scalar(28.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -79,7 +83,8 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[40.32, 39.61, 38.94, 38.31, 37.72, 37.16],
-                    unit='deg')),
+                    unit='deg'),
+                kind=ChopperKind.FRAME_OVERLAP),
         "FOC4":
         Chopper(frequency=sc.scalar(14.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -91,7 +96,8 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[32.98, 31.82, 30.74, 29.72, 28.77, 27.87],
-                    unit='deg')),
+                    unit='deg'),
+                kind=ChopperKind.FRAME_OVERLAP),
         "FOC5":
         Chopper(frequency=sc.scalar(14.0, unit=hz),
                 phase=sc.scalar(0.0, unit='deg'),
@@ -103,12 +109,13 @@ def make_beamline() -> dict:
                 opening_angles_width=sc.array(
                     dims=[dim],
                     values=[50.81, 48.55, 46.42, 44.43, 42.56, 40.80],
-                    unit='deg'))
+                    unit='deg'),
+                kind=ChopperKind.FRAME_OVERLAP)
     }
 
     source = {
-        "pulse_length": sc.scalar(2.86e+03, unit='us'),
-        "pulse_t_0": sc.scalar(130.0, unit='us'),
+        "source_pulse_length": sc.scalar(2.86e+03, unit='us'),
+        "source_pulse_t_0": sc.scalar(130.0, unit='us'),
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 

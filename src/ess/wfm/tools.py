@@ -28,22 +28,21 @@ def to_bin_edges(x: sc.Variable, dim: str) -> sc.Variable:
         return sc.concatenate(sc.concatenate(left, center, dim), right, dim)
 
 
-def _angular_frame_edge_to_time(angular_frequency: sc.Variable, angle: sc.Variable,
-                                phase: sc.Variable) -> sc.Variable:
-    """
-    Convert an angle on a rotating chopper to a time point (in microseconds).
-    """
-    return sc.to_unit((angle + phase) / angular_frequency, 'us')
+# def _angular_frame_edge_to_time(angular_frequency: sc.Variable, angle: sc.Variable,
+#                                 phase: sc.Variable) -> sc.Variable:
+#     """
+#     Convert an angle on a rotating chopper to a time point (in microseconds).
+#     """
+#     return sc.to_unit((angle + phase) / angular_frequency, 'us')
 
-
-def frame_opening_and_closing_times(frame: sc.DataArray) -> tuple:
-    """
-    Get coordinates of a chopper frame opening in time and distance.
-    """
-    t_open = _angular_frame_edge_to_time(frame["angular_frequency"].data,
-                                         frame["opening_angles_open"].data,
-                                         frame["phase"].data)
-    t_close = _angular_frame_edge_to_time(frame["angular_frequency"].data,
-                                          frame["opening_angles_close"].data,
-                                          frame["phase"].data)
-    return t_open, t_close
+# def frame_opening_and_closing_times(frame: sc.DataArray) -> tuple:
+#     """
+#     Get coordinates of a chopper frame opening in time and distance.
+#     """
+#     t_open = _angular_frame_edge_to_time(frame["angular_frequency"].data,
+#                                          frame["opening_angles_open"].data,
+#                                          frame["phase"].data)
+#     t_close = _angular_frame_edge_to_time(frame["angular_frequency"].data,
+#                                           frame["opening_angles_close"].data,
+#                                           frame["phase"].data)
+#     return t_open, t_close

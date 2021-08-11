@@ -2,12 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import numpy as np
-from .choppers import Chopper, make_chopper_cascade
-
-# class Beamline:
-#     def __init__(self, choppers, source):
-#         self.choppers = choppers
-#         self.source = source
+from .choppers import Chopper, ChopperKind
 
 
 def make_fake_beamline(
@@ -73,53 +68,32 @@ def make_fake_beamline(
                 phase=sc.scalar(0.0, unit='deg'),
                 position=chopper_positions["WFMC1"],
                 opening_angles_center=opening_angles_center_1,
-                opening_angles_width=opening_angles_width),
+                opening_angles_width=opening_angles_width,
+                kind=ChopperKind.WFM),
         "WFMC2":
         Chopper(frequency=frequency,
                 phase=sc.scalar(0.0, unit='deg'),
                 position=chopper_positions["WFMC2"],
                 opening_angles_center=opening_angles_center_2,
-                opening_angles_width=opening_angles_width),
+                opening_angles_width=opening_angles_width,
+                kind=ChopperKind.WFM),
     }
 
-    source = {
-        "pulse_length": sc.to_unit(pulse_length, 'us'),
-        "pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
+    # source = {
+    #     "pulse_length": sc.to_unit(pulse_length, 'us'),
+    #     "pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
+    #     "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
+    # }
+
+    # chopper_cascade = make_chopper_cascade(choppers)
+    # chopper_cascade = sc.Dataset({})
+    coords = {
+        'choppers': sc.scalar(choppers),
+        'position': sc.vector(value=[0., 0., 60.], unit='m'),
+        "source_pulse_length": sc.to_unit(pulse_length, 'us'),
+        "source_pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
         "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
-
-    # beamline = Beamline(choppers=choppers, source=source)
-
-    chopper_cascade = make_chopper_cascade(choppers)
-    coords = {
-        'choppers': sc.scalar(chopper_cascade),
-        'position': sc.vector(value=[0., 0., 60.], unit='m')
-    }
-    for key, value in source.items():
-        coords[key] = value
+    # for key, value in source.items():
+    #     coords[key] = value
     return coords
-
-
-# def make_coords(**kwargs):
-#     beamline = _make_fake_beamline(**kwargs)
-#     chopper_cascade = wfm.make_chopper_cascade(beamline)
-#     coords = {
-#         'choppers': sc.scalar(chopper_cascade),
-#         'position': sc.vector(value=[0., 0., 60.], unit='m')
-#     }
-#     for key, value in beamline.source.items():
-#         coords[key] = value
-#     return coords
-
-# def make_default_parameters():
-#     return {
-#         "chopper_positions": {
-#             "WFMC1": sc.vector(value=[0.0, 0.0, 6.775], unit='m'),
-#             "WFMC2": sc.vector(value=[0.0, 0.0, 7.225], unit='m')
-#         },
-#         "frequency": sc.scalar(56.0, unit=sc.units.one / sc.units.s),
-#         "lambda_min": sc.scalar(1.0, unit='angstrom'),
-#         "pulse_length": sc.to_unit(sc.scalar(2.86e+03, unit='us'), 's'),
-#         "pulse_t_0": sc.to_unit(sc.scalar(130.0, unit='us'), 's'),
-#         "nframes": 2
-#     }
