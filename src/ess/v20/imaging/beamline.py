@@ -11,6 +11,9 @@ def make_beamline() -> Beamline:
     V20 chopper cascade and component positions.
     Chopper opening angles taken from Woracek et al. (2016)
     https://doi.org/10.1016/j.nima.2016.09.034
+
+    The +15.0 increments added to the angles correspond to an offset between the
+    zero angle and the chopper top-dead centre.
     """
 
     dim = 'frame'
