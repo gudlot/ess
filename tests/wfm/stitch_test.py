@@ -55,8 +55,9 @@ def _do_stitching_on_beamline(wavelengths):
     # Compute their arrival time at the detector.
     alpha = 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))
     dz = sc.norm(coords['position'] - coords['source_position'])
-    arrival_times = sc.to_unit(alpha * dz * wavelengths, 'us') + coords['pulse_t_0'] + (
-        0.5 * coords['pulse_length'])
+    arrival_times = sc.to_unit(
+        alpha * dz * wavelengths,
+        'us') + coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])
 
     # Make a data array that contains the beamline and the time coordinate
     tmin = sc.min(arrival_times)
@@ -85,10 +86,11 @@ def _do_stitching_on_beamline(wavelengths):
                                          num=1001,
                                          unit='angstrom'))
 
-    near_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 0].data
-    far_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 1].data
+    choppers = da.meta["choppers"].value
+    # near_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 0].data
+    # far_wfm_chopper_position = da.meta["choppers"].value["position"]["chopper", 1].data
     # Distance between WFM choppers
-    dz_wfm = sc.norm(far_wfm_chopper_position - near_wfm_chopper_position)
+    dz_wfm = sc.norm(choppers["WFMC2"].position - choppers["WFMC1"].position)
     # Delta_lambda  / lambda
     dlambda_over_lambda = dz_wfm / sc.norm(coords['position'] -
                                            frames['wfm_chopper_mid_point'].data)

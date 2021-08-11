@@ -6,10 +6,11 @@ from .common import allclose
 
 
 def _frames_from_slopes(data):
-    pos_norm = sc.norm(data.meta["position"])
+    detector_pos_norm = sc.norm(data.meta["position"])
 
     # Get the number of WFM frames
-    nframes = data.meta["choppers"].value["opening_angles_open"].sizes["frame"]
+    choppers = data.meta["choppers"].value
+    nframes = choppers["WFMC1"].opening_angles_open.sizes["frame"]
 
     # Now find frame boundaries
     frames = sc.Dataset()
@@ -28,46 +29,55 @@ def _frames_from_slopes(data):
                                          shape=[nframes],
                                          unit=sc.units.us)
 
-    near_wfm_chopper_position = data.meta["choppers"].value["position"]["chopper",
-                                                                        0].data
-    far_wfm_chopper_position = data.meta["choppers"].value["position"]["chopper",
-                                                                       1].data
+    near_wfm_chopper = choppers["WFMC1"]
+    far_wfm_chopper = choppers["WFMC2"]
 
     # Distance between WFM choppers
-    dz_wfm = sc.norm(far_wfm_chopper_position - near_wfm_chopper_position)
+    dz_wfm = sc.norm(far_wfm_chopper.position - near_wfm_chopper.position)
     # Mid-point between WFM choppers
-    z_wfm = 0.5 * sc.norm(near_wfm_chopper_position + far_wfm_chopper_position)
+    z_wfm = 0.5 * (near_wfm_chopper.position + far_wfm_chopper.position)
+    # Distance between detector positions and wfm chopper mid-point
+    zdet_minus_zwfm = sc.norm(data.meta["position"] - z_wfm)
     # Neutron mass to Planck constant ratio
     # TODO: would be nice to use physical constants in scipp or scippneutron
     alpha = 2.5278e+2 * (sc.Unit('us') / sc.Unit('angstrom') / sc.Unit('m'))
 
+    near_t_open = near_wfm_chopper.time_open
+    near_t_close = near_wfm_chopper.time_close
+    far_t_open = far_wfm_chopper.time_open
+    far_t_close = far_wfm_chopper.time_close
+
+    # start, tend = wfm.frame_opening_and_closing_times(
+    #     data.meta["choppers"].value["frame", i])
+
     for i in range(nframes):
-        tstart, tend = wfm.frame_opening_and_closing_times(
-            data.meta["choppers"].value["frame", i])
-        dt_lambda_max = tend['chopper', 0] - tstart['chopper', 0]
+        # tstart, tend = wfm.frame_opening_and_closing_times(
+        #     data.meta["choppers"].value["frame", i])
+        dt_lambda_max = near_t_close["frame", i] - near_t_open["frame", i]
         slope_lambda_max = dz_wfm / dt_lambda_max
         intercept_lambda_max = sc.norm(
-            near_wfm_chopper_position) - slope_lambda_max * tend['chopper', 0]
-        t_lambda_max = (pos_norm - intercept_lambda_max) / slope_lambda_max
+            near_wfm_chopper.position) - slope_lambda_max * near_t_close["frame", i]
+        t_lambda_max = (detector_pos_norm - intercept_lambda_max) / slope_lambda_max
 
-        slope_lambda_min = sc.norm(near_wfm_chopper_position) / (
-            tend['chopper', 0] - (data.meta["pulse_length"] + data.meta["pulse_t_0"]))
+        slope_lambda_min = sc.norm(near_wfm_chopper.position) / (
+            near_t_close["frame", i] -
+            (data.meta["source_pulse_length"] + data.meta["source_pulse_t_0"]))
         intercept_lambda_min = sc.norm(
-            far_wfm_chopper_position) - slope_lambda_min * tstart['chopper', 1]
-        t_lambda_min = (pos_norm - intercept_lambda_min) / slope_lambda_min
+            far_wfm_chopper.position) - slope_lambda_min * far_t_open["frame", i]
+        t_lambda_min = (detector_pos_norm - intercept_lambda_min) / slope_lambda_min
 
-        t_lambda_min_plus_dt = (pos_norm -
-                                (sc.norm(near_wfm_chopper_position) - slope_lambda_min *
-                                 tend['chopper', 0])) / slope_lambda_min
+        t_lambda_min_plus_dt = (detector_pos_norm -
+                                (sc.norm(near_wfm_chopper.position) - slope_lambda_min *
+                                 near_t_close["frame", i])) / slope_lambda_min
         dt_lambda_min = t_lambda_min_plus_dt - t_lambda_min
 
         # Compute wavelength information
         lambda_min = (t_lambda_min + 0.5 * dt_lambda_min -
-                      tstart["chopper", 1]) / (alpha * (pos_norm - z_wfm))
+                      far_t_open["frame", i]) / (alpha * zdet_minus_zwfm)
         lambda_max = (t_lambda_max - 0.5 * dt_lambda_max -
-                      tstart["chopper", 1]) / (alpha * (pos_norm - z_wfm))
-        dlambda_min = dz_wfm * lambda_min / (pos_norm - z_wfm)
-        dlambda_max = dz_wfm * lambda_max / (pos_norm - z_wfm)
+                      far_t_open["frame", i]) / (alpha * zdet_minus_zwfm)
+        dlambda_min = dz_wfm * lambda_min / zdet_minus_zwfm
+        dlambda_max = dz_wfm * lambda_max / zdet_minus_zwfm
 
         frames["time_min"]["frame", i] = t_lambda_min
         frames["delta_time_min"]["frame", i] = dt_lambda_min
@@ -77,11 +87,9 @@ def _frames_from_slopes(data):
         frames["wavelength_max"]["frame", i] = lambda_max
         frames["delta_wavelength_min"]["frame", i] = dlambda_min
         frames["delta_wavelength_max"]["frame", i] = dlambda_max
-        frames["time_correction"]["frame", i] = tstart["chopper", 1]
+        frames["time_correction"]["frame", i] = far_t_open["frame", i]
 
-    frames["wfm_chopper_mid_point"] = sc.mean(
-        sc.concatenate(data.meta["choppers"].value["position"]["chopper", 0],
-                       data.meta["choppers"].value["position"]["chopper", 1], 'none'))
+    frames["wfm_chopper_mid_point"] = z_wfm
     return frames
 
 

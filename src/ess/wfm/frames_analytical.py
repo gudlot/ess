@@ -53,7 +53,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # Distance between WFM choppers
     dz_wfm = sc.norm(far_wfm_chopper.position - near_wfm_chopper.position)
     # Mid-point between WFM choppers
-    # z_wfm = 0.5 * sc.norm(near_wfm_chopper.position + far_wfm_chopper.position)
     z_wfm = 0.5 * (near_wfm_chopper.position + far_wfm_chopper.position)
     # Ratio of WFM chopper distances
     z_ratio_wfm = (sc.norm(far_wfm_chopper.position) /
