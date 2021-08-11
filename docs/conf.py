@@ -89,6 +89,12 @@ html_favicon = "_static/favicon.ico"
 
 html_static_path = ['_static']
 
+# -- Options for Matplotlib in notebooks ----------------------------------
+
+nbsphinx_execute_arguments = [
+    "--Session.metadata=scipp_docs_build=True",
+]
+
 # -- Options for doctest --------------------------------------------------
 
 doctest_global_setup = '''
