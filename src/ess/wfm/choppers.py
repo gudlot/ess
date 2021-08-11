@@ -30,6 +30,18 @@ class Chopper:
         self._opening_angles_close = opening_angles_close
         self._kind = kind
 
+    def __eq__(self, other):
+        return all([
+            sc.identical(self.frequency, other.frequency),
+            sc.identical(self.position, other.position),
+            sc.identical(self.phase, other.phase),
+            sc.identical(self.opening_angles_center, other.opening_angles_center),
+            sc.identical(self.opening_angles_width, other.opening_angles_width),
+            sc.identical(self.opening_angles_open, other.opening_angles_open),
+            sc.identical(self.opening_angles_close, other.opening_angles_close),
+            self.kind == other.kind
+        ])
+
     @property
     def frequency(self):
         return self._frequency
@@ -121,55 +133,3 @@ class Chopper:
     def time_close(self, as_unit='us'):
         return sc.to_unit(
             (self.opening_angles_close + self.phase) / self.angular_frequency, as_unit)
-
-        # return (2.0 * np.pi * sc.units.rad) * self._frequency
-
-
-# def _to_angular_frequency(f: sc.Variable) -> sc.Variable:
-#     """
-#     Convert frequency in Hz to angular frequency.
-#     """
-#     return (2.0 * np.pi * sc.units.rad) * f
-
-# def _extract_and_concatenate(container: dict, key: str, dim: str) -> sc.Variable:
-#     array = None
-#     for item in container.values():
-#         scalar = getattr(item, key)
-#         if array is None:
-#             array = scalar
-#         else:
-#             array = sc.concatenate(array, scalar, dim)
-#     return array
-
-# def make_chopper_cascade(choppers: dict) -> sc.Dataset:
-#     """
-#     Create a description of a chopper cascade using a supplied description of
-#     beamline components.
-#     """
-
-#     for chopper in choppers.values():
-#         if chopper.opening_angles_open is None and chopper.opening_angles_close is None:
-#             chopper.opening_angles_open = (chopper.opening_angles_center -
-#                                            0.5 * chopper.opening_angles_width)
-#             chopper.opening_angles_close = (chopper.opening_angles_center +
-#                                             0.5 * chopper.opening_angles_width)
-
-#     ds = sc.Dataset()
-
-#     ds["names"] = sc.array(dims=["chopper"], values=list(choppers.keys()))
-
-#     ds["angular_frequency"] = _to_angular_frequency(
-#         _extract_and_concatenate(container=choppers, key="frequency", dim="chopper"))
-
-#     ds["phase"] = sc.to_unit(
-#         _extract_and_concatenate(container=choppers, key="phase", dim="chopper"), 'rad')
-
-#     ds["position"] = _extract_and_concatenate(container=choppers,
-#                                               key="position",
-#                                               dim="chopper")
-
-#     for key in ["opening_angles_open", "opening_angles_close"]:
-#         ds[key] = sc.to_unit(
-#             _extract_and_concatenate(container=choppers, key=key, dim="chopper"), 'rad')
-
-#     return ds
