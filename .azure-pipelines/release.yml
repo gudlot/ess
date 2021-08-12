@@ -33,7 +33,7 @@ extends:
     config:
       linux:
         py_versions: ['3.7']
-        conda_env: 'ess-developer-stable.yml'
+        conda_env: 'ess-developer.yml'
     deploy: true
     conda_label: 'main'
-    publish_docs: true
+    release: true
