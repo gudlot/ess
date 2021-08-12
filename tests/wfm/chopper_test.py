@@ -69,8 +69,6 @@ def test_chopper_constructor_from_open_close_angles(params):
         'opening_angles_center'] - 0.5 * params['opening_angles_width']
     opening_angles_close = params[
         'opening_angles_center'] + 0.5 * params['opening_angles_width']
-
-    kind = ChopperKind.WFM
     chopper = Chopper(frequency=params['frequency'],
                       phase=params['phase'],
                       position=params['position'],
@@ -84,7 +82,7 @@ def test_chopper_constructor_from_open_close_angles(params):
 def test_chopper_constructor_bad_widths(params):
     params['opening_angles_width'].values[1] = -3.0
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(**params)
+        Chopper(**params)
     assert str(e_info.value) == "Negative window width found in chopper opening angles."
 
 
@@ -93,7 +91,7 @@ def test_chopper_constructor_bad_centers(params):
         1, 0, 2, 3, 4, 5
     ]]
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(**params)
+        Chopper(**params)
     assert str(e_info.value) == "Chopper opening angles are not monotonic."
 
 
@@ -104,12 +102,12 @@ def test_chopper_constructor_bad_open_angles(params):
         'opening_angles_center'] + 0.5 * params['opening_angles_width']
     opening_angles_open.values = opening_angles_open.values[[1, 0, 2, 3, 4, 5]]
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(frequency=params['frequency'],
-                          phase=params['phase'],
-                          position=params['position'],
-                          opening_angles_open=opening_angles_open,
-                          opening_angles_close=opening_angles_close,
-                          kind=params['kind'])
+        Chopper(frequency=params['frequency'],
+                phase=params['phase'],
+                position=params['position'],
+                opening_angles_open=opening_angles_open,
+                opening_angles_close=opening_angles_close,
+                kind=params['kind'])
     # This will raise the error on the widths before it reaches the monotonicity check
     assert str(e_info.value) == "Negative window width found in chopper opening angles."
 
@@ -122,28 +120,28 @@ def test_chopper_constructor_bad_open_and_close_angles(params):
     opening_angles_open.values = opening_angles_open.values[[1, 0, 2, 3, 4, 5]]
     opening_angles_close.values = opening_angles_close.values[[1, 0, 2, 3, 4, 5]]
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(frequency=params['frequency'],
-                          phase=params['phase'],
-                          position=params['position'],
-                          opening_angles_open=opening_angles_open,
-                          opening_angles_close=opening_angles_close,
-                          kind=params['kind'])
+        Chopper(frequency=params['frequency'],
+                phase=params['phase'],
+                position=params['position'],
+                opening_angles_open=opening_angles_open,
+                opening_angles_close=opening_angles_close,
+                kind=params['kind'])
     assert str(e_info.value) == "Chopper opening angles are not monotonic."
 
 
 def test_chopper_constructor_bad_close_angles(params):
     dims = params['opening_angles_center'].dims
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(frequency=params['frequency'],
-                          phase=params['phase'],
-                          position=params['position'],
-                          opening_angles_open=sc.array(dims=dims,
-                                                       values=[0.0, 1.0, 2.0],
-                                                       unit='rad'),
-                          opening_angles_close=sc.array(dims=dims,
-                                                        values=[4.0, 3.0, 5.0],
-                                                        unit='rad'),
-                          kind=params['kind'])
+        Chopper(frequency=params['frequency'],
+                phase=params['phase'],
+                position=params['position'],
+                opening_angles_open=sc.array(dims=dims,
+                                             values=[0.0, 1.0, 2.0],
+                                             unit='rad'),
+                opening_angles_close=sc.array(dims=dims,
+                                              values=[4.0, 3.0, 5.0],
+                                              unit='rad'),
+                kind=params['kind'])
     assert str(e_info.value) == "Chopper closing angles are not monotonic."
 
 
@@ -152,13 +150,13 @@ def test_chopper_constructor_bad_lengths(params):
         1, 0, 2, 3, 4, 5
     ]]
     with pytest.raises(ValueError) as e_info:
-        chopper = Chopper(frequency=params['frequency'],
-                          phase=params['phase'],
-                          position=params['position'],
-                          opening_angles_center=params['opening_angles_center'][
-                              params['opening_angles_center'].dims[0], :-1],
-                          opening_angles_width=params['opening_angles_width'],
-                          kind=params['kind'])
+        Chopper(frequency=params['frequency'],
+                phase=params['phase'],
+                position=params['position'],
+                opening_angles_center=params['opening_angles_center'][
+                    params['opening_angles_center'].dims[0], :-1],
+                opening_angles_width=params['opening_angles_width'],
+                kind=params['kind'])
     assert str(
         e_info.value) == ("All angle input arrays (centers, widths, open or close) "
                           "must have the same length.")
