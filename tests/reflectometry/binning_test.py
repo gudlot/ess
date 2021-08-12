@@ -28,8 +28,9 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id":
-        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32),
+        "detector_id": sc.Variable(dims=["event"],
+                                   values=DETECTORS,
+                                   dtype=sc.dtype.int32),
     },
 )
 
@@ -63,10 +64,12 @@ BINNED.bins.constituents['data'].coords["tof"] = sc.linspace(dim='event',
                                                              stop=10,
                                                              num=N,
                                                              unit=sc.units.us)
-BINNED.bins.constituents['data'].coords["qz"] = sc.linspace(
-    dim='event', start=0.1, stop=1.0, num=N, unit=sc.Unit('1/angstrom'))
-BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m,
-                                                       0. * sc.units.m,
+BINNED.bins.constituents['data'].coords["qz"] = sc.linspace(dim='event',
+                                                            start=0.1,
+                                                            stop=1.0,
+                                                            num=N,
+                                                            unit=sc.Unit('1/angstrom'))
+BINNED.attrs['sample_position'] = sc.geometry.position(0. * sc.units.m, 0. * sc.units.m,
                                                        0. * sc.units.m)
 BINNED.attrs['instrument_name'] = sc.scalar(value='AMOR')
 BINNED.attrs['experiment_title'] = sc.scalar(value='test')
@@ -112,10 +115,7 @@ class TestBinning(unittest.TestCase):
 
     def test_2d_bin_unit(self):
         p = data.ReflData(BINNED.copy())
-        bins = (sc.linspace(dim='tof',
-                            start=0.1e-6,
-                            stop=10e-6,
-                            num=5,
+        bins = (sc.linspace(dim='tof', start=0.1e-6, stop=10e-6, num=5,
                             unit=sc.units.s),
                 sc.linspace(dim='qz',
                             start=0.01e10,
@@ -129,10 +129,7 @@ class TestBinning(unittest.TestCase):
 
     def test_2d_bin_bad_dim(self):
         p = data.ReflData(BINNED.copy())
-        bins = (sc.linspace(dim='tof',
-                            start=0.1e-6,
-                            stop=10e-6,
-                            num=5,
+        bins = (sc.linspace(dim='tof', start=0.1e-6, stop=10e-6, num=5,
                             unit=sc.units.s),
                 sc.linspace(dim='q',
                             start=0.01e10,

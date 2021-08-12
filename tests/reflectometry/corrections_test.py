@@ -25,8 +25,9 @@ DATA = sc.DataArray(
         dtype=sc.dtype.float32,
     ),
     coords={
-        "detector_id":
-        sc.Variable(dims=["event"], values=DETECTORS, dtype=sc.dtype.int32)
+        "detector_id": sc.Variable(dims=["event"],
+                                   values=DETECTORS,
+                                   dtype=sc.dtype.int32)
     },
 )
 
@@ -78,8 +79,8 @@ class TestCorrections(unittest.TestCase):
         assert_almost_equal(
             actual_result.values,
             [
-                44.9999641, 44.9998564, 44.999991, 44.999991, 44.9998564,
-                44.9999641, 44.9998564, 44.9999641, 44.9998564
+                44.9999641, 44.9998564, 44.999991, 44.999991, 44.9998564, 44.9999641,
+                44.9998564, 44.9999641, 44.9998564
             ],
         )
 
@@ -90,8 +91,8 @@ class TestCorrections(unittest.TestCase):
         y_measured = 1.0 * sc.units.m
         y_origin = 0.0 * sc.units.m
         expected_result = 0.9509667
-        actual_result = corrections.y_dash0(velocity, z_origin, y_origin,
-                                            z_measured, y_measured)
+        actual_result = corrections.y_dash0(velocity, z_origin, y_origin, z_measured,
+                                            y_measured)
         assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_correction_no_spill(self):
@@ -99,8 +100,8 @@ class TestCorrections(unittest.TestCase):
         sample_size = 10.0 * sc.units.m
         theta = sc.Variable(values=[30.0], unit=sc.units.deg, dims=['event'])
         expected_result = 1
-        actual_result = corrections.illumination_correction(
-            beam_size, sample_size, theta)
+        actual_result = corrections.illumination_correction(beam_size, sample_size,
+                                                            theta)
         assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_correction_with_spill(self):
@@ -108,8 +109,8 @@ class TestCorrections(unittest.TestCase):
         sample_size = 0.5 * sc.units.m
         theta = sc.Variable(values=[30.0], unit=sc.units.deg, dims=['event'])
         expected_result = 0.59490402718695351
-        actual_result = corrections.illumination_correction(
-            beam_size, sample_size, theta)
+        actual_result = corrections.illumination_correction(beam_size, sample_size,
+                                                            theta)
         assert_almost_equal(actual_result.values, expected_result)
 
     def test_illumination_of_sample_big_sample(self):
@@ -117,8 +118,8 @@ class TestCorrections(unittest.TestCase):
         sample_size = 10.0 * sc.units.m
         theta = 90.0 * sc.units.deg
         expected_result = 1.0 * sc.units.m
-        actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta)
+        actual_result = corrections.illumination_of_sample(beam_size, sample_size,
+                                                           theta)
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_of_sample_small_sample(self):
@@ -126,8 +127,8 @@ class TestCorrections(unittest.TestCase):
         sample_size = 0.5 * sc.units.m
         theta = 90.0 * sc.units.deg
         expected_result = 0.5 * sc.units.m
-        actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta)
+        actual_result = corrections.illumination_of_sample(beam_size, sample_size,
+                                                           theta)
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_of_sample_off_angle(self):
@@ -135,17 +136,15 @@ class TestCorrections(unittest.TestCase):
         sample_size = 10.0 * sc.units.m
         theta = 30.0 * sc.units.deg
         expected_result = 2.0 * sc.units.m
-        actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta)
+        actual_result = corrections.illumination_of_sample(beam_size, sample_size,
+                                                           theta)
         assert_almost_equal(actual_result.values, expected_result.values)
 
     def test_illumination_range(self):
         beam_size = 100.0 * sc.units.m
         sample_size = 10.0 * sc.units.m
         theta = sc.Variable(values=[15.0, 30.0], unit=sc.units.deg, dims=[''])
-        expected_result = sc.Variable(values=[10, 10],
-                                      unit=sc.units.m,
-                                      dims=[''])
-        actual_result = corrections.illumination_of_sample(
-            beam_size, sample_size, theta)
+        expected_result = sc.Variable(values=[10, 10], unit=sc.units.m, dims=[''])
+        actual_result = corrections.illumination_of_sample(beam_size, sample_size,
+                                                           theta)
         assert_almost_equal(actual_result.values, expected_result.values)

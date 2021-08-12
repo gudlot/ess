@@ -36,13 +36,14 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
     if (q_min < q_fix).value and (q_fix < q_max).value:
         n_linear = ((q_fix - q_min) / d_q + 0.5).astype(sc.dtype.int64)
         q_linear = q_fix - d_q * sc.arange('qz', n_linear.value, 0, -1)
-        n_log = (sc.log(q_max / q_fix) / sc.log(1. + d_q / q_fix) +
-                 0.5).astype(sc.dtype.int64)
-        q_log = sc.Variable(['qz'],
-                            values=(q_fix.value * (1. + d_q / q_fix).value**
-                                    sc.arange('qz', 0,
-                                              (n_log + 1).values, 1).values),
-                            unit=q_max.unit)
+        n_log = (sc.log(q_max / q_fix) / sc.log(1. + d_q / q_fix) + 0.5).astype(
+            sc.dtype.int64)
+        q_log = sc.Variable(
+            ['qz'],
+            values=(q_fix.value *
+                    (1. + d_q / q_fix).value**sc.arange('qz', 0,
+                                                        (n_log + 1).values, 1).values),
+            unit=q_max.unit)
         return sc.concatenate(q_linear, q_log, 'qz')
     elif (q_min < q_max).value and (q_max < q_fix).value:
         n_linear = ((q_fix - q_min) / d_q + 0.5).astype(sc.dtype.int64)
@@ -51,10 +52,10 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
                                            (m_linear - 1).value, -1)
         return q_linear
     elif (q_fix < q_min).value and (q_min < q_max).value:
-        n_log = (sc.log(q_max / q_fix) / sc.log(1. + d_q / q_fix) +
-                 0.5).astype(sc.dtype.int64)
-        m_log = (sc.log(q_min / q_fix) / sc.log(1. + d_q / q_fix) -
-                 0.5).astype(sc.dtype.int64)
+        n_log = (sc.log(q_max / q_fix) / sc.log(1. + d_q / q_fix) + 0.5).astype(
+            sc.dtype.int64)
+        m_log = (sc.log(q_min / q_fix) / sc.log(1. + d_q / q_fix) - 0.5).astype(
+            sc.dtype.int64)
         q_log = sc.Variable(
             ['qz'],
             values=q_fix.value *
@@ -63,5 +64,4 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
             unit=q_max.unit)
         return q_log
     else:
-        raise ValueError(
-            "The given values of input parameters are not compatible.")
+        raise ValueError("The given values of input parameters are not compatible.")
