@@ -29,9 +29,9 @@ def make_fake_beamline(
 
     choppers = {}
 
-    opening_angles_center_1 = None
-    opening_angles_center_2 = None
-    opening_angles_width = None
+    opening_angles_center_wfm_1 = sc.empty(dims=[dim], shape=[nframes], unit='rad')
+    opening_angles_center_wfm_2 = sc.empty_like(opening_angles_center_wfm_1)
+    opening_angles_width = sc.empty_like(opening_angles_center_wfm_1)
 
     for i in range(nframes):
         # Equation (3) in Schmakat et al. (2020)
@@ -50,18 +50,9 @@ def make_fake_beamline(
         phi_wfm_2 = omega * (pulse_t_0 + 1.5 * pulse_length + 0.5 * alpha * (
             (3.0 * lambda_min) - lambda_max) * sc.norm(chopper_positions["WFMC1"]))
 
-        if opening_angles_width is None:
-            opening_angles_width = theta
-        else:
-            opening_angles_width = sc.concatenate(opening_angles_width, theta, dim)
-        if opening_angles_center_1 is None:
-            opening_angles_center_1 = phi_wfm_1
-            opening_angles_center_2 = phi_wfm_2
-        else:
-            opening_angles_center_1 = sc.concatenate(opening_angles_center_1, phi_wfm_1,
-                                                     dim)
-            opening_angles_center_2 = sc.concatenate(opening_angles_center_2, phi_wfm_2,
-                                                     dim)
+        opening_angles_width[dim, i] = theta
+        opening_angles_center_wfm_1[dim, i] = phi_wfm_1
+        opening_angles_center_wfm_2[dim, i] = phi_wfm_2
 
         lambda_min = lambda_max
 
@@ -70,14 +61,14 @@ def make_fake_beamline(
         Chopper(frequency=frequency,
                 phase=sc.scalar(0.0, unit='deg'),
                 position=chopper_positions["WFMC1"],
-                opening_angles_center=opening_angles_center_1,
+                opening_angles_center=opening_angles_center_wfm_1,
                 opening_angles_width=opening_angles_width,
                 kind=ChopperKind.WFM),
         "WFMC2":
         Chopper(frequency=frequency,
                 phase=sc.scalar(0.0, unit='deg'),
                 position=chopper_positions["WFMC2"],
-                opening_angles_center=opening_angles_center_2,
+                opening_angles_center=opening_angles_center_wfm_2,
                 opening_angles_width=opening_angles_width,
                 kind=ChopperKind.WFM),
     }

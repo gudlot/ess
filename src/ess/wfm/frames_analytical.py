@@ -44,7 +44,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     far_wfm_chopper = wfm_choppers[wfm_chopper_names[far_index]]
 
     # Compute distances for each detector pixel
-    # detector_pos_norm = sc.norm(data.meta["position"])
     detector_positions = data.meta["position"]
 
     # Container for frames information

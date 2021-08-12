@@ -24,6 +24,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     source_pos = sc.norm(data.meta["source_position"]).value
     furthest_detector_pos = sc.max(detector_pos_norm).value
     pulse_rectangle_height = furthest_detector_pos / 50.0
+    tmax_glob = sc.max(frames["time_max"].data).value
 
     # Create figure and axes
     fig, ax = plt.subplots(1, 1, figsize=(9, 7))
@@ -68,14 +69,17 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
         yframe = sc.norm(chopper.position).value
         time_open = chopper.time_open.values
         time_close = chopper.time_close.values
+        tmin = 0.0
         for fnum in range(len(time_open)):
-            ax.plot([time_open[fnum], time_close[fnum]], [yframe] * 2,
-                    color="C{}".format(fnum))
+            tmax = time_open[fnum]
+            ax.plot([tmin, tmax], [yframe] * 2, color='k')
+            tmin = time_close[fnum]
+        ax.plot([tmin, tmax_glob], [yframe] * 2, color='k')
         ax.text(2.0 * time_close[-1] - time_open[-1],
                 yframe,
                 name,
                 ha="left",
-                va="center")
+                va="bottom")
 
     # Plot the shades of possible neutron paths
     for i in range(frames.sizes["frame"]):
@@ -122,17 +126,15 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
         ax.fill(lambda_min[:, 0], lambda_min[:, 1], color='w', zorder=-4)
         ax.fill(lambda_max[:, 0], lambda_max[:, 1], color='w', zorder=-4)
 
-        ax.text(sc.mean(sc.concatenate(frame["time_min"], frame["time_max"],
-                                       'none')).value,
+        ax.text(0.5 * (frame["time_min"] + frame["delta_time_min"] + frame["time_max"] -
+                       frame["delta_time_max"]).value,
                 furthest_detector_pos,
                 "Frame {}".format(i + 1),
                 ha="center",
                 va="top")
 
     # Add thick solid line for the detector position, spanning the entire width
-    ax.plot([0, sc.max(frames["time_max"].data).value], [furthest_detector_pos] * 2,
-            lw=3,
-            color='grey')
+    ax.plot([0, tmax_glob], [furthest_detector_pos] * 2, lw=3, color='grey')
     ax.text(0.0, furthest_detector_pos, "Detector", va="bottom", ha="left")
 
     # Set axis labels
