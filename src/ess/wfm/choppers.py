@@ -30,7 +30,30 @@ class Chopper:
         self._opening_angles_close = opening_angles_close
         self._kind = kind
 
+        # Sanitize input parameters
+        if (sc.min(self.opening_angles_width) < sc.scalar(
+                0.0, unit=self.opening_angles_width.unit)).value:
+            raise ValueError("Negative window width found in chopper opening angles.")
+        lengths = []
+        for angles in [
+                opening_angles_center, opening_angles_width, opening_angles_open,
+                opening_angles_close
+        ]:
+            if angles is not None:
+                lengths.append(len(angles))
+        if lengths.count(lengths[0]) != len(lengths):
+            raise ValueError("All angle input arrays (centers, widths, open or close) "
+                             "must have the same length.")
+        if not np.all(np.diff(self.opening_angles_open.values) > 0):
+            raise ValueError("Chopper opening angles are not monotonic.")
+        if not np.all(np.diff(self.opening_angles_close.values) > 0):
+            raise ValueError("Chopper closing angles are not monotonic.")
+
     def __eq__(self, other):
+        """
+        Define == operator to allow for coordinate comparison.
+        This will also be called for the != operator.
+        """
         return all([
             sc.identical(self.frequency, other.frequency),
             sc.identical(self.position, other.position),
@@ -59,58 +82,56 @@ class Chopper:
         self._position = value
 
     @property
-    def phase(self, as_unit='rad'):
-        return sc.to_unit(self._phase, as_unit)
+    def phase(self):
+        return sc.to_unit(self._phase, sc.units.rad)
 
     @phase.setter
     def phase(self, value):
         self._phase = value
 
     @property
-    def opening_angles_center(self, as_unit='rad'):
+    def opening_angles_center(self):
         if self._opening_angles_center is None:
-            out = sc.mean(
-                sc.concatenate(self._opening_angles_open, self._opening_angles_close,
-                               'none'))
+            out = 0.5 * (self._opening_angles_open + self._opening_angles_close)
         else:
             out = self._opening_angles_center
-        return sc.to_unit(out, as_unit)
+        return sc.to_unit(out, sc.units.rad)
 
     @opening_angles_center.setter
     def opening_angles_center(self, value):
         self._opening_angles_center = value
 
     @property
-    def opening_angles_width(self, as_unit='rad'):
+    def opening_angles_width(self):
         if self._opening_angles_width is None:
             out = self._opening_angles_close - self._opening_angles_open
         else:
             out = self._opening_angles_width
-        return sc.to_unit(out, as_unit)
+        return sc.to_unit(out, sc.units.rad)
 
     @opening_angles_width.setter
     def opening_angles_width(self, value):
         self._opening_angles_width = value
 
     @property
-    def opening_angles_open(self, as_unit='rad'):
+    def opening_angles_open(self):
         if self._opening_angles_open is None:
             out = self._opening_angles_center - 0.5 * self._opening_angles_width
         else:
             out = self._opening_angles_open
-        return sc.to_unit(out, as_unit)
+        return sc.to_unit(out, sc.units.rad)
 
     @opening_angles_open.setter
     def opening_angles_open(self, value):
         self._opening_angles_open = value
 
     @property
-    def opening_angles_close(self, as_unit='rad'):
+    def opening_angles_close(self):
         if self._opening_angles_close is None:
             out = self._opening_angles_center + 0.5 * self._opening_angles_width
         else:
             out = self._opening_angles_close
-        return sc.to_unit(out, as_unit)
+        return sc.to_unit(out, sc.units.rad)
 
     @opening_angles_close.setter
     def opening_angles_close(self, value):
@@ -125,11 +146,13 @@ class Chopper:
         return (2.0 * np.pi * sc.units.rad) * self._frequency
 
     @property
-    def time_open(self, as_unit='us'):
+    def time_open(self):
         return sc.to_unit(
-            (self.opening_angles_open + self.phase) / self.angular_frequency, as_unit)
+            (self.opening_angles_open + self.phase) / self.angular_frequency,
+            sc.units.us)
 
     @property
-    def time_close(self, as_unit='us'):
+    def time_close(self):
         return sc.to_unit(
-            (self.opening_angles_close + self.phase) / self.angular_frequency, as_unit)
+            (self.opening_angles_close + self.phase) / self.angular_frequency,
+            sc.units.us)
