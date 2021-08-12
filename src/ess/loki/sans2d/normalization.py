@@ -18,7 +18,12 @@ def transmission_fraction(sample, direct, wavelength_bins):
     def setup(data, begin, end, scatter):
         background = data - sc.mean(data['tof', begin:end], 'tof')
         background = scn.convert(background, 'tof', 'wavelength', scatter=scatter)
-        background = sc.rebin(background, 'wavelength', wavelength_bins)
+        #TODO: NANs after rebining
+        #print('background before')
+        #sc.to_html(background)
+        background = sc.rebin(background.copy(), 'wavelength', wavelength_bins)
+        #print('background after')
+        #sc.to_html(background)
         return background
 
     us = sc.units.us
