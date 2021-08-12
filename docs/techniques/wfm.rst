@@ -1,5 +1,5 @@
-ess\.wfm
-========
+Wavelength frame multiplication
+===============================
 
 .. toctree::
    :maxdepth: 4
