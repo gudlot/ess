@@ -227,8 +227,8 @@ def frames_peakfinding(data=None,
         fig.savefig(figname, bbox_inches="tight")
 
     frames = {
-        "left_edges": np.array([f[0] for f in frame_boundaries]),
-        "right_edges": np.array([f[1] for f in frame_boundaries]),
+        "time_min": np.array([f[0] for f in frame_boundaries]),
+        "time_max": np.array([f[1] for f in frame_boundaries]),
         "gaps": np.array(frame_gaps),
         "shifts": np.array(frame_shifts)
     }

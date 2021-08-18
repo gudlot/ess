@@ -23,3 +23,10 @@ Documentation
    :caption: Techniques
 
    techniques/reflectometry
+   techniques/wfm
+
+.. toctree::
+   :caption: About
+   :maxdepth: 3
+
+   about/release-notes

@@ -43,11 +43,11 @@ def mask_from_adj_pixels(mask):
     mask = mask.copy()
 
     def make_flip(fill):
-        flip = sc.Variable(dims=['neighbor', 'y', 'x'],
-                           shape=[
-                               8,
-                           ] + mask.shape,
-                           dtype=sc.dtype.bool)
+        flip = sc.empty(dims=['neighbor', 'y', 'x'],
+                        shape=[
+                            8,
+                        ] + mask.shape,
+                        dtype=sc.dtype.bool)
         flip['neighbor', 0] = _shift(mask, "x", True, fill)
         flip['neighbor', 1] = _shift(mask, "x", False, fill)
         flip['neighbor', 2] = _shift(mask, "y", True, fill)
@@ -75,13 +75,13 @@ def mean_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.Variable(['neighbor'] + data.dims,
-                            dtype=data.dtype,
-                            shape=[
-                                9,
-                            ] + data.shape,
-                            variances=has_variances,
-                            unit=data.unit)
+    container = sc.empty(dims=['neighbor'] + data.dims,
+                         dtype=data.dtype,
+                         shape=[
+                             9,
+                         ] + data.shape,
+                         variances=has_variances,
+                         unit=data.unit)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
     container['neighbor', 2] = _shift(data, "x", False, fill)
@@ -90,7 +90,7 @@ def mean_from_adj_pixels(data):
     container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True, fill)
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False, fill)
 
-    edges_mask = container <= sc.Variable(value=fill, unit=data.unit)
+    edges_mask = container <= sc.scalar(value=fill, unit=data.unit)
     da = sc.DataArray(data=container, masks={'edges': edges_mask})
     return sc.mean(da, dim='neighbor').data
 
@@ -119,12 +119,12 @@ def median_from_adj_pixels(data):
     """
     fill = np.finfo(data.values.dtype).min
     has_variances = data.variances is not None
-    container = sc.Variable(['neighbor'] + data.dims,
-                            dtype=data.dtype,
-                            shape=[
-                                9,
-                            ] + data.shape,
-                            variances=has_variances)
+    container = sc.empty(dims=['neighbor'] + data.dims,
+                         dtype=data.dtype,
+                         shape=[
+                             9,
+                         ] + data.shape,
+                         variances=has_variances)
     container['neighbor', 0] = data
     container['neighbor', 1] = _shift(data, "x", True, fill)
     container['neighbor', 2] = _shift(data, "x", False, fill)
@@ -133,7 +133,7 @@ def median_from_adj_pixels(data):
     container['neighbor', 5:7] = _shift(container['neighbor', 1:3], "y", True, fill)
     container['neighbor', 7:9] = _shift(container['neighbor', 1:3], "y", False, fill)
 
-    edges_mask = container <= sc.Variable(value=fill, variance=fill)
+    edges_mask = container <= sc.scalar(value=fill, variance=fill)
     return _median(container, edges_mask, dim='neighbor')
 
 
@@ -145,7 +145,7 @@ def groupby2D(data, nx_target, ny_target, x='x', y='y', z='wavelength'):
     xx = sc.Variable(dims=[x], values=np.arange(data.sizes[x]) // element_width_x)
     yy = sc.Variable(dims=[y], values=np.arange(data.sizes[y]) // element_width_y)
     grid = xx + nx_target * yy
-    spectrum_mapping = sc.Variable(["spectrum"],
+    spectrum_mapping = sc.Variable(dims=["spectrum"],
                                    values=np.ravel(grid.values, order='F'))
 
     reshaped = sc.Dataset()
