@@ -19,12 +19,18 @@ def make_beamline() -> dict:
     dim = 'frame'
     hz = sc.units.one / sc.units.s
 
+    source = {
+        "source_pulse_length": sc.scalar(2.86e+03, unit='us'),
+        "source_pulse_t_0": sc.scalar(140.0, unit='us'),
+        "source_position": sc.vector(value=[0.0, 0.0, -25.3], unit='m')
+    }
+
     choppers = {
         "WFMC1":
         Chopper(
             frequency=sc.scalar(70.0, unit=hz),
             phase=sc.scalar(47.10, unit='deg'),
-            position=sc.vector(value=[0, 0, 6.6 - 18.45], unit='m'),
+            position=source["source_position"] + sc.vector(value=[0, 0, 6.6], unit='m'),
             opening_angles_open=sc.array(
                 dims=[dim],
                 values=np.array([83.71, 140.49, 193.26, 242.32, 287.91, 330.3]) + 15.0,
@@ -38,7 +44,7 @@ def make_beamline() -> dict:
         Chopper(
             frequency=sc.scalar(70.0, unit=hz),
             phase=sc.scalar(76.76, unit='deg'),
-            position=sc.vector(value=[0, 0, 7.1 - 18.45], unit='m'),
+            position=source["source_position"] + sc.vector(value=[0, 0, 7.1], unit='m'),
             opening_angles_open=sc.array(
                 dims=[dim],
                 values=np.array([65.04, 126.1, 182.88, 235.67, 284.73, 330.32]) + 15.0,
@@ -52,7 +58,7 @@ def make_beamline() -> dict:
         Chopper(
             frequency=sc.scalar(56.0, unit=hz),
             phase=sc.scalar(62.40, unit='deg'),
-            position=sc.vector(value=[0, 0, 8.8 - 18.45], unit='m'),
+            position=source["source_position"] + sc.vector(value=[0, 0, 8.8], unit='m'),
             opening_angles_open=sc.array(
                 dims=[dim],
                 values=np.array([64.35, 125.05, 183.41, 236.4, 287.04, 335.53]) + 15.0,
@@ -66,7 +72,8 @@ def make_beamline() -> dict:
         Chopper(
             frequency=sc.scalar(28.0, unit=hz),
             phase=sc.scalar(12.27, unit='deg'),
-            position=sc.vector(value=[0, 0, 15.9 - 18.45], unit='m'),
+            position=source["source_position"] +
+            sc.vector(value=[0, 0, 15.9], unit='m'),
             opening_angles_open=sc.array(
                 dims=[dim],
                 values=np.array([79.78, 136.41, 191.73, 240.81, 287.13, 330.89]) + 15.0,
@@ -76,11 +83,6 @@ def make_beamline() -> dict:
                 values=np.array([116.38, 172.47, 221.94, 267.69, 311.69, 360.0]) + 15.0,
                 unit='deg'),
             kind=ChopperKind.FRAME_OVERLAP)
-    }
-
-    source = {
-        "source_pulse_length": sc.scalar(2.86e+03, unit='us'),
-        "source_pulse_t_0": sc.scalar(140.0, unit='us'),
     }
 
     return {"choppers": choppers, "source": source}
