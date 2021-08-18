@@ -11,7 +11,6 @@ def make_beamline() -> dict:
     Chopper opening angles taken from Woracek et al. (2016)
     https://doi.org/10.1016/j.nima.2016.09.034
 
-    The -18.45 offsets in position is because the source is located at -18.45m.
     The +15.0 increments added to the angles correspond to an offset between the
     zero angle and the chopper top-dead centre.
     """
