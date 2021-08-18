@@ -2,10 +2,11 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
-from ...wfm.choppers import Chopper, ChopperKind
+from ...wfm.beamline import Beamline
+from ...wfm.choppers import Chopper
 
 
-def make_beamline() -> dict:
+def make_beamline() -> Beamline:
     """
     V20 chopper cascade and component positions.
     Chopper opening angles taken from Woracek et al. (2016)
@@ -31,8 +32,7 @@ def make_beamline() -> dict:
             opening_angles_close=sc.array(
                 dims=[dim],
                 values=np.array([94.7, 155.79, 212.56, 265.33, 314.37, 360.0]) + 15.0,
-                unit='deg'),
-            kind=ChopperKind.WFM),
+                unit='deg')),
         "WFMC2":
         Chopper(
             frequency=sc.scalar(70.0, unit=hz),
@@ -45,8 +45,7 @@ def make_beamline() -> dict:
             opening_angles_close=sc.array(
                 dims=[dim],
                 values=np.array([76.03, 141.4, 202.18, 254.97, 307.74, 360.0]) + 15.0,
-                unit='deg'),
-            kind=ChopperKind.WFM),
+                unit='deg')),
         "FOC1":
         Chopper(
             frequency=sc.scalar(56.0, unit=hz),
@@ -59,8 +58,7 @@ def make_beamline() -> dict:
             opening_angles_close=sc.array(
                 dims=[dim],
                 values=np.array([84.99, 148.29, 205.22, 254.27, 302.8, 360.0]) + 15.0,
-                unit='deg'),
-            kind=ChopperKind.FRAME_OVERLAP),
+                unit='deg')),
         "FOC2":
         Chopper(
             frequency=sc.scalar(28.0, unit=hz),
@@ -73,13 +71,13 @@ def make_beamline() -> dict:
             opening_angles_close=sc.array(
                 dims=[dim],
                 values=np.array([116.38, 172.47, 221.94, 267.69, 311.69, 360.0]) + 15.0,
-                unit='deg'),
-            kind=ChopperKind.FRAME_OVERLAP)
+                unit='deg'))
     }
 
     source = {
-        "source_pulse_length": sc.scalar(2.86e+03, unit='us'),
-        "source_pulse_t_0": sc.scalar(140.0, unit='us'),
+        "pulse_length": sc.scalar(2.86e+03, unit='us'),
+        "pulse_t_0": sc.scalar(140.0, unit='us'),
+        "position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }
 
-    return {"choppers": choppers, "source": source}
+    return Beamline(choppers=choppers, source=source)
