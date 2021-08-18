@@ -20,9 +20,8 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     frames = get_frames(data, **kwargs)
 
     # Find detector pixel furthest away from source
-    detector_pos_norm = sc.norm(data.meta["position"])
-    source_pos = sc.norm(data.meta["source_position"]).value
-    furthest_detector_pos = sc.max(detector_pos_norm).value
+    source_pos = data.meta["source_position"]
+    furthest_detector_pos = sc.max(sc.norm(data.meta["position"] - source_pos)).value
     pulse_rectangle_height = furthest_detector_pos / 50.0
     tmax_glob = sc.max(frames["time_max"].data).value
 
@@ -37,7 +36,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     # not be present in the description of the beamline.
     # So we fake this by simply using t_0 again at the end of the pulse.
     ax.add_patch(
-        Rectangle((0, source_pos),
+        Rectangle((0, 0),
                   (2.0 * data.meta["source_pulse_t_0"] +
                    data.meta["source_pulse_length"]).value,
                   -pulse_rectangle_height,
@@ -48,7 +47,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     # Draw a dark grey rectangle from t_0 to t_0 + pulse_length to represent the usable
     # pulse.
     ax.add_patch(
-        Rectangle((data.meta["source_pulse_t_0"].value, source_pos),
+        Rectangle((data.meta["source_pulse_t_0"].value, 0),
                   data.meta["source_pulse_length"].value,
                   -pulse_rectangle_height,
                   lw=1,
@@ -66,7 +65,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
 
     # Plot the chopper openings as segments
     for name, chopper in data.meta["choppers"].value.items():
-        yframe = sc.norm(chopper.position).value
+        yframe = sc.norm(chopper.position - source_pos).value
         time_open = chopper.time_open.values
         time_close = chopper.time_close.values
         tmin = 0.0
@@ -90,18 +89,19 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
             frame = frame[dim, 0]
 
         # Minimum wavelength
-        lambda_min = np.array(
-            [[(data.meta["source_pulse_t_0"] + data.meta["source_pulse_length"] -
-               frame['delta_time_min']).value, source_pos],
-             [(data.meta["source_pulse_t_0"] + data.meta["source_pulse_length"]).value,
-              source_pos],
-             [(frame["time_min"] + frame["delta_time_min"]).value,
-              furthest_detector_pos], [frame["time_min"].value, furthest_detector_pos]])
+        lambda_min = np.array([[
+            (data.meta["source_pulse_t_0"] + data.meta["source_pulse_length"] -
+             frame['delta_time_min']).value, 0
+        ], [(data.meta["source_pulse_t_0"] + data.meta["source_pulse_length"]).value,
+            0],
+                               [(frame["time_min"] + frame["delta_time_min"]).value,
+                                furthest_detector_pos],
+                               [frame["time_min"].value, furthest_detector_pos]])
 
         # Maximum wavelength
-        lambda_max = np.array([[data.meta["source_pulse_t_0"].value, source_pos],
+        lambda_max = np.array([[data.meta["source_pulse_t_0"].value, 0],
                                [(data.meta["source_pulse_t_0"] +
-                                 frame['delta_time_max']).value, source_pos],
+                                 frame['delta_time_max']).value, 0],
                                [frame["time_max"].value, furthest_detector_pos],
                                [(frame["time_max"] - frame["delta_time_max"]).value,
                                 furthest_detector_pos]])

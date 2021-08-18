@@ -44,7 +44,7 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     far_wfm_chopper = wfm_choppers[wfm_chopper_names[far_index]]
 
     # Compute distances for each detector pixel
-    detector_positions = data.meta["position"]
+    detector_positions = data.meta["position"] - data.meta["source_position"]
 
     # Container for frames information
     frames = sc.Dataset()
@@ -52,10 +52,11 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # Distance between WFM choppers
     dz_wfm = sc.norm(far_wfm_chopper.position - near_wfm_chopper.position)
     # Mid-point between WFM choppers
-    z_wfm = 0.5 * (near_wfm_chopper.position + far_wfm_chopper.position)
+    z_wfm = 0.5 * (near_wfm_chopper.position +
+                   far_wfm_chopper.position) - data.meta["source_position"]
     # Ratio of WFM chopper distances
-    z_ratio_wfm = (sc.norm(far_wfm_chopper.position) /
-                   sc.norm(near_wfm_chopper.position))
+    z_ratio_wfm = (sc.norm(far_wfm_chopper.position - data.meta["source_position"]) /
+                   sc.norm(near_wfm_chopper.position - data.meta["source_position"]))
     # Distance between detector positions and wfm chopper mid-point
     zdet_minus_zwfm = sc.norm(detector_positions - z_wfm)
 
@@ -82,7 +83,8 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     # t_lambda_min is found from the relation between lambda_N and lambda_N+1,
     # equation (3) in Schmakat et al. (2020).
     t_lambda_min = t_lambda_max * z_ratio_wfm - data.meta["source_pulse_length"] * (
-        zdet_minus_zwfm / sc.norm(near_wfm_chopper.position))
+        zdet_minus_zwfm /
+        sc.norm(near_wfm_chopper.position - data.meta["source_position"]))
 
     # dt_lambda_min is found from the relation between t and delta_t: equation (2)
     # in Schmakat et al. (2020), and using the expression for t_lambda_max.
@@ -111,6 +113,7 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     frames["delta_wavelength_min"] = dlambda_min
     frames["delta_wavelength_max"] = dlambda_max
 
-    frames["wfm_chopper_mid_point"] = z_wfm
+    frames["wfm_chopper_mid_point"] = 0.5 * (near_wfm_chopper.position +
+                                             far_wfm_chopper.position)
 
     return frames
