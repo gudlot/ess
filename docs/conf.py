@@ -17,6 +17,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import doctest
+import sphinx_rtd_theme
 
 html_show_sourcelink = True
 nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercontent.com/scipp/scipp/main/docs/{{ env.doc2path(env.docname, base=None) }}>`_
@@ -76,7 +77,6 @@ todo_include_todos = False
 
 # -- Options for HTML output -------------------------------------------------
 # Should only use this theme on READTHEDOCS. TODO.
-import sphinx_rtd_theme
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_context = {'css_files': ['_static/theme_overrides.css']}
