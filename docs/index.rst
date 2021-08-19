@@ -3,6 +3,11 @@ ess - Data reduction for ESS instrumentation
 
 `European Spallation Source`_ (ESS) toolkit for neutron scattering data reduction powered by `scipp`_ and `scippneutron`_.
 Provides ESS facility and instrument bespoke tools.
+The ``ess`` module is part of the software stack for data reduction:
+
+.. raw:: html
+
+   <object data="images/software-stack.svg" type="image/svg+xml"></object>
 
 
 .. _European Spallation Source: https://europeanspallationsource.se
