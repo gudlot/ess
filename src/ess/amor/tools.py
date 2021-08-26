@@ -21,13 +21,13 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
     :type q_min: scipp._scipp.core.Variable
     :param q_fix: The last point in the linear binning and first in the log binning. Optional, defaults to 0.005 Å^{-1}
     :type: q_fix: scipp._scipp.core.Variable
-    :param q_max: The maximum q-value to be present in the data. Optional, defaults to 0.08 Å^{-1} 
+    :param q_max: The maximum q-value to be present in the data. Optional, defaults to 0.08 Å^{-1}
     :type q_max: scipp._scipp.core.Variable
     :param q_d: The q-spacing for the linear region, from which the log-spacing is defined. Optional, defaults to 0.05*q_fix Å^{-1}
     :type q_d: scipp._scipp.core.Variable
 
     :return: The bin edges to be used in q-binning.
-    :rtype: scipp._scipp.core.Variable 
+    :rtype: scipp._scipp.core.Variable
     """
     q_min = sc.to_unit(q_min, q_max.unit)
     q_fix = sc.to_unit(q_fix, q_max.unit)
@@ -39,7 +39,7 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
         n_log = (sc.log(q_max / q_fix) / sc.log(1. + d_q / q_fix) + 0.5).astype(
             sc.dtype.int64)
         q_log = sc.Variable(
-            ['qz'],
+            dims=['qz'],
             values=(q_fix.value *
                     (1. + d_q / q_fix).value**sc.arange('qz', 0,
                                                         (n_log + 1).values, 1).values),
@@ -57,7 +57,7 @@ def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
         m_log = (sc.log(q_min / q_fix) / sc.log(1. + d_q / q_fix) - 0.5).astype(
             sc.dtype.int64)
         q_log = sc.Variable(
-            ['qz'],
+            dims=['qz'],
             values=q_fix.value *
             (1. + d_q / q_fix).values**sc.arange('qz', m_log.value,
                                                  (n_log + 1).value, 1.).values,
