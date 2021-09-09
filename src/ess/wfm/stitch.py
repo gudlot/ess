@@ -63,6 +63,21 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
         # TODO: when scipp 0.8 is released, rename_dims will create a new object.
         # section = section.rename_dims({dim: 'tof'})
         section.rename_dims({dim: 'tof'})
+        print("===============================")
+        print(section)
+        print("###############################")
+        print(section.events)
+        if section.events is not None:
+            section.events.coords['tof'] = section.events.meta[dim] - frames[
+                "time_correction"].data["frame", i]
+            del section.events.meta[dim]
+            # TODO: when scipp 0.8 is released, rename_dims will create a new object.
+            # section = section.rename_dims({dim: 'tof'})
+            section.events.rename_dims({dim: 'tof'})
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            print(section.events)
+        print("44444444444444444444444444444")
+        print(section)
 
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])
