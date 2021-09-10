@@ -4,8 +4,36 @@ import scipp as sc
 from typing import Union
 
 
-def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames: bool,
-                 bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
+def _populate_coords(old_item, new_item, dim):
+    for group in ["coords", "attrs"]:
+        for key in getattr(old_item, group):
+            if key != dim:
+                getattr(new_item, group)[key] = getattr(old_item, group)[key].copy()
+
+
+def _update_source_position(item, coords_or_attrs, frames):
+    getattr(item,
+            coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
+
+
+# def _make_merged_data_coord(frames, bins):
+#     if isinstance(bins, int):
+#         return sc.linspace(
+#             dim="tof",
+#             start=(frames["time_min"]["frame", 0] -
+#                    frames["time_correction"]["frame", 0]).value,
+#             stop=(frames["time_max"]["frame", -1] -
+#                   frames["time_correction"]["frame", -1]).value,
+#             num=bins + 1,
+#             unit=frames["time_min"].unit,
+#         )
+#     else:
+#         return bins
+
+
+def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
+                       merge_frames: bool,
+                       bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
     if merge_frames:
         # Make empty data container
@@ -21,6 +49,7 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
             )
         else:
             tof_coord = bins
+        # tof_coord = _make_merged_data_coord(frames, bins)
 
         dims = []
         shape = []
@@ -38,10 +67,11 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
                                              variances=item.variances is not None,
                                              unit=item.unit),
                                coords={"tof": tof_coord})
-            for group in ["coords", "attrs"]:
-                for key in getattr(item, group):
-                    if key != dim:
-                        getattr(out, group)[key] = getattr(item, group)[key].copy()
+            _populate_coords(item, out, dim)
+            # for group in ["coords", "attrs"]:
+            #     for key in getattr(item, group):
+            #         if key != dim:
+            #             getattr(out, group)[key] = getattr(item, group)[key].copy()
         else:
             out = None
     else:
@@ -56,88 +86,113 @@ def _stitch_item(item: sc.DataArray, dim: str, frames: sc.Dataset, merge_frames:
         raise KeyError("'source_position' was not found in metadata.")
 
     for i in range(frames.sizes["frame"]):
-        if item.bins is None:
-            section = item[dim, frames["time_min"].data[
-                "frame", i]:frames["time_max"].data["frame", i]].copy()
-            section.coords['tof'] = section.meta[dim] - frames["time_correction"].data[
-                "frame", i]
-            del section.meta[dim]
-            section.rename_dims({dim: 'tof'})
-        else:
-            piece = sc.bin(item,
-                           edges=[
-                               sc.concatenate(frames["time_min"].data["frame", i],
-                                              frames["time_max"].data["frame",
-                                                                      i], 'time')
-                           ])
-            piece.bins.coords['tof'] = piece.bins.meta[dim] - frames[
-                "time_correction"].data["frame", i]
-            piece.coords['tof'] = piece.meta['time'] - frames["time_correction"].data[
-                "frame", i]
-            del piece.meta['time']
-            del piece.bins.meta['time']
-            section = piece.events.copy()
-            section.rename_dims({'time': 'tof'})
-
-
-# # frame
-# # TODO: when scipp 0.8 is released, rename_dims will create a new object.
-# # section = section.rename_dims({dim: 'tof'})
-#         section.rename_dims({dim: 'tof'})
-#         print("===============================")
-#         print(section)
-#         print("###############################")
-#         print(section.events)
-#         if section.events is not None:
-#             section.events.coords['tof'] = section.events.meta[dim] - frames[
-#                 "time_correction"].data["frame", i]
-#             del section.events.meta[dim]
-#             # TODO: when scipp 0.8 is released, rename_dims will create a new object.
-#             # section = section.rename_dims({dim: 'tof'})
-#             section.events.rename_dims({dim: 'tof'})
-#             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-#             print(section.events)
-#         print("44444444444444444444444444444")
-#         print(section)
+        section = item[dim,
+                       frames["time_min"].data["frame",
+                                               i]:frames["time_max"].data["frame",
+                                                                          i]].copy()
+        section.coords['tof'] = section.meta[dim] - frames["time_correction"].data[
+            "frame", i]
+        del section.meta[dim]
+        section.rename_dims({dim: 'tof'})
 
         if merge_frames:
-            if item.bins is None:
-                out += sc.rebin(section, 'tof', out.meta["tof"])
-            else:
-                if out is None:
-                    out = section
-                else:
-                    out = sc.concatenate(out, section, 'tof')
+            out += sc.rebin(section, 'tof', out.meta["tof"])
         else:
-            getattr(section, coords_or_attrs
-                    )['source_position'] = frames["wfm_chopper_mid_point"].data
+            _update_source_position(section, coords_or_attrs, frames)
+            # getattr(section, coords_or_attrs
+            #         )['source_position'] = frames["wfm_chopper_mid_point"].data
             out[f"frame{i}"] = section
 
     # Note: we need to do the modification here because if not there is a coordinate
     # mismatch between `out` and `section`
     if merge_frames:
-        if item.bins is not None:
-            out = sc.bin(out,
-                         edges=[
-                             sc.concatenate(tof_coord['tof', 0], tof_coord['tof', -1],
-                                            'tof')
-                         ])
-            for group in ["coords", "attrs"]:
-                for key in getattr(item, group):
-                    if key != dim:
-                        getattr(out, group)[key] = getattr(item, group)[key].copy()
-        getattr(
-            out,
-            coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
-    elif item.bins is not None:
-        for name in out:
-            for group in ["coords", "attrs"]:
-                for key in getattr(item, group):
-                    if key != dim:
-                        getattr(out[name], group)[key] = getattr(item,
-                                                                 group)[key].copy()
+        _update_source_position(out, coords_or_attrs, frames)
+        # getattr(
+        #     out,
+        #     coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
 
     return out
+
+
+def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
+                       merge_frames: bool,
+                       bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
+
+    if merge_frames:
+        out = None
+    else:
+        out = {}
+
+    # Determine whether source_position is in coords or attrs
+    coords_or_attrs = None
+    for meta in ["coords", "attrs"]:
+        if "source_position" in getattr(item, meta):
+            coords_or_attrs = meta
+    if coords_or_attrs is None:
+        raise KeyError("'source_position' was not found in metadata.")
+
+    for i in range(frames.sizes["frame"]):
+        piece = sc.bin(item,
+                       edges=[
+                           sc.concatenate(frames["time_min"].data["frame", i],
+                                          frames["time_max"].data["frame", i], 'time')
+                       ])
+        piece.bins.coords[
+            'tof'] = piece.bins.meta[dim] - frames["time_correction"].data["frame", i]
+        piece.coords['tof'] = piece.meta['time'] - frames["time_correction"].data[
+            "frame", i]
+        del piece.meta['time']
+        del piece.bins.meta['time']
+        section = piece.events.copy()
+        section.rename_dims({'time': 'tof'})
+
+        if merge_frames:
+            if out is None:
+                out = section
+            else:
+                out = sc.concatenate(out, section, 'tof')
+        else:
+            _update_source_position(section, coords_or_attrs, frames)
+            # getattr(section, coords_or_attrs
+            #         )['source_position'] = frames["wfm_chopper_mid_point"].data
+            _populate_coords(item, section, dim)
+            out[f"frame{i}"] = section
+
+    # Note: we need to do the modification here because if not there is a coordinate
+    # mismatch between `out` and `section`
+    if merge_frames:
+        edges = sc.array(dims=['tof'],
+                         values=[(frames["time_min"]["frame", 0] -
+                                  frames["time_correction"]["frame", 0]).value,
+                                 (frames["time_max"]["frame", -1] -
+                                  frames["time_correction"]["frame", -1]).value],
+                         unit=frames["time_min"].unit)
+        out = sc.bin(out, edges=[edges])
+        _populate_coords(item, out, dim)
+        _update_source_position(out, coords_or_attrs, frames)
+    #     # for group in ["coords", "attrs"]:
+    #     #     for key in getattr(item, group):
+    #     #         if key != dim:
+    #     #             getattr(out, group)[key] = getattr(item, group)[key].copy()
+    #     getattr(
+    #         out,
+    #         coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
+    # # else:
+    # #     for name in out:
+    # #         for group in ["coords", "attrs"]:
+    # #             for key in getattr(item, group):
+    # #                 if key != dim:
+    # #                     getattr(out[name], group)[key] = getattr(item,
+    # #                                                              group)[key].copy()
+
+    return out
+
+
+def _stitch_item(item: sc.DataArray, **kwargs) -> Union[sc.DataArray, dict]:
+    if item.bins is not None:
+        return _stitch_event_data(item, **kwargs)
+    else:
+        return _stitch_dense_data(item, **kwargs)
 
 
 def stitch(
