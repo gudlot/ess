@@ -11,24 +11,15 @@ def _populate_coords(old_item, new_item, dim):
                 getattr(new_item, group)[key] = getattr(old_item, group)[key].copy()
 
 
-def _update_source_position(item, coords_or_attrs, frames):
+def _update_source_position(item, frames):
+    coords_or_attrs = None
+    for meta in ["coords", "attrs"]:
+        if "source_position" in getattr(item, meta):
+            coords_or_attrs = meta
+    if coords_or_attrs is None:
+        raise KeyError("'source_position' was not found in metadata.")
     getattr(item,
             coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
-
-
-# def _make_merged_data_coord(frames, bins):
-#     if isinstance(bins, int):
-#         return sc.linspace(
-#             dim="tof",
-#             start=(frames["time_min"]["frame", 0] -
-#                    frames["time_correction"]["frame", 0]).value,
-#             stop=(frames["time_max"]["frame", -1] -
-#                   frames["time_correction"]["frame", -1]).value,
-#             num=bins + 1,
-#             unit=frames["time_min"].unit,
-#         )
-#     else:
-#         return bins
 
 
 def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
@@ -49,7 +40,6 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
             )
         else:
             tof_coord = bins
-        # tof_coord = _make_merged_data_coord(frames, bins)
 
         dims = []
         shape = []
@@ -68,22 +58,10 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
                                              unit=item.unit),
                                coords={"tof": tof_coord})
             _populate_coords(item, out, dim)
-            # for group in ["coords", "attrs"]:
-            #     for key in getattr(item, group):
-            #         if key != dim:
-            #             getattr(out, group)[key] = getattr(item, group)[key].copy()
         else:
             out = None
     else:
         out = {}
-
-    # Determine whether source_position is in coords or attrs
-    coords_or_attrs = None
-    for meta in ["coords", "attrs"]:
-        if "source_position" in getattr(item, meta):
-            coords_or_attrs = meta
-    if coords_or_attrs is None:
-        raise KeyError("'source_position' was not found in metadata.")
 
     for i in range(frames.sizes["frame"]):
         section = item[dim,
@@ -98,18 +76,13 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
         if merge_frames:
             out += sc.rebin(section, 'tof', out.meta["tof"])
         else:
-            _update_source_position(section, coords_or_attrs, frames)
-            # getattr(section, coords_or_attrs
-            #         )['source_position'] = frames["wfm_chopper_mid_point"].data
+            _update_source_position(section, frames)
             out[f"frame{i}"] = section
 
     # Note: we need to do the modification here because if not there is a coordinate
     # mismatch between `out` and `section`
     if merge_frames:
-        _update_source_position(out, coords_or_attrs, frames)
-        # getattr(
-        #     out,
-        #     coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
+        _update_source_position(out, frames)
 
     return out
 
@@ -122,14 +95,6 @@ def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
         out = None
     else:
         out = {}
-
-    # Determine whether source_position is in coords or attrs
-    coords_or_attrs = None
-    for meta in ["coords", "attrs"]:
-        if "source_position" in getattr(item, meta):
-            coords_or_attrs = meta
-    if coords_or_attrs is None:
-        raise KeyError("'source_position' was not found in metadata.")
 
     for i in range(frames.sizes["frame"]):
         piece = sc.bin(item,
@@ -152,10 +117,8 @@ def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
             else:
                 out = sc.concatenate(out, section, 'tof')
         else:
-            _update_source_position(section, coords_or_attrs, frames)
-            # getattr(section, coords_or_attrs
-            #         )['source_position'] = frames["wfm_chopper_mid_point"].data
             _populate_coords(item, section, dim)
+            _update_source_position(section, frames)
             out[f"frame{i}"] = section
 
     # Note: we need to do the modification here because if not there is a coordinate
@@ -169,21 +132,7 @@ def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
                          unit=frames["time_min"].unit)
         out = sc.bin(out, edges=[edges])
         _populate_coords(item, out, dim)
-        _update_source_position(out, coords_or_attrs, frames)
-    #     # for group in ["coords", "attrs"]:
-    #     #     for key in getattr(item, group):
-    #     #         if key != dim:
-    #     #             getattr(out, group)[key] = getattr(item, group)[key].copy()
-    #     getattr(
-    #         out,
-    #         coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
-    # # else:
-    # #     for name in out:
-    # #         for group in ["coords", "attrs"]:
-    # #             for key in getattr(item, group):
-    # #                 if key != dim:
-    # #                     getattr(out[name], group)[key] = getattr(item,
-    # #                                                              group)[key].copy()
+        _update_source_position(out, frames)
 
     return out
 
