@@ -51,15 +51,12 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
                 dims.append('tof')
                 shape.append(tof_coord.sizes['tof'] - 1)
 
-        if item.bins is None:
-            out = sc.DataArray(data=sc.zeros(dims=dims,
-                                             shape=shape,
-                                             variances=item.variances is not None,
-                                             unit=item.unit),
-                               coords={"tof": tof_coord})
-            _populate_coords(item, out, dim)
-        else:
-            out = None
+        out = sc.DataArray(data=sc.zeros(dims=dims,
+                                         shape=shape,
+                                         variances=item.variances is not None,
+                                         unit=item.unit),
+                           coords={"tof": tof_coord})
+        _populate_coords(item, out, dim)
     else:
         out = {}
 
