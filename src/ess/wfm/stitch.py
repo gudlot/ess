@@ -59,7 +59,6 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
 def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
-    # Note: it's better to have frame as the inner dim and pixels as the outer dims
     edges = sc.flatten(sc.transpose(sc.concatenate(frames["time_min"].data,
                                                    frames["time_max"].data, 'dummy'),
                                     dims=['frame', 'dummy']),
@@ -71,8 +70,11 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
         binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
                                                                               i]
 
-    binned.bins.coords[new_dim] = binned.bins.coords[dim]
-    del binned.bins.coords[dim]
+    erase = None
+    if new_dim != dim:
+        binned.bins.coords[new_dim] = binned.bins.coords[dim]
+        del binned.bins.coords[dim]
+        erase = [dim]
 
     binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
                                   2).astype(sc.dtype.bool)
@@ -81,7 +83,7 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
         (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,
         (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data,
         new_dim)
-    return sc.bin(binned, edges=[new_edges], erase=[dim])
+    return sc.bin(binned, edges=[new_edges], erase=erase)
 
 
 def _stitch_item(item: sc.DataArray, frames: sc.Dataset,

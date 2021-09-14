@@ -47,7 +47,7 @@ def test_basic_stitching():
                      }))
 
 
-def _do_stitching_on_beamline(wavelengths, event_mode=False):
+def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
     # Make beamline parameters for 6 frames
     coords = wfm.make_fake_beamline(nframes=6)
 
@@ -58,7 +58,7 @@ def _do_stitching_on_beamline(wavelengths, event_mode=False):
     arrival_times = sc.to_unit(
         alpha * dz * wavelengths,
         'us') + coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])
-    coords['time'] = arrival_times
+    coords[dim] = arrival_times
 
     # Make a data array that contains the beamline and the time coordinate
     tmin = sc.min(arrival_times)
@@ -69,7 +69,7 @@ def _do_stitching_on_beamline(wavelengths, event_mode=False):
         num = 2
     else:
         num = 2001
-    time_binning = sc.linspace(dim='time',
+    time_binning = sc.linspace(dim=dim,
                                start=(tmin - dt).value,
                                stop=(tmax + dt).value,
                                num=num,
@@ -87,7 +87,7 @@ def _do_stitching_on_beamline(wavelengths, event_mode=False):
     # Find location of frames
     frames = wfm.get_frames(da)
 
-    stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)
+    stitched = wfm.stitch(frames=frames, data=da, dim=dim, bins=2001)
 
     wav = scn.convert(stitched, origin='tof', target='wavelength', scatter=False)
     if event_mode:
@@ -130,12 +130,14 @@ def _check_lambda_inside_resolution(lam,
     assert sc.isclose(sum_in_range, 1.0 * sc.units.counts).value is check_value
 
 
+@pytest.mark.parametrize("dim", ['time', 'tof'])
 @pytest.mark.parametrize("event_mode", [False, True])
-def test_stitching_on_beamline(event_mode):
+def test_stitching_on_beamline(event_mode, dim):
     wavelengths = sc.array(dims=['event'],
                            values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],
                            unit='angstrom')
     stitched, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths,
+                                                              dim=dim,
                                                               event_mode=event_mode)
 
     for i in range(len(wavelengths)):
@@ -145,14 +147,16 @@ def test_stitching_on_beamline(event_mode):
                                         event_mode=event_mode)
 
 
+@pytest.mark.parametrize("dim", ['time', 'tof'])
 @pytest.mark.parametrize("event_mode", [False, True])
-def test_stitching_on_beamline_bad_wavelength(event_mode):
+def test_stitching_on_beamline_bad_wavelength(event_mode, dim):
     # Create 6 neutrons. The first wavelength is in this case too short to pass through
     # the WFM choppers.
     wavelengths = sc.array(dims=['event'],
                            values=[1.5, 3.2, 4.5, 6.0, 7.0, 8.25],
                            unit='angstrom')
     stitched, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths,
+                                                              dim=dim,
                                                               event_mode=event_mode)
 
     # The first wavelength should fail the check, since anything not passing through
