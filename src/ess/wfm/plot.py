@@ -142,3 +142,43 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     ax.set_ylabel("Distance [m]")
 
     return fig
+
+
+def _sum_remaining_dims(data, dim):
+    """
+    Sum all dims in `data` except `dim`.
+    """
+    to_be_summed = set(data.dims) - set([dim])
+    summed = data
+    for dim_ in to_be_summed:
+        summed = sc.sum(summed, dim_)
+    return summed
+
+
+def frames_before_stitching(data, frames, dim):
+    """
+    Plot the individual frames before the stitching is carried out.
+    """
+    summed = _sum_remaining_dims(data, dim)
+    return sc.plot({
+        'frame{}'.format(i):
+        summed[dim, frames['time_min']['frame', i].data:frames['time_max']['frame',
+                                                                           i].data]
+        for i in range(frames['time_min'].sizes['frame'])
+    })
+
+
+def frames_after_stitching(data, frames, dim):
+    """
+    Plot the individual frames after the stitching is carried out.
+    """
+    summed = _sum_remaining_dims(data, dim)
+    out = {}
+    for i in range(frames['time_min'].sizes['frame']):
+        key = 'frame{}'.format(i)
+        out[key] = summed[dim,
+                          frames['time_min']['frame',
+                                             i].data:frames['time_max']['frame',
+                                                                        i].data].copy()
+        out[key].coords[dim] -= frames['time_correction']['frame', i].data
+    return sc.plot(out)
