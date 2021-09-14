@@ -11,27 +11,29 @@ def solid_angle(data):
     return (pixel_size * pixel_length) / (L2 * L2)
 
 
-def transmission_fraction(sample, direct, wavelength_bins):
+def transmission_fraction(sample, background, direct, wavelength_bins):
     # Approximation based on equations in CalculateTransmission documentation
     # p = \frac{S_T}{D_T}\frac{D_I}{S_I}
     # This is equivalent to mantid.CalculateTransmission without fitting
     def setup(data, begin, end, scatter):
-        background = data - sc.mean(data['tof', begin:end], 'tof')
-        background = scn.convert(background, 'tof', 'wavelength', scatter=scatter)
+        transformed = data - sc.mean(data['tof', begin:end], 'tof')
+        transformed = scn.convert(transformed, 'tof', 'wavelength', scatter=scatter)
         #TODO: NANs after rebining
         #print('background before')
         #sc.to_html(background)
-        background = sc.rebin(background.copy(), 'wavelength', wavelength_bins)
+        transformed = sc.rebin(transformed.copy(), 'wavelength', wavelength_bins)
         #print('background after')
         #sc.to_html(background)
-        return background
+        return transformed
 
     us = sc.units.us
     #TODO: resolve this
     sample_incident = setup(sample.attrs['monitor2'].value, 85000.0 * us, 98000.0 * us, scatter=False)
-    sample_trans = setup(sample.attrs['monitor4'].value, 50.0 * us, 3000.0 * us, scatter=False)
-    direct_incident = setup(direct.attrs['monitor2'].value, 85000.0 * us, 98000.0 * us, scatter=False)
-    direct_trans = setup(direct.attrs['monitor4'].value, 50.0 * us, 3000.0 * us, scatter=False)
+    sample_trans = setup(sample.attrs['monitor4'].value, 85000.0 * us, 98000.0 * us, scatter=False)
+    direct_incident = setup(direct.attrs['monitor2'].value, 40000.0 * us, 100005 * us, scatter=False)
+    direct_trans = setup(direct.attrs['monitor4'].value, 40000.0 * us, 100005 * us, scatter=False)
+    #direct_incident = setup(background.attrs['monitor2'].value, 85000.0 * us, 98000.0 * us, scatter=False)
+    #direct_trans = setup(background.attrs['monitor4'].value, 50.0 * us, 3000.0 * us, scatter=False)
 
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)
     #CalculateTransmission(SampleRunWorkspace=transWsTmp,

@@ -6,20 +6,21 @@ import reduction
 import normalization
 
 
-def to_wavelength(data, transmission, direct_beam, direct_beam_transmission,
+def to_wavelength(data, background, transmission, direct_beam, direct_beam_transmission,
                   masks, wavelength_bins):
     data = data.copy()
     #TODO: transmission returns NANs
     transmission = normalization.transmission_fraction(transmission,
-                                         direct_beam_transmission,
-                                         wavelength_bins)
+                                                        background,
+                                                        direct_beam_transmission,
+                                                        wavelength_bins)
     for name, mask in masks.items():
         data.masks[name] = mask
     data = scn.convert(data, 'tof', 'wavelength', out=data, scatter=True)
     data = sc.rebin(data, 'wavelength', wavelength_bins)
 
     monitor = data.attrs['monitor2'].value
-    monitor = monitor - sc.mean(monitor['tof', 85000.0 * sc.units.us:98000.0 * sc.units.us], 'tof')
+    monitor = monitor - sc.mean(monitor['tof', 85000.0 * sc.units.us: 98000.0 * sc.units.us], 'tof')
     monitor = scn.convert(monitor, 'tof', 'wavelength', out=monitor, scatter=False)
     monitor = sc.rebin(monitor, 'wavelength', wavelength_bins)
 
@@ -33,9 +34,10 @@ def to_wavelength(data, transmission, direct_beam, direct_beam_transmission,
     return d
 
 
-def to_q(data, transmission, direct_beam, direct_beam_transmission, masks, q_bins,
+def to_q(data, background,  transmission, direct_beam, direct_beam_transmission, masks, q_bins,
          wavelength_bins, wavelength_bands=None, groupby=None):
     wav = to_wavelength(data=data,
+                             background = background,
                              transmission=transmission,
                              direct_beam=direct_beam,
                              direct_beam_transmission=direct_beam_transmission,
