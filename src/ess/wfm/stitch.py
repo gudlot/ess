@@ -92,7 +92,16 @@ def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
     else:
         out = _stitch_dense_data(item=item, frames=frames, **kwargs)
 
-    # Update source position
+    # Update source position.
+    # TODO: Note that this is a hack, to make sure the unit conversion to wavelength
+    # computes the correct L1.
+    # Because we cannot, in a nice way, tell the difference between cases where one
+    # needs to set L1 (because `scatter=True` will be used in the conversion later),
+    # and when one needs to set `Ltotal` instead (because `scatter=False` is required
+    # for e.g. imaging).
+    # Once we support general conversion graphs in the unit conversion of scippneutron,
+    # we should stop modifying the coordinate here, and change to using a specialized
+    # WFM conversion graph that looks for `wfm_chopper_mid_point` in the coords.
     if "source_position" in item.meta:
         del out.meta["source_position"]
     out.coords['source_position'] = frames["wfm_chopper_mid_point"].data

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
-import numpy as np
 import scipp as sc
 import scippneutron as scn
 import pytest
