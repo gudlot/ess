@@ -184,7 +184,7 @@ def frames_before_stitching(data: sc.DataArray,
     for i in range(frames_no_shift['time_min'].sizes['frame']):
         key = 'frame{}'.format(i)
         out[key] = stitch(frames=frames_no_shift['frame', i:i + 1],
-                          data=data,
+                          data=summed,
                           dim=dim,
                           bins=bins_per_frame)
         # TODO: is this still required with the new plotting in scipp 0.8?
@@ -206,7 +206,7 @@ def frames_after_stitching(data: sc.DataArray,
     for i in range(frames['time_min'].sizes['frame']):
         key = 'frame{}'.format(i)
         out[key] = stitch(frames=frames['frame', i:i + 1],
-                          data=data,
+                          data=summed,
                           dim=dim,
                           bins=bins_per_frame)
         # TODO: is this still required with the new plotting in scipp 0.8?

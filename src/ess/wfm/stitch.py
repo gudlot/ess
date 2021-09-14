@@ -4,25 +4,7 @@ import scipp as sc
 from typing import Union
 
 
-def _populate_coords(old_item, new_item, dim):
-    for group in ["coords", "attrs"]:
-        for key in getattr(old_item, group):
-            if key != dim:
-                getattr(new_item, group)[key] = getattr(old_item, group)[key].copy()
-
-
-def _update_source_position(item, frames):
-    coords_or_attrs = None
-    for meta in ["coords", "attrs"]:
-        if "source_position" in getattr(item, meta):
-            coords_or_attrs = meta
-    if coords_or_attrs is None:
-        raise KeyError("'source_position' was not found in metadata.")
-    getattr(item,
-            coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
-
-
-def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim: str,
+def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
     # Make empty data container
@@ -54,7 +36,10 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim
                                      variances=item.variances is not None,
                                      unit=item.unit),
                        coords={new_dim: new_coord})
-    _populate_coords(item, out, dim)
+    for group in ["coords", "attrs"]:
+        for key in getattr(item, group):
+            if key != dim:
+                getattr(out, group)[key] = getattr(item, group)[key].copy()
 
     for i in range(frames.sizes["frame"]):
         section = item[dim,
@@ -68,14 +53,10 @@ def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim
 
         out += sc.rebin(section, new_dim, out.meta[new_dim])
 
-    # Note: we need to do the modification here because if not there is a coordinate
-    # mismatch between `out` and `section`
-    _update_source_position(out, frames)
-
     return out
 
 
-def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim: str,
+def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
     # Note: it's better to have frame as the inner dim and pixels as the outer dims
@@ -103,11 +84,19 @@ def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim
     return sc.bin(binned, edges=[new_edges], erase=[dim])
 
 
-def _stitch_item(item: sc.DataArray, **kwargs) -> Union[sc.DataArray, dict]:
+def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
+                 **kwargs) -> Union[sc.DataArray, dict]:
+
     if item.bins is not None:
-        return _stitch_event_data(item, **kwargs)
+        out = _stitch_event_data(item=item, frames=frames, **kwargs)
     else:
-        return _stitch_dense_data(item, **kwargs)
+        out = _stitch_dense_data(item=item, frames=frames, **kwargs)
+
+    # Update source position
+    if "source_position" in item.meta:
+        del out.meta["source_position"]
+    out.coords['source_position'] = frames["wfm_chopper_mid_point"].data
+    return out
 
 
 def stitch(
