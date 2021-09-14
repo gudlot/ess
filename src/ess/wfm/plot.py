@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
 from .wfm import get_frames
+from .stitch import stitch
 
 
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
@@ -144,7 +145,7 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
     return fig
 
 
-def _sum_remaining_dims(data, dim):
+def _sum_remaining_dims(data: sc.DataArray, dim: str) -> sc.DataArray:
     """
     Sum all dims in `data` except `dim`.
     """
@@ -155,20 +156,48 @@ def _sum_remaining_dims(data, dim):
     return summed
 
 
-def frames_before_stitching(data, frames, dim):
+def _bin_event_data_for_ploting(data, frame, bins_per_frame):
+    """
+    Bin event data using `bins_per_frame` to make a meaningful plot.
+    """
+    return sc.bin(data,
+                  edges=[
+                      sc.linspace(dim='tof',
+                                  start=frame["time_min"].value,
+                                  stop=frame["time_max"].value,
+                                  num=bins_per_frame,
+                                  unit=frame['time_min'].unit)
+                  ]).bins.sum()
+
+
+def frames_before_stitching(data: sc.DataArray,
+                            frames: sc.Dataset,
+                            dim: str,
+                            bins_per_frame: int = 32):
     """
     Plot the individual frames before the stitching is carried out.
     """
     summed = _sum_remaining_dims(data, dim)
-    return sc.plot({
-        'frame{}'.format(i):
-        summed[dim, frames['time_min']['frame', i].data:frames['time_max']['frame',
-                                                                           i].data]
-        for i in range(frames['time_min'].sizes['frame'])
-    })
+    frames_no_shift = frames.copy()
+    frames_no_shift['time_correction'].data *= 0.
+    out = {}
+    for i in range(frames_no_shift['time_min'].sizes['frame']):
+        key = 'frame{}'.format(i)
+        out[key] = stitch(frames=frames_no_shift['frame', i:i + 1],
+                          data=data,
+                          dim=dim,
+                          bins=bins_per_frame)
+        # TODO: is this still required with the new plotting in scipp 0.8?
+        if out[key].bins is not None:
+            out[key] = _bin_event_data_for_ploting(out[key], frames['frame', i],
+                                                   bins_per_frame)
+    return sc.plot(out)
 
 
-def frames_after_stitching(data, frames, dim):
+def frames_after_stitching(data: sc.DataArray,
+                           frames: sc.Dataset,
+                           dim: str,
+                           bins_per_frame: int = 32):
     """
     Plot the individual frames after the stitching is carried out.
     """
@@ -176,9 +205,17 @@ def frames_after_stitching(data, frames, dim):
     out = {}
     for i in range(frames['time_min'].sizes['frame']):
         key = 'frame{}'.format(i)
-        out[key] = summed[dim,
-                          frames['time_min']['frame',
-                                             i].data:frames['time_max']['frame',
-                                                                        i].data].copy()
-        out[key].coords[dim] -= frames['time_correction']['frame', i].data
+        out[key] = stitch(frames=frames['frame', i:i + 1],
+                          data=data,
+                          dim=dim,
+                          bins=bins_per_frame)
+        # TODO: is this still required with the new plotting in scipp 0.8?
+        if out[key].bins is not None:
+            frame = frames['frame', i]
+            new_frame = {
+                "time_min": frame['time_min'] - frame['time_correction'],
+                "time_max": frame['time_max'] - frame['time_correction']
+            }
+            out[key] = _bin_event_data_for_ploting(out[key], new_frame, bins_per_frame)
+
     return sc.plot(out)

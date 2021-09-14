@@ -22,116 +22,85 @@ def _update_source_position(item, frames):
             coords_or_attrs)['source_position'] = frames["wfm_chopper_mid_point"].data
 
 
-def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
-                       merge_frames: bool,
+def _stitch_dense_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
-    if merge_frames:
-        # Make empty data container
-        if isinstance(bins, int):
-            tof_coord = sc.linspace(
-                dim="tof",
-                start=(frames["time_min"]["frame", 0] -
-                       frames["time_correction"]["frame", 0]).value,
-                stop=(frames["time_max"]["frame", -1] -
-                      frames["time_correction"]["frame", -1]).value,
-                num=bins + 1,
-                unit=frames["time_min"].unit,
-            )
-        else:
-            tof_coord = bins
-
-        dims = []
-        shape = []
-        for dim_ in item.dims:
-            if dim_ != dim:
-                dims.append(dim_)
-                shape.append(item.sizes[dim_])
-            else:
-                dims.append('tof')
-                shape.append(tof_coord.sizes['tof'] - 1)
-
-        out = sc.DataArray(data=sc.zeros(dims=dims,
-                                         shape=shape,
-                                         variances=item.variances is not None,
-                                         unit=item.unit),
-                           coords={"tof": tof_coord})
-        _populate_coords(item, out, dim)
+    # Make empty data container
+    if isinstance(bins, int):
+        new_coord = sc.linspace(
+            dim=new_dim,
+            start=(frames["time_min"]["frame", 0] -
+                   frames["time_correction"]["frame", 0]).value,
+            stop=(frames["time_max"]["frame", -1] -
+                  frames["time_correction"]["frame", -1]).value,
+            num=bins + 1,
+            unit=frames["time_min"].unit,
+        )
     else:
-        out = {}
+        new_coord = bins
+
+    dims = []
+    shape = []
+    for dim_ in item.dims:
+        if dim_ != dim:
+            dims.append(dim_)
+            shape.append(item.sizes[dim_])
+        else:
+            dims.append(new_dim)
+            shape.append(new_coord.sizes[new_dim] - 1)
+
+    out = sc.DataArray(data=sc.zeros(dims=dims,
+                                     shape=shape,
+                                     variances=item.variances is not None,
+                                     unit=item.unit),
+                       coords={new_dim: new_coord})
+    _populate_coords(item, out, dim)
 
     for i in range(frames.sizes["frame"]):
         section = item[dim,
                        frames["time_min"].data["frame",
                                                i]:frames["time_max"].data["frame",
                                                                           i]].copy()
-        section.coords['tof'] = section.meta[dim] - frames["time_correction"].data[
+        section.coords[new_dim] = section.meta[dim] - frames["time_correction"].data[
             "frame", i]
         del section.meta[dim]
-        section.rename_dims({dim: 'tof'})
+        section.rename_dims({dim: new_dim})
 
-        if merge_frames:
-            out += sc.rebin(section, 'tof', out.meta["tof"])
-        else:
-            _update_source_position(section, frames)
-            out[f"frame{i}"] = section
+        out += sc.rebin(section, new_dim, out.meta[new_dim])
 
     # Note: we need to do the modification here because if not there is a coordinate
     # mismatch between `out` and `section`
-    if merge_frames:
-        _update_source_position(out, frames)
+    _update_source_position(out, frames)
 
     return out
 
 
-def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset,
-                       merge_frames: bool,
+def _stitch_event_data(item: sc.DataArray, dim: str, frames: sc.Dataset, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
-    if merge_frames:
-        out = None
-    else:
-        out = {}
+    # Note: it's better to have frame as the inner dim and pixels as the outer dims
+    edges = sc.flatten(sc.transpose(sc.concatenate(frames["time_min"].data,
+                                                   frames["time_max"].data, 'dummy'),
+                                    dims=['frame', 'dummy']),
+                       to=dim)
+
+    binned = sc.bin(item, edges=[edges])
 
     for i in range(frames.sizes["frame"]):
-        piece = sc.bin(item,
-                       edges=[
-                           sc.concatenate(frames["time_min"].data["frame", i],
-                                          frames["time_max"].data["frame", i], 'time')
-                       ])
-        piece.bins.coords[
-            'tof'] = piece.bins.meta[dim] - frames["time_correction"].data["frame", i]
-        piece.coords['tof'] = piece.meta['time'] - frames["time_correction"].data[
-            "frame", i]
-        del piece.meta['time']
-        del piece.bins.meta['time']
-        section = piece.events.copy()
-        section.rename_dims({'time': 'tof'})
+        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
+                                                                              i]
 
-        if merge_frames:
-            if out is None:
-                out = section
-            else:
-                out = sc.concatenate(out, section, 'tof')
-        else:
-            _populate_coords(item, section, dim)
-            _update_source_position(section, frames)
-            out[f"frame{i}"] = section
+    binned.bins.coords[new_dim] = binned.bins.coords[dim]
+    del binned.bins.coords[dim]
 
-    # Note: we need to do the modification here because if not there is a coordinate
-    # mismatch between `out` and `section`
-    if merge_frames:
-        edges = sc.array(dims=['tof'],
-                         values=[(frames["time_min"]["frame", 0] -
-                                  frames["time_correction"]["frame", 0]).value,
-                                 (frames["time_max"]["frame", -1] -
-                                  frames["time_correction"]["frame", -1]).value],
-                         unit=frames["time_min"].unit)
-        out = sc.bin(out, edges=[edges])
-        _populate_coords(item, out, dim)
-        _update_source_position(out, frames)
+    binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
+                                  2).astype(sc.dtype.bool)
 
-    return out
+    new_edges = sc.concatenate(
+        (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,
+        (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data,
+        new_dim)
+    return sc.bin(binned, edges=[new_edges], erase=[dim])
 
 
 def _stitch_item(item: sc.DataArray, **kwargs) -> Union[sc.DataArray, dict]:
@@ -145,13 +114,20 @@ def stitch(
         data: Union[sc.DataArray, sc.Dataset],
         dim: str,
         frames: sc.Dataset,
-        merge_frames: bool = True,
+        new_dim: str = 'tof',
         bins: Union[int, sc.Variable] = 256) -> Union[sc.DataArray, sc.Dataset, dict]:
     """
     Convert raw arrival time WFM data to time-of-flight by shifting each frame
     (described by the `frames` argument) by a time offset defined by the position
     of the WFM choppers.
     This process is also known as 'stitching' the frames.
+
+    :param data: The DataArray or Dataset to be stitched.
+    :param dim: The dimension along which the stitching will be performed.
+    :param frames: The Dataset containing the information on the frame boundaries.
+    :param new_dim: New dimension of the returned data, after stitching. Default: 'tof'.
+    :param bins: Number or Variable describing the bins for the returned data. Default:
+        256.
     """
 
     # TODO: for now, if frames depend on positions, we take the mean along the
@@ -164,21 +140,18 @@ def stitch(
         frames["time_max"] = sc.mean(frames["time_max"], _dim)
 
     if isinstance(data, sc.Dataset):
-        if merge_frames:
-            stitched = sc.Dataset()
-        else:
-            stitched = {}
+        stitched = sc.Dataset()
         for i, (key, item) in enumerate(data.items()):
             stitched[key] = _stitch_item(item=item,
                                          dim=dim,
                                          frames=frames,
-                                         merge_frames=merge_frames,
+                                         new_dim=new_dim,
                                          bins=bins)
     else:
         stitched = _stitch_item(item=data,
                                 dim=dim,
                                 frames=frames,
-                                merge_frames=merge_frames,
+                                new_dim=new_dim,
                                 bins=bins)
 
     return stitched
