@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
-import numpy as np
 import scipp as sc
 import scippneutron as scn
+import pytest
 
 
 def test_basic_stitching():
@@ -47,7 +47,7 @@ def test_basic_stitching():
                      }))
 
 
-def _do_stitching_on_beamline(wavelengths):
+def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
     # Make beamline parameters for 6 frames
     coords = wfm.make_fake_beamline(nframes=6)
 
@@ -58,33 +58,48 @@ def _do_stitching_on_beamline(wavelengths):
     arrival_times = sc.to_unit(
         alpha * dz * wavelengths,
         'us') + coords['source_pulse_t_0'] + (0.5 * coords['source_pulse_length'])
+    coords[dim] = arrival_times
 
     # Make a data array that contains the beamline and the time coordinate
     tmin = sc.min(arrival_times)
     tmax = sc.max(arrival_times)
     dt = 0.1 * (tmax - tmin)
-    coords['time'] = sc.linspace(dim='time',
-                                 start=(tmin - dt).value,
-                                 stop=(tmax + dt).value,
-                                 num=2001,
-                                 unit=dt.unit)
-    counts, _ = np.histogram(arrival_times.values, bins=coords['time'].values)
-    da = sc.DataArray(coords=coords,
-                      data=sc.array(dims=['time'], values=counts, unit='counts'))
+
+    if event_mode:
+        num = 2
+    else:
+        num = 2001
+    time_binning = sc.linspace(dim=dim,
+                               start=(tmin - dt).value,
+                               stop=(tmax + dt).value,
+                               num=num,
+                               unit=dt.unit)
+    events = sc.DataArray(data=sc.ones(dims=['event'],
+                                       shape=arrival_times.shape,
+                                       unit=sc.units.counts,
+                                       variances=True),
+                          coords=coords)
+    if event_mode:
+        da = sc.bin(events, edges=[time_binning])
+    else:
+        da = sc.histogram(events, bins=time_binning)
 
     # Find location of frames
     frames = wfm.get_frames(da)
 
-    stitched = wfm.stitch(frames=frames, data=da, dim='time', bins=2001)
+    stitched = wfm.stitch(frames=frames, data=da, dim=dim, bins=2001)
 
     wav = scn.convert(stitched, origin='tof', target='wavelength', scatter=False)
-    rebinned = sc.rebin(wav,
-                        dim='wavelength',
-                        bins=sc.linspace(dim='wavelength',
-                                         start=1.0,
-                                         stop=10.0,
-                                         num=1001,
-                                         unit='angstrom'))
+    if event_mode:
+        out = wav
+    else:
+        out = sc.rebin(wav,
+                       dim='wavelength',
+                       bins=sc.linspace(dim='wavelength',
+                                        start=1.0,
+                                        stop=10.0,
+                                        num=1001,
+                                        unit='angstrom'))
 
     choppers = da.meta["choppers"].value
     # Distance between WFM choppers
@@ -93,42 +108,66 @@ def _do_stitching_on_beamline(wavelengths):
     dlambda_over_lambda = dz_wfm / sc.norm(coords['position'] -
                                            frames['wfm_chopper_mid_point'].data)
 
-    return rebinned, dlambda_over_lambda
+    return out, dlambda_over_lambda
 
 
-def _check_lambda_inside_resolution(lam, dlam_over_lam, data, check_value=True):
+def _check_lambda_inside_resolution(lam,
+                                    dlam_over_lam,
+                                    data,
+                                    event_mode=False,
+                                    check_value=True):
     dlam = 0.5 * dlam_over_lam * lam
-    assert sc.isclose(
-        sc.sum(data['wavelength', lam - dlam:lam + dlam]).data,
-        1.0 * sc.units.counts).value is check_value
+    if event_mode:
+        sum_in_range = sc.bin(data,
+                              edges=[
+                                  sc.array(dims=['wavelength'],
+                                           values=[(lam - dlam).value,
+                                                   (lam + dlam).value],
+                                           unit=lam.unit)
+                              ]).bins.sum().data['wavelength', 0]
+    else:
+        sum_in_range = sc.sum(data['wavelength', lam - dlam:lam + dlam]).data
+    assert sc.isclose(sum_in_range, 1.0 * sc.units.counts).value is check_value
 
 
-def test_stitching_on_beamline():
-    # Create 6 neutrons with selected wavelengths, one neutron per frame
-    wavelengths = sc.array(dims=['wavelength'],
+@pytest.mark.parametrize("dim", ['time', 'tof'])
+@pytest.mark.parametrize("event_mode", [False, True])
+def test_stitching_on_beamline(event_mode, dim):
+    wavelengths = sc.array(dims=['event'],
                            values=[1.75, 3.2, 4.5, 6.0, 7.0, 8.25],
                            unit='angstrom')
-    rebinned, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths)
+    stitched, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths,
+                                                              dim=dim,
+                                                              event_mode=event_mode)
 
     for i in range(len(wavelengths)):
-        _check_lambda_inside_resolution(wavelengths['wavelength', i],
-                                        dlambda_over_lambda, rebinned)
+        _check_lambda_inside_resolution(wavelengths['event', i],
+                                        dlambda_over_lambda,
+                                        stitched,
+                                        event_mode=event_mode)
 
 
-def test_stitching_on_beamline_bad_wavelength():
+@pytest.mark.parametrize("dim", ['time', 'tof'])
+@pytest.mark.parametrize("event_mode", [False, True])
+def test_stitching_on_beamline_bad_wavelength(event_mode, dim):
     # Create 6 neutrons. The first wavelength is in this case too short to pass through
     # the WFM choppers.
-    wavelengths = sc.array(dims=['wavelength'],
+    wavelengths = sc.array(dims=['event'],
                            values=[1.5, 3.2, 4.5, 6.0, 7.0, 8.25],
                            unit='angstrom')
-    rebinned, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths)
+    stitched, dlambda_over_lambda = _do_stitching_on_beamline(wavelengths,
+                                                              dim=dim,
+                                                              event_mode=event_mode)
 
     # The first wavelength should fail the check, since anything not passing through
     # the choppers won't satisfy the dlambda/lambda condition.
-    _check_lambda_inside_resolution(wavelengths['wavelength', 0],
+    _check_lambda_inside_resolution(wavelengths['event', 0],
                                     dlambda_over_lambda,
-                                    rebinned,
-                                    check_value=False)
+                                    stitched,
+                                    check_value=False,
+                                    event_mode=event_mode)
     for i in range(1, len(wavelengths)):
-        _check_lambda_inside_resolution(wavelengths['wavelength', i],
-                                        dlambda_over_lambda, rebinned)
+        _check_lambda_inside_resolution(wavelengths['event', i],
+                                        dlambda_over_lambda,
+                                        stitched,
+                                        event_mode=event_mode)
