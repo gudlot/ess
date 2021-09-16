@@ -33,7 +33,7 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
 
     out = sc.DataArray(data=sc.zeros(dims=dims,
                                      shape=shape,
-                                     variances=item.variances is not None,
+                                     with_variances=item.variances is not None,
                                      unit=item.unit),
                        coords={new_dim: new_coord})
     for group in ["coords", "attrs"]:
@@ -42,16 +42,14 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
                 getattr(out, group)[key] = getattr(item, group)[key].copy()
 
     for i in range(frames.sizes["frame"]):
-        section = item[dim,
-                       frames["time_min"].data["frame",
-                                               i]:frames["time_max"].data["frame",
-                                                                          i]].copy()
-        section.coords[new_dim] = section.meta[dim] - frames["time_correction"].data[
+        section = item[dim, frames["time_min"].data["frame", i]:frames["time_max"].data[
+            "frame", i]].rename_dims({dim: new_dim})
+        section.coords[new_dim] = section.coords[dim] - frames["time_correction"].data[
             "frame", i]
-        del section.meta[dim]
-        section.rename_dims({dim: new_dim})
+        if new_dim != dim:
+            del section.coords[dim]
 
-        out += sc.rebin(section, new_dim, out.meta[new_dim])
+        out += sc.rebin(section, new_dim, out.coords[new_dim])
 
     return out
 
@@ -67,8 +65,10 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
     binned = sc.bin(item, edges=[edges])
 
     for i in range(frames.sizes["frame"]):
-        binned[dim, i * 2].bins.coords[dim] -= frames["time_correction"].data["frame",
-                                                                              i]
+        # TODO: temporary fix working on the .values because read-only flag is set
+        binned[dim, i *
+               2].value.coords[dim].values -= frames["time_correction"].data["frame",
+                                                                             i].values
 
     erase = None
     if new_dim != dim:
@@ -104,8 +104,8 @@ def _stitch_item(item: sc.DataArray, frames: sc.Dataset,
     # Once we support general conversion graphs in the unit conversion of scippneutron,
     # we should stop modifying the coordinate here, and change to using a specialized
     # WFM conversion graph that looks for `wfm_chopper_mid_point` in the coords.
-    if "source_position" in item.meta:
-        del out.meta["source_position"]
+    if "source_position" in item.coords:
+        del out.coords["source_position"]
     out.coords['source_position'] = frames["wfm_chopper_mid_point"].data
     return out
 

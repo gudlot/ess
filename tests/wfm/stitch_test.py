@@ -77,7 +77,7 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
     events = sc.DataArray(data=sc.ones(dims=['event'],
                                        shape=arrival_times.shape,
                                        unit=sc.units.counts,
-                                       variances=True),
+                                       with_variances=True),
                           coords=coords)
     if event_mode:
         da = sc.bin(events, edges=[time_binning])
