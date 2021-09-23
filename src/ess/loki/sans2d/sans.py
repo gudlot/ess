@@ -7,9 +7,9 @@ import normalization
 
 
 def to_wavelength(data, background, transmission, direct_beam, direct_beam_transmission,
-                  masks, wavelength_bins):
+                  masks, wavelength_bins, min_bin, max_bin, pixel_size, pixel_length):
     data = data.copy()
-    #TODO: transmission returns NANs
+
     transmission = normalization.transmission_fraction(transmission,
                                                         background,
                                                         direct_beam_transmission,
@@ -20,7 +20,7 @@ def to_wavelength(data, background, transmission, direct_beam, direct_beam_trans
     data = sc.rebin(data, 'wavelength', wavelength_bins)
 
     monitor = data.attrs['monitor2'].value
-    monitor = monitor - sc.mean(monitor['tof', 85000.0 * sc.units.us: 98000.0 * sc.units.us], 'tof')
+    monitor = monitor - sc.mean(monitor['tof', min_bin * sc.units.us: max_bin * sc.units.us], 'tof')
     monitor = scn.convert(monitor, 'tof', 'wavelength', out=monitor, scatter=False)
     monitor = sc.rebin(monitor, 'wavelength', wavelength_bins)
 
@@ -29,20 +29,24 @@ def to_wavelength(data, background, transmission, direct_beam, direct_beam_trans
                                       monitor.coords['wavelength'])
     direct_beam = monitor * transmission * direct_beam
 
-    d = sc.Dataset({'data': data, 'norm': normalization.solid_angle(data) * direct_beam})
+    d = sc.Dataset({'data': data, 'norm': normalization.solid_angle(data, pixel_size, pixel_length) * direct_beam})
     contrib.to_bin_centers(d, 'wavelength')
     return d
 
 
 def to_q(data, background,  transmission, direct_beam, direct_beam_transmission, masks, q_bins,
-         wavelength_bins, wavelength_bands=None, groupby=None):
+         min_bin, max_bin, pixel_size, pixel_length, wavelength_bins, wavelength_bands=None, groupby=None):
     wav = to_wavelength(data=data,
                              background = background,
                              transmission=transmission,
                              direct_beam=direct_beam,
                              direct_beam_transmission=direct_beam_transmission,
                              masks=masks,
-                             wavelength_bins=wavelength_bins)
+                             wavelength_bins=wavelength_bins,
+                             min_bin = min_bin,
+                             max_bin = max_bin,
+                             pixel_size = pixel_size,
+                             pixel_length = pixel_length)
     reducer = reduction.simple_reducer(dim='spectrum')
 
     if wavelength_bands == None:

@@ -2,7 +2,6 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippneutron as scn
-import contrib
 
 def simple_reducer(*, dim):
     return lambda x: sc.sum(x, dim=dim)
@@ -17,7 +16,6 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
     Example:
     >>> reduced = reduce_to_q(data, q_bins=q_bins, reducer=simple_reducer('spectrum'))  # noqa: E501
     """
-    # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
     data = scn.convert(data, 'wavelength', 'Q', scatter=True)
     if wavelength_bands is None:

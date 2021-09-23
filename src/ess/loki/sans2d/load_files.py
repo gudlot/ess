@@ -1,10 +1,7 @@
 import scipp as sc
 import scippneutron as scn
-import numpy as np
 
-def load_isis(filename, spectrum_size):
-    #TODO: decide how to handle internal arguments
-    tof_bins = sc.Variable(dims=['tof'], unit=sc.units.us, values=np.linspace(0, 100000, num=101))
+def load_isis(filename, spectrum_size, tof_bins):
     events = scn.load(filename=filename, mantid_args={'LoadMonitors':True})
     return sc.histogram(events['spectrum',:spectrum_size], tof_bins)
 
@@ -24,7 +21,7 @@ def load_mask(idf_filename, mask_file):
 
     return scn.load(filename=idf_filename, mantid_alg='LoadMask', mantid_args={'InputFile': mask_file})
 
-def setup_masks(idf_filename, mask_files, sample, background, spectrum_size):
+def load_masks(idf_filename, mask_files, sample, background, spectrum_size):
 
     mask_1_xml = load_mask(idf_filename, mask_files[0])
     mask_2_xml = load_mask(idf_filename, mask_files[1])

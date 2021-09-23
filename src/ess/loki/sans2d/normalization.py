@@ -1,12 +1,7 @@
 import scipp as sc
 import scippneutron as scn
 
-def solid_angle(data):
-    # TODO proper solid angle
-    # [0.0117188,0.0075,0.0075] bounding box size
-    pixel_size = 0.055604405491402636 * sc.units.m
-    #1.05m / 512 pixels
-    pixel_length = 0.004 * sc.units.m
+def solid_angle(data, pixel_size, pixel_length):
     L2 = scn.L2(data)
     return (pixel_size * pixel_length) / (L2 * L2)
 
