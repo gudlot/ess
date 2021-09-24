@@ -1,5 +1,5 @@
 import scipp as sc
-from scipp import constants
+from scipp.constants import g, h, neutron_mass
 from ess.reflectometry import transform_coords
 import numpy as np
 
@@ -10,7 +10,7 @@ def test_y_dash_with_different_secondary_flight_paths():
 
     # Approximate cold-neutron velocities
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(constants.h / (vel * constants.neutron_mass),
+    wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
 
     # In this setup the faster the neutrons the closer d'y(z) tends to 1.0
@@ -19,7 +19,7 @@ def test_y_dash_with_different_secondary_flight_paths():
 
     scattered_beam = detector_position - sample_position
     no_gravity_grad = scattered_beam.fields.y / scattered_beam.fields.z
-    gravity_effect_grad = (-0.5 * constants.g * scattered_beam.fields.z / (vel * vel))
+    gravity_effect_grad = (-0.5 * g * scattered_beam.fields.z / (vel * vel))
     assert sc.isclose(grad, no_gravity_grad + gravity_effect_grad).value
 
 
@@ -28,7 +28,7 @@ def test_y_dash_with_different_velocities():
     detector_position = sc.vector(value=[0, 1, 1], unit=sc.units.m)
 
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(constants.h / (vel * constants.neutron_mass),
+    wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
 
     # In this setup the faster the neutrons the closer d'y(z) tends to 1.0
@@ -38,7 +38,7 @@ def test_y_dash_with_different_velocities():
     assert sc.less(grad, 1 * sc.units.one).value
 
     vel *= 2
-    wav = sc.to_unit(constants.h / (vel * constants.neutron_mass),
+    wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
     grad_fast = transform_coords.to_y_dash(wavelength=wav,
                                            sample_position=sample_position,
@@ -59,7 +59,7 @@ def test_scattering_angle():
     no_gravity_angle = _angle(scattered_beam, beam_direction)
 
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(constants.h / (vel * constants.neutron_mass),
+    wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
 
     angle = transform_coords.to_scattering_angle(w=0 * sc.units.rad,
@@ -69,7 +69,7 @@ def test_scattering_angle():
                                                  sample_position=sample_position)
     assert sc.less(angle, no_gravity_angle).value
 
-    gravity_shift_y = -0.5 * constants.g * (scattered_beam.fields.z ** 2 / vel ** 2)
+    gravity_shift_y = -0.5 * g * (scattered_beam.fields.z ** 2 / vel ** 2)
     expected = _angle(scattered_beam + gravity_shift_y
                       * sc.vector(value=[0, 1, 0]), beam_direction)
     assert sc.isclose(angle, expected).value
@@ -78,7 +78,7 @@ def test_scattering_angle():
 def test_det_wavelength_to_wavelength_scattering_angle():
     # comparible with cold-neutrons from moderator
     vel = 2000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(constants.h / (vel * constants.neutron_mass),
+    wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
     sample_position = sc.vector(value=[0, 0, 0], unit=sc.units.m)
     source_position = sc.vector(value=[0, 0, -10], unit=sc.units.m)
