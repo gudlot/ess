@@ -32,12 +32,11 @@ Features
 Contributors
 ~~~~~~~~~~~~
 
+Matthew Andrew :sup:`b, c`\ ,
 Owen Arnold :sup:`b, c`\ ,
 Simon Heybrock :sup:`a`\ ,
-Matthew D. Jones :sup:`b, c`\ ,
 Andrew McCluskey :sup:`a`\ ,
-Neil Vaytet :sup:`a`\ ,
-and Jan-Lukas Wynen :sup:`a`\
+and Neil Vaytet :sup:`a`\
 
 Contributing Organizations
 --------------------------
