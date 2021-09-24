@@ -1,5 +1,5 @@
-ess\.amor
-=========
+Amor
+====
 
 .. toctree::
    :maxdepth: 4
