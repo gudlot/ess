@@ -9,18 +9,14 @@ def to_velocity(wavelength):
 
 # Derivative of y with respect to z
 def to_y_dash(wavelength, sample_position, detector_position):
-    z_origin = sample_position.fields.z
-    y_origin = sample_position.fields.y
-    z_measured = detector_position.fields.z
-    y_measured = detector_position.fields.y
-    z_diff = z_measured - z_origin
-    y_diff = y_measured - y_origin
+    diff = (detector_position - sample_position)
     velocity_sq = to_velocity(wavelength)
     velocity_sq *= velocity_sq
     gy = sc.vector(value=[0, -1, 0]) * g
     # dy due to gravity = -0.5gt^2 = -0.5g(dz/dv)^2
     # therefore y'(z) = dy/dz - 0.5g.dz/dv^2 / dz
-    return (-0.5 * sc.norm(gy) * z_diff / velocity_sq) + (y_diff / z_diff)
+    return (-0.5 * sc.norm(gy)
+            * diff.fields.z / velocity_sq) + (diff.fields.y / diff.fields.z)
 
 
 def to_scattering_angle(w, wavelength, detector_id, position, sample_position):
