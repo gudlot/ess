@@ -1,4 +1,4 @@
-name: ess-developer-stable
+name: ess-developer
 
 channels:
   - conda-forge
