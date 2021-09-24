@@ -4,7 +4,7 @@ from ess.reflectometry import transform_coords
 import numpy as np
 
 
-def test_y_dash_with_different_secondary_flight_paths():
+def test_y_dash_for_gravitational_effect():
     sample_position = sc.vector(value=[0, 0, 0], unit=sc.units.m)
     detector_position = sc.vector(value=[0, 0.5, 1], unit=sc.units.m)
 
@@ -13,7 +13,6 @@ def test_y_dash_with_different_secondary_flight_paths():
     wav = sc.to_unit(h / (vel * neutron_mass),
                      unit=sc.units.angstrom)
 
-    # In this setup the faster the neutrons the closer d'y(z) tends to 1.0
     grad = transform_coords.to_y_dash(wavelength=wav, sample_position=sample_position,
                                       detector_position=detector_position)
 
