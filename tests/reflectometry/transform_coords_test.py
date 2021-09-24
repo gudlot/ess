@@ -99,3 +99,12 @@ def test_det_wavelength_to_wavelength_scattering_angle():
                                       graph=settings)
     assert sc.isclose(transformed.coords['scattering_angle'],
                       (np.pi / 4) * sc.units.rad, atol=1e-4 * sc.units.rad).value
+
+    # We now check the sample angle. Setting to previous final scattering angle
+    # should yield a scattering angle of 0.
+    measurement.coords["w"] = transformed.coords['scattering_angle']
+    transformed = sc.transform_coords(x=measurement,
+                                      coords=['wavelength', 'scattering_angle'],
+                                      graph=settings)
+    assert sc.isclose(transformed.coords['scattering_angle'],
+                      0.0 * sc.units.rad).value

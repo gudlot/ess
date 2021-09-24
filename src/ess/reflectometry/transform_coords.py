@@ -29,4 +29,4 @@ def to_scattering_angle(w, wavelength, detector_id, position, sample_position):
     z_measured = position.fields.z
     y_dash = to_y_dash(wavelength, sample_position, position)
     height = y_dash * (z_measured - z_origin) + y_origin
-    return -w + sc.atan2(y=height, x=z_measured)
+    return sc.atan2(y=height, x=z_measured) - w
