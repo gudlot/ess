@@ -3,9 +3,11 @@
 Release Notes
 =============
 
+v0.1.0 (September 2021)
+-----------------------
 
-v0.1 (August 2021)
-------------------
+This is the first official release of ``scipp/ess``.
+The API may change without notice in future releases.
 
 Features
 ~~~~~~~~
@@ -17,12 +19,11 @@ Features
 Contributors
 ~~~~~~~~~~~~
 
+Matthew Andrew :sup:`b, c`\ ,
 Owen Arnold :sup:`b, c`\ ,
 Simon Heybrock :sup:`a`\ ,
-Matthew D. Jones :sup:`b, c`\ ,
 Andrew McCluskey :sup:`a`\ ,
-Neil Vaytet :sup:`a`\ ,
-and Jan-Lukas Wynen :sup:`a`\
+and Neil Vaytet :sup:`a`\
 
 Contributing Organizations
 --------------------------
