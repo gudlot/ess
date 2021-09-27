@@ -3,24 +3,11 @@
 Release Notes
 =============
 
-Since v0.1.0
-------------
-
-Features
-~~~~~~~~
-
-Breaking changes
-~~~~~~~~~~~~~~~~
-
-Bugfixes
-~~~~~~~~
-
-Contributors
-~~~~~~~~~~~~
-
-
 v0.1.0 (September 2021)
 -----------------------
+
+This is the first official release of ``scipp/ess``.
+The API may change without notice in future releases.
 
 Features
 ~~~~~~~~
