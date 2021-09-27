@@ -26,6 +26,12 @@ Documentation
 
 .. toctree::
    :maxdepth: 3
+   :caption: Getting started
+
+   getting-started/installation
+
+.. toctree::
+   :maxdepth: 3
    :caption: Instruments
 
    instruments/amor
