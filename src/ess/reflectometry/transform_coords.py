@@ -3,7 +3,8 @@ from scipp.constants import neutron_mass, h, g
 
 
 def to_velocity(wavelength):
-    return sc.to_unit(h / (wavelength * neutron_mass), sc.units.m / sc.units.s,
+    return sc.to_unit(h / (wavelength * neutron_mass),
+                      sc.units.m / sc.units.s,
                       copy=False)
 
 
@@ -15,8 +16,8 @@ def to_y_dash(wavelength, sample_position, detector_position):
     gy = sc.vector(value=[0, -1, 0]) * g
     # dy due to gravity = -0.5gt^2 = -0.5g(dz/dv)^2
     # therefore y'(z) = dy/dz - 0.5g.dz/dv^2 / dz
-    return (-0.5 * sc.norm(gy)
-            * diff.fields.z / velocity_sq) + (diff.fields.y / diff.fields.z)
+    return (-0.5 * sc.norm(gy) * diff.fields.z / velocity_sq) + (diff.fields.y /
+                                                                 diff.fields.z)
 
 
 def to_scattering_angle(w, wavelength, detector_id, position, sample_position):

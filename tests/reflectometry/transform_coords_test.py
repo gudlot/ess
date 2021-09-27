@@ -10,10 +10,10 @@ def test_y_dash_for_gravitational_effect():
 
     # Approximate cold-neutron velocities
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(h / (vel * neutron_mass),
-                     unit=sc.units.angstrom)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
 
-    grad = transform_coords.to_y_dash(wavelength=wav, sample_position=sample_position,
+    grad = transform_coords.to_y_dash(wavelength=wav,
+                                      sample_position=sample_position,
                                       detector_position=detector_position)
 
     scattered_beam = detector_position - sample_position
@@ -27,8 +27,7 @@ def test_y_dash_with_different_velocities():
     detector_position = sc.vector(value=[0, 1, 1], unit=sc.units.m)
 
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(h / (vel * neutron_mass),
-                     unit=sc.units.angstrom)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
 
     # In this setup the faster the neutrons the closer d'y(z) tends to 1.0
     grad = transform_coords.to_y_dash(wavelength=wav,
@@ -37,8 +36,7 @@ def test_y_dash_with_different_velocities():
     assert sc.less(grad, 1 * sc.units.one).value
 
     vel *= 2
-    wav = sc.to_unit(h / (vel * neutron_mass),
-                     unit=sc.units.angstrom)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
     grad_fast = transform_coords.to_y_dash(wavelength=wav,
                                            sample_position=sample_position,
                                            detector_position=detector_position)
@@ -58,8 +56,7 @@ def test_scattering_angle():
     no_gravity_angle = _angle(scattered_beam, beam_direction)
 
     vel = 1000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(h / (vel * neutron_mass),
-                     unit=sc.units.angstrom)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
 
     angle = transform_coords.to_scattering_angle(w=0 * sc.units.rad,
                                                  wavelength=wav,
@@ -68,17 +65,16 @@ def test_scattering_angle():
                                                  sample_position=sample_position)
     assert sc.less(angle, no_gravity_angle).value
 
-    gravity_shift_y = -0.5 * g * (scattered_beam.fields.z ** 2 / vel ** 2)
-    expected = _angle(scattered_beam + gravity_shift_y
-                      * sc.vector(value=[0, 1, 0]), beam_direction)
+    gravity_shift_y = -0.5 * g * (scattered_beam.fields.z**2 / vel**2)
+    expected = _angle(scattered_beam + gravity_shift_y * sc.vector(value=[0, 1, 0]),
+                      beam_direction)
     assert sc.isclose(angle, expected).value
 
 
 def test_det_wavelength_to_wavelength_scattering_angle():
     # comparible with cold-neutrons from moderator
     vel = 2000 * (sc.units.m / sc.units.s)
-    wav = sc.to_unit(h / (vel * neutron_mass),
-                     unit=sc.units.angstrom)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
     sample_position = sc.vector(value=[0, 0, 0], unit=sc.units.m)
     source_position = sc.vector(value=[0, 0, -10], unit=sc.units.m)
     detector_position = sc.vector(value=[0, 1, 1], unit=sc.units.m)
@@ -97,7 +93,8 @@ def test_det_wavelength_to_wavelength_scattering_angle():
                                       coords=['wavelength', 'scattering_angle'],
                                       graph=settings)
     assert sc.isclose(transformed.coords['scattering_angle'],
-                      (np.pi / 4) * sc.units.rad, atol=1e-4 * sc.units.rad).value
+                      (np.pi / 4) * sc.units.rad,
+                      atol=1e-4 * sc.units.rad).value
 
     # We now check the sample angle. Setting to previous final scattering angle
     # should yield a scattering angle of 0.
@@ -105,5 +102,4 @@ def test_det_wavelength_to_wavelength_scattering_angle():
     transformed = sc.transform_coords(x=measurement,
                                       coords=['wavelength', 'scattering_angle'],
                                       graph=settings)
-    assert sc.isclose(transformed.coords['scattering_angle'],
-                      0.0 * sc.units.rad).value
+    assert sc.isclose(transformed.coords['scattering_angle'], 0.0 * sc.units.rad).value
