@@ -83,6 +83,33 @@ def test_scattering_angle():
     assert sc.isclose(angle, expected).value
 
 
+def test_scattering_angle_xzy():
+    # Same as previous but we define forward beam direction to be +x
+    # up direction to be z (gravity therefore acts in -z)
+    # perpendicular direction to be y, as in w is rotation around y
+
+    source_position = sc.vector(value=[-1, 0, 1], unit=sc.units.m)
+    sample_position = sc.vector(value=[0, 0, 0], unit=sc.units.m)
+    detector_position = sc.vector(value=[1, 0, 1], unit=sc.units.m)
+    incident_beam = sample_position - source_position
+    scattered_beam = detector_position - sample_position
+
+    vel = 1000 * (sc.units.m / sc.units.s)
+    wav = sc.to_unit(h / (vel * neutron_mass), unit=sc.units.angstrom)
+
+    angle = transform_coords.to_scattering_angle(w_norm=sc.vector(value=[0, 0, 1]),
+                                                 wavelength=wav,
+                                                 detector_id=None,
+                                                 sample_position=sample_position,
+                                                 incident_beam=incident_beam,
+                                                 scattered_beam=scattered_beam)
+
+    gravity_shift_y = -0.5 * g * (scattered_beam.fields.z ** 2 / vel ** 2)
+    expected = _angle(scattered_beam + gravity_shift_y
+                      * sc.vector(value=[0, 1, 0]), incident_beam) / 2.0
+    assert sc.isclose(angle, expected).value
+
+
 def test_det_wavelength_to_wavelength_scattering_angle():
     # comparible with cold-neutrons from moderator
     vel = 2000 * (sc.units.m / sc.units.s)
