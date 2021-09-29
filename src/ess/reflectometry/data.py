@@ -87,7 +87,7 @@ class ReflData:
 
         :param bins: wavelength and theta edges
         :type bins: Tuple(scipp._scipp.core.Variable)
-        
+
         :return: Data array binned into wavelength and theta
         :rtype: scipp._scipp.core.DataArray
         """
@@ -124,10 +124,14 @@ class ReflData:
         """
         From the time-of-flight data, find the wavelength for each neutron event.
         """
-        scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
-        self.data.bins.constituents["data"].coords["wavelength"] = (scn.convert(
-            self.data, origin="tof", target="wavelength",
-            scatter=True).bins.constituents["data"].coords["wavelength"])
+        # scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
+        # self.data.bins.constituents["data"].coords["wavelength"] = (scn.convert(
+        #     self.data, origin="tof", target="wavelength",
+        #     scatter=True).bins.constituents["data"].coords["wavelength"])
+        self.data = scn.convert(self.data,
+                                origin='tof',
+                                target='wavelength',
+                                scatter=True)
 
     def find_theta(self):
         """
@@ -136,8 +140,8 @@ class ReflData:
         if self.gravity:
             nu_angle = corrections.angle_with_gravity(
                 self.data,
-                self.data.coords["position"],
-                self.data.attrs["sample_position"],
+                self.data.meta["position"],
+                self.data.meta["sample_position"],
             )
             theta = -self.sample_angle_offset + nu_angle
             self.data.bins.constituents["data"].coords["theta"] = theta
@@ -149,9 +153,9 @@ class ReflData:
             # Find the range of possible positions that the neutron could
             # strike, this range of theta values is taken to be the full
             # width half maximum for the theta distribution
-            offset_positive = resolution.z_offset(self.data.attrs["sample_position"],
+            offset_positive = resolution.z_offset(self.data.meta["sample_position"],
                                                   half_beam_on_sample)
-            offset_negative = resolution.z_offset(self.data.attrs["sample_position"],
+            offset_negative = resolution.z_offset(self.data.meta["sample_position"],
                                                   half_beam_on_sample)
             self.data.bins.constituents['data'].attrs[
                 'offset_positive'] = offset_positive
@@ -176,7 +180,7 @@ class ReflData:
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
                 self.detector_spatial_resolution, self.data.coords["position"].fields.z,
-                self.data.attrs["sample_position"].fields.z)
+                self.data.meta["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
                 (self.data.attrs["sigma_gamma"] / self.data.bins.coords["theta"]) *
