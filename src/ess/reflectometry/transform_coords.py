@@ -41,8 +41,8 @@ def _angle(a, b):
     return sc.acos(sc.dot(a, b) / (sc.norm(a) * sc.norm(b)))
 
 
-def to_scattering_angle(w_norm, wavelength, detector_id, sample_position,
-                        incident_beam, scattered_beam):
+def to_scattering_angle(w_norm, wavelength, detector_id, sample_position, incident_beam,
+                        scattered_beam):
     w_norm = w_norm / sc.norm(w_norm)
     incident_beam_norm = incident_beam / sc.norm(incident_beam)
     scattered_beam_norm = scattered_beam / sc.norm(scattered_beam)
