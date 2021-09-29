@@ -124,10 +124,6 @@ class ReflData:
         """
         From the time-of-flight data, find the wavelength for each neutron event.
         """
-        # scn.convert(self.data, origin="tof", target="wavelength", scatter=True)
-        # self.data.bins.constituents["data"].coords["wavelength"] = (scn.convert(
-        #     self.data, origin="tof", target="wavelength",
-        #     scatter=True).bins.constituents["data"].coords["wavelength"])
         self.data = scn.convert(self.data,
                                 origin='tof',
                                 target='wavelength',
