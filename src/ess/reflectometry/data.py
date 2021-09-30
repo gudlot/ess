@@ -120,7 +120,7 @@ class ReflData:
         return binning.two_dimensional_bin(
             self.data, bins) / (self.event.shape[0] * sc.units.dimensionless)
 
-    def find_wavelength(self):
+    def find_wavelength(self, wavelength_cut=None):
         """
         From the time-of-flight data, find the wavelength for each neutron event.
         """
@@ -128,6 +128,14 @@ class ReflData:
                                 origin='tof',
                                 target='wavelength',
                                 scatter=True)
+        # Select desired wavelength range
+        if wavelength_cut is not None:
+            self.data = sc.bin(self.data,
+                               edges=[
+                                   sc.concatenate(wavelength_cut,
+                                                  self.data.coords['wavelength'].max(),
+                                                  'wavelength')
+                               ])
 
     def find_theta(self):
         """

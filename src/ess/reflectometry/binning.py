@@ -18,15 +18,15 @@ def q_bin(data, bins):
 
     :param data: reflectometry data to be binned
     :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
-    :param bins: q-bin edges 
-    :type bins: scipp._scipp.core.Variable 
+    :param bins: q-bin edges
+    :type bins: scipp._scipp.core.Variable
 
     :return: Data array binned into qz with resolution
-    :rtype: scipp._scipp.core.DataArray 
-    :raises: NotFoundError is qz or tof coordinate cannot be found 
+    :rtype: scipp._scipp.core.DataArray
+    :raises: NotFoundError is qz or tof coordinate cannot be found
     """
-    if 'qz' in data.events.coords and 'tof' in data.events.coords:
-        erase = ['tof'] + data.dims
+    if 'qz' in data.events.coords:
+        erase = data.dims
         data.events.coords['qz'] = sc.to_unit(data.events.coords['qz'], bins.unit)
         binned = sc.bin(data, erase=erase, edges=[bins])
         if 'sigma_qz_by_qz' in data.events.coords:
@@ -38,7 +38,7 @@ def q_bin(data, bins):
                     qzr = np.append(qzr, 0)
             binned.coords['sigma_qz_by_qz'] = sc.Variable(values=qzr, dims=['qz'])
     else:
-        raise sc.NotFoundError('qz or tof coordinate cannot be found.')
+        raise sc.NotFoundError('qz coordinate cannot be found.')
     return binned / (data.events.shape[0] * sc.units.dimensionless)
 
 
@@ -50,9 +50,9 @@ def two_dimensional_bin(data, bins):
     :type data: Union[ess.reflectometry.ReflData.data, ess.amor.AmorData.data, ess.amor.AmorReference.data]
     :param bins: Bin edges
     :type bins: Tuple[scipp._scipp.core.Variable]
-    
+
     :return: Data array binned into given bin edges
-    :rtype: scipp._scipp.core.DataArray 
+    :rtype: scipp._scipp.core.DataArray
     """
     for i in bins:
         data.events.coords[i.dims[0]] = sc.to_unit(data.events.coords[i.dims[0]],

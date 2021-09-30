@@ -200,27 +200,6 @@ class TestData(unittest.TestCase):
         assert_almost_equal(b.data.values, np.array([3.0, 3.0, 3.]) / 9.)
         assert_almost_equal(b.data.variances, np.array([3.0, 3.0, 3.]) / 81.)
 
-    def test_q_bin_no_tof(self):
-        p = data.ReflData(BINNED.copy())
-        p.event.coords["qz"] = sc.linspace(dim="event",
-                                           start=1,
-                                           stop=10,
-                                           num=N,
-                                           unit=sc.Unit('1/angstrom'))
-        p.event.coords["sigma_qz_by_qz"] = sc.linspace(dim="event",
-                                                       start=0.1,
-                                                       stop=1.0,
-                                                       num=N,
-                                                       unit=sc.Unit('1/angstrom'),
-                                                       dtype=sc.dtype.float64)
-        bins = sc.linspace(dim='qz',
-                           start=0.,
-                           stop=11.,
-                           num=4,
-                           unit=sc.Unit('1/angstrom'))
-        with self.assertRaises(sc.NotFoundError):
-            _ = p.q_bin(bins)
-
     def test_wavelength_theta_bin(self):
         p = data.ReflData(BINNED.copy())
         p.event.coords["wavelength"] = sc.Variable(
