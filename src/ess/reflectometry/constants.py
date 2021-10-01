@@ -6,4 +6,4 @@ import scipp.constants as constants
 # h = (h * 1e20 / 1e6 *
 #      (sc.units.kg * sc.units.angstrom * sc.units.angstrom / sc.units.us))
 HDM = constants.h / constants.neutron_mass
-G_ACC = sc.geometry.position(0. * constants.G.unit, constants.G, 0. * constants.G.unit)
+G_ACC = sc.geometry.position(0. * constants.g.unit, -constants.g, 0. * constants.g.unit)

@@ -119,10 +119,18 @@ def load(
     data.coords["sigma_lambda_by_lambda"] = chopper_chopper_distance / (
         data.coords["position"].fields.z - data.coords["source_position"].fields.z)
     data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
-    find_wavelength(wavelength_cut=wavelength_cut)
-    find_theta()
-    illumination()
-    find_qz()
+
+    data = refl.utils.to_wavelength(data, wavelength_cut=wavelength_cut)
+
+    # coords = refl.utils.compute_theta(data)
+    # for name, coord in coords.itmes():
+    #     data.bins.coords[name] = coord
+
+    # data /= refl.corrections.illumination_correction(beam_size, sample_size,
+    #                                                  data.bins.coords["theta"])
+    # illumination()
+    # qz = refl.utils.compute_qz()
+    # find_qz()
     # _setup_orso(reduction_creator, reduction_creator_affiliation, sample_description,
     #             data_owner, experiment_id, experiment_date, reduction_file)
     return data

@@ -7,7 +7,7 @@ Corrections to be used for neutron reflectometry reduction processes.
 import numpy as np
 import scipp as sc
 from scipy.special import erf
-from ess.reflectometry import HDM, G_ACC
+from .constants import HDM, G_ACC
 
 
 def angle_with_gravity(data, pixel_position, sample_position):
