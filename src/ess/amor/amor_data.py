@@ -60,7 +60,7 @@ class AmorData(ReflData):
         detector_spatial_resolution=0.0025 * sc.units.m,
         chopper_sample_distance=15.0 * sc.units.m,
         chopper_speed=20 / 3 * 1e-6 / sc.units.us,
-        chopper_detector_distance=1.9e11 * sc.units.angstrom,
+        chopper_detector_distance=19.0 * sc.units.m,
         chopper_chopper_distance=0.49 * sc.units.m,
         chopper_phase=-8.0 * sc.units.deg,
         wavelength_cut=2.4 * sc.units.angstrom,
@@ -74,6 +74,15 @@ class AmorData(ReflData):
             detector_spatial_resolution=detector_spatial_resolution,
             data_file=data_file,
         )
+        # Convert tof nanoseconds to microseconds for convenience
+        # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
+        # the same as the dtype of the underlying event coordinate?
+        if self.data.coords['tof'].dtype != sc.dtype.float64:
+            self.data.bins.coords['tof'] = self.data.bins.coords['tof'].astype(
+                'float64')
+            self.data.coords['tof'] = self.data.coords['tof'].astype('float64')
+        self.data.bins.coords['tof'] = sc.to_unit(self.data.bins.coords['tof'], 'us')
+        self.data.coords['tof'] = sc.to_unit(self.data.coords['tof'], 'us')
         # These are Amor specific parameters
         self.tau = 1 / (2 * chopper_speed)
         self.chopper_detector_distance = chopper_detector_distance
@@ -82,7 +91,7 @@ class AmorData(ReflData):
         self.wavelength_cut = wavelength_cut
         # The source position is not the true source position due to the
         # use of choppers to define the pulse.
-        self.data.attrs["source_position"] = sc.geometry.position(
+        self.data.coords["source_position"] = sc.geometry.position(
             0.0 * sc.units.m, 0.0 * sc.units.m, -chopper_sample_distance)
         self.tof_correction()
         # The wavelength contribution to the resolution function, defined
@@ -90,9 +99,9 @@ class AmorData(ReflData):
         # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
         self.data.coords["sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
             self.data.coords["position"].fields.z -
-            self.data.attrs["source_position"].fields.z)
+            self.data.coords["source_position"].fields.z)
         self.data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
-        self.find_wavelength()
+        self.find_wavelength(wavelength_cut=self.wavelength_cut)
         self.find_theta()
         self.illumination()
         self.find_qz()
@@ -157,24 +166,22 @@ class AmorData(ReflData):
     def tof_correction(self):
         """
         A correction for the presense of the chopper with respect to the "true" ToF.
+        Also fold the two pulses.
+        TODO: generalise mechanism to fold any number of pulses.
         """
-        self.data.coords["position"].unit = sc.units.m
-        buf = self.data.bins.constituents["data"]
-        tof = sc.to_unit(buf.coords["tof"].astype(sc.dtype.float64), 'us')
-        tof.unit = sc.units.us
-        del buf.coords["tof"]
-        buf.coords["tof"] = tof
+        # Make 2 bins, one for each pulse
+        edges = sc.array(dims=['tof'],
+                         values=[0., self.tau.value, 2 * self.tau.value],
+                         unit=self.tau.unit)
+        self.data = sc.bin(self.data, edges=[edges])
+        # Make one offset for each bin
         tof_offset = self.tau * self.chopper_phase / (180.0 * sc.units.deg)
-        tof_cut = self.wavelength_cut * self.chopper_detector_distance / HDM
-        tof_e = (sc.Variable(
-            values=np.remainder((tof - tof_cut + self.tau).values, self.tau.values),
-            unit=sc.units.us,
-            dims=["event"],
-        ) + tof_cut + tof_offset)
-        buf = self.data.bins.constituents["data"]
-        tof = tof_e.astype(sc.dtype.float64)
-        del buf.coords["tof"]
-        buf.coords["tof"] = tof
+        offset = sc.concatenate(tof_offset, tof_offset - self.tau, 'tof')
+        # Apply the offset on both bins
+        self.data.bins.coords['tof'] += offset
+        # Rebin to exclude second (empty) pulse range
+        self.data = sc.bin(self.data,
+                           edges=[sc.concatenate(0. * sc.units.us, self.tau, 'tof')])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -187,8 +194,8 @@ class AmorData(ReflData):
         if wavelength_min is None:
             wavelength_min = self.wavelength_cut
         if wavelength_max is None:
-            wavelength_max = wavelength_min + self.tau * (
-                HDM / self.chopper_detector_distance)
+            wavelength_max = wavelength_min + sc.to_unit(
+                self.tau * (HDM / self.chopper_detector_distance), 'angstrom')
             if (wavelength_max > sc.max(self.event.coords["wavelength"])).value:
                 wavelength_max = sc.max(self.event.coords["wavelength"])
         wavelength_max = sc.to_unit(wavelength_max,
