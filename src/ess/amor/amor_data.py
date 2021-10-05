@@ -169,13 +169,16 @@ class AmorData(ReflData):
         Also fold the two pulses.
         TODO: generalise mechanism to fold any number of pulses.
         """
+        tof_offset = self.tau * self.chopper_phase / (180.0 * sc.units.deg)
         # Make 2 bins, one for each pulse
         edges = sc.array(dims=['tof'],
-                         values=[0., self.tau.value, 2 * self.tau.value],
+                         values=[
+                             -tof_offset.value, (self.tau - tof_offset).value,
+                             (2 * (self.tau - tof_offset)).value
+                         ],
                          unit=self.tau.unit)
         self.data = sc.bin(self.data, edges=[edges])
         # Make one offset for each bin
-        tof_offset = self.tau * self.chopper_phase / (180.0 * sc.units.deg)
         offset = sc.concatenate(tof_offset, tof_offset - self.tau, 'tof')
         # Apply the offset on both bins
         self.data.bins.coords['tof'] += offset
