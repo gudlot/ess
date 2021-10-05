@@ -174,7 +174,7 @@ class AmorData(ReflData):
         edges = sc.array(dims=['tof'],
                          values=[
                              -tof_offset.value, (self.tau - tof_offset).value,
-                             (2 * (self.tau - tof_offset)).value
+                             (2 * self.tau - tof_offset).value
                          ],
                          unit=self.tau.unit)
         self.data = sc.bin(self.data, edges=[edges])
