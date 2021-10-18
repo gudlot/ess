@@ -32,28 +32,27 @@ def _tof_correction(data, tau, chopper_phase):
     return sc.bin(data, edges=[sc.concatenate(0. * sc.units.us, tau, 'tof')])
 
 
-def load(
-    filename,
-    reduction_creator=None,
-    data_owner=None,
-    experiment_id=None,
-    experiment_date=None,
-    sample_description=None,
-    reduction_file=None,
-    data_file=None,
-    reduction_creator_affiliation=None,
-    sample_angle_offset=0 * sc.units.deg,
-    gravity=True,
-    beam_size=0.001 * sc.units.m,
-    sample_size=0.01 * sc.units.m,
-    detector_spatial_resolution=0.0025 * sc.units.m,
-    chopper_sample_distance=15.0 * sc.units.m,
-    chopper_speed=20 / 3 * 1e-6 / sc.units.us,
-    chopper_detector_distance=19.0 * sc.units.m,
-    chopper_chopper_distance=0.49 * sc.units.m,
-    chopper_phase=-8.0 * sc.units.deg,
-    wavelength_cut=2.4 * sc.units.angstrom,
-):
+def load(filename,
+         reduction_creator=None,
+         data_owner=None,
+         experiment_id=None,
+         experiment_date=None,
+         sample_description=None,
+         reduction_file=None,
+         data_file=None,
+         reduction_creator_affiliation=None,
+         sample_angle_offset=0 * sc.units.deg,
+         gravity=True,
+         beam_size=0.001 * sc.units.m,
+         sample_size=0.01 * sc.units.m,
+         detector_spatial_resolution=0.0025 * sc.units.m,
+         chopper_sample_distance=15.0 * sc.units.m,
+         chopper_speed=20 / 3 * 1e-6 / sc.units.us,
+         chopper_detector_distance=19.0 * sc.units.m,
+         chopper_chopper_distance=0.49 * sc.units.m,
+         chopper_phase=-8.0 * sc.units.deg,
+         wavelength_min=2.4 * sc.units.angstrom,
+         wavelength_max=None):
     """
     Loader for a single Amor data file.
 
@@ -82,14 +81,12 @@ def load(
     Attributes:
         tau (:py:class:`scipp._scipp.core.Variable`): Half of the inverse of the chopper speed.
     """
-    data = refl.io.load(
-        filename=filename,
-        sample_angle_offset=sample_angle_offset,
-        gravity=gravity,
-        beam_size=beam_size,
-        sample_size=sample_size,
-        detector_spatial_resolution=detector_spatial_resolution,
-    )
+    data = refl.io.load(filename=filename,
+                        sample_angle_offset=sample_angle_offset,
+                        gravity=gravity,
+                        beam_size=beam_size,
+                        sample_size=sample_size,
+                        detector_spatial_resolution=detector_spatial_resolution)
 
     # Convert tof nanoseconds to microseconds for convenience
     # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
@@ -102,10 +99,13 @@ def load(
 
     # These are Amor specific parameters
     tau = 1 / (2 * chopper_speed)
-    chopper_detector_distance = chopper_detector_distance
-    chopper_chopper_distance = chopper_chopper_distance
-    chopper_phase = chopper_phase
-    wavelength_cut = wavelength_cut
+
+    # # TODO: do we still need this as attributes?
+    # chopper_detector_distance = chopper_detector_distance
+    # chopper_chopper_distance = chopper_chopper_distance
+    # chopper_phase = chopper_phase
+    # wavelength_cut = wavelength_cut
+
     # The source position is not the true source position due to the
     # use of choppers to define the pulse.
     data.coords["source_position"] = sc.geometry.position(0.0 * sc.units.m,
@@ -120,11 +120,17 @@ def load(
         data.coords["position"].fields.z - data.coords["source_position"].fields.z)
     data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
 
-    data = refl.utils.to_wavelength(data, wavelength_cut=wavelength_cut)
+    data = refl.utils.to_wavelength(data,
+                                    wavelength_min=wavelength_min,
+                                    wavelength_max=wavelength_max)
 
-    # coords = refl.utils.compute_theta(data)
-    # for name, coord in coords.itmes():
-    #     data.bins.coords[name] = coord
+    data.bins.coords["velocity"] = refl.utils.compute_velocity(
+        data.bins.coords["wavelength"], "m/s")
+    # return data
+
+    attrs = refl.utils.compute_theta(data)
+    for name, attr in attrs.items():
+        data.bins.coords[name] = attr
 
     # data /= refl.corrections.illumination_correction(beam_size, sample_size,
     #                                                  data.bins.coords["theta"])

@@ -1,24 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-
+import numpy as np
 import scipp as sc
 import scippneutron as scn
 from . import corrections
 from . import resolution
+from .constants import HDM
 
 
-def to_wavelength(data, wavelength_cut=None):
+def to_wavelength(data, wavelength_min=None, wavelength_max=None):
     """
     From the time-of-flight data, find the wavelength for each neutron event.
     """
     data = scn.convert(data, origin='tof', target='wavelength', scatter=True)
     # Select desired wavelength range
-    if wavelength_cut is not None:
-        data = sc.bin(data,
-                      edges=[
-                          sc.concatenate(wavelength_cut,
-                                         data.coords['wavelength'].max(), 'wavelength')
-                      ])
+    if (wavelength_min is not None) or (wavelength_max is not None):
+        if wavelength_min is None:
+            wavelength_min = data.coords['wavelength'].min()
+        if wavelength_max is None:
+            wavelength_max = data.coords['wavelength'].max()
+        data = sc.bin(
+            data, edges=[sc.concatenate(wavelength_min, wavelength_max, 'wavelength')])
     return data
 
 
@@ -27,9 +29,16 @@ def compute_theta(data):
     Calculate the theta angle (and resolution) with or without a gravity correction.
     """
     if data.meta["gravity"].value:
+        # Temporary broadcast of position coord to all events
+        data.bins.constituents["data"].coords['position'] = sc.empty(
+            sizes=data.bins.constituents["data"].sizes,
+            dtype=sc.dtype.vector_3_float64,
+            unit='m')
+        data.bins.coords['position'][...] = data.meta['position']
+
         nu_angle = corrections.angle_with_gravity(
-            data,
-            data.meta["position"],
+            data.bins.coords["velocity"],
+            data.bins.coords["position"],
             data.meta["sample_position"],
         )
         theta = -data.meta["sample_angle_offset"] + nu_angle
@@ -47,14 +56,16 @@ def compute_theta(data):
         offset_positive = resolution.z_offset(data.meta["sample_position"],
                                               half_beam_on_sample)
         offset_negative = resolution.z_offset(data.meta["sample_position"],
-                                              half_beam_on_sample)
+                                              -half_beam_on_sample)
         # data.bins.constituents['data'].attrs['offset_positive'] = offset_positive
         # data.bins.constituents['data'].attrs['offset_negative'] = offset_negative
         # data.bins.attrs['offset_positive'] = offset_positive
         # data.bins.attrs['offset_negative'] = offset_negative
-        angle_max = corrections.angle_with_gravity(data, data.coords["position"],
+        angle_max = corrections.angle_with_gravity(data.bins.coords["velocity"],
+                                                   data.bins.coords["position"],
                                                    offset_positive)
-        angle_min = corrections.angle_with_gravity(data, data.coords["position"],
+        angle_min = corrections.angle_with_gravity(data.bins.coords["velocity"],
+                                                   data.bins.coords["position"],
                                                    offset_negative)
         # del data.bins.constituents['data'].attrs['offset_positive']
         # del data.bins.constituents['data'].attrs['offset_negative']
@@ -67,7 +78,7 @@ def compute_theta(data):
         # due to the detector's spatial resolution, which we will call
         # sigma_gamma
         sigma_gamma = resolution.detector_resolution(
-            detector_spatial_resolution, data.coords["position"].fields.z,
+            data.meta["detector_spatial_resolution"], data.meta["position"].fields.z,
             data.meta["sample_position"].fields.z)
         # data.attrs["sigma_gamma"] = sigma_gamma
         # sigma_theta = sc.sqrt(
@@ -84,8 +95,8 @@ def compute_theta(data):
         # data.bins.coords["sigma_theta_by_theta"] = sigma_theta.bins.constituents["data"]
         return {
             "theta": theta,
-            "sigma_theta_position": sigma_theta_position,
-            "sigma_gamma": sigma_gamma,
+            # "sigma_theta_position": sigma_theta_position,
+            # "sigma_gamma": sigma_gamma,
             "sigma_theta_by_theta": sigma_theta
         }
     else:
@@ -119,3 +130,7 @@ def compute_qz(data):
     data.bins.constituents["data"].coords["sigma_qz_by_qz"] = sc.sqrt(
         (data.coords["s_qz_bins"] +
          data.bins.coords["s_qz_events"]).bins.constituents["data"])
+
+
+def compute_velocity(wavelength, to_unit='m/s'):
+    return sc.to_unit(HDM / wavelength, "m/s")
