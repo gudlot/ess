@@ -100,15 +100,16 @@ def compute_theta(data):
         raise NotImplementedError
 
 
-def compute_qz(data):
+def compute_qz(theta, wavelength):
     """
     Calculate the scattering vector (and resolution).
     """
-    # data.bins.constituents["data"].coords["qz"] = (
-    #     4.0 * np.pi * sc.sin(data.bins.constituents["data"].coords["theta"]) /
-    #     data.bins.constituents["data"].coords["wavelength"])
-    data.bins.coords["qz"] = (4.0 * np.pi * sc.sin(data.bins.coords["theta"]) /
-                              data.bins.coords["wavelength"])
+    # # data.bins.constituents["data"].coords["qz"] = (
+    # #     4.0 * np.pi * sc.sin(data.bins.constituents["data"].coords["theta"]) /
+    # #     data.bins.constituents["data"].coords["wavelength"])
+    # data.bins.coords["qz"] = (4.0 * np.pi * sc.sin(data.bins.coords["theta"]) /
+    #                           data.bins.coords["wavelength"])
+    return 4.0 * np.pi * sc.sin(theta) / wavelength
     data.coords["s_qz_bins"] = sc.zeros(
         dims=data.coords["detector_id"].dims,
         shape=data.coords["detector_id"].shape,

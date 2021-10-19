@@ -140,7 +140,8 @@ def load(filename,
     # data /= refl.corrections.illumination_correction(beam_size, sample_size,
     #                                                  data.bins.coords["theta"])
     # illumination()
-    # qz = refl.utils.compute_qz()
+    data.coords["qz"] = refl.utils.compute_qz(theta=data.coords["theta"],
+                                              wavelength=data.coords["wavelength"])
     # find_qz()
     # _setup_orso(reduction_creator, reduction_creator_affiliation, sample_description,
     #             data_owner, experiment_id, experiment_date, reduction_file)

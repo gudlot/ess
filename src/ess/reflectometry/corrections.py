@@ -64,11 +64,11 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     Returns:
         (:py:class:`scipp._scipp.core.VariableView`): The gradient of the trajectory of the neutron at the origin position.
     """
-    print("Velocity:\n", velocity, '\n', velocity.min(), '\n', velocity.max())
-    print("z_origin:\n", z_origin, '\n', z_origin.min(), '\n', z_origin.max())
-    print("y_origin:\n", y_origin, '\n', y_origin.min(), '\n', y_origin.max())
-    print("z_measured:\n", z_measured, '\n', z_measured.min(), '\n', z_measured.max())
-    print("y_measured:\n", y_measured, '\n', y_measured.min(), '\n', y_measured.max())
+    # print("Velocity:\n", velocity, '\n', velocity.min(), '\n', velocity.max())
+    # print("z_origin:\n", z_origin, '\n', z_origin.min(), '\n', z_origin.max())
+    # print("y_origin:\n", y_origin, '\n', y_origin.min(), '\n', y_origin.max())
+    # print("z_measured:\n", z_measured, '\n', z_measured.min(), '\n', z_measured.max())
+    # print("y_measured:\n", y_measured, '\n', y_measured.min(), '\n', y_measured.max())
 
     velocity2 = velocity * velocity
     z_diff = z_measured - z_origin
