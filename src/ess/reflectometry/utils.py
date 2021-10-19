@@ -8,19 +8,14 @@ from . import resolution
 from .constants import HDM
 
 
-def to_wavelength(data, wavelength_min=None, wavelength_max=None):
+def to_wavelength(data, wavelength_bins=None):
     """
     From the time-of-flight data, find the wavelength for each neutron event.
     """
     data = scn.convert(data, origin='tof', target='wavelength', scatter=True)
     # Select desired wavelength range
-    if (wavelength_min is not None) or (wavelength_max is not None):
-        if wavelength_min is None:
-            wavelength_min = data.coords['wavelength'].min()
-        if wavelength_max is None:
-            wavelength_max = data.coords['wavelength'].max()
-        data = sc.bin(
-            data, edges=[sc.concatenate(wavelength_min, wavelength_max, 'wavelength')])
+    if wavelength_bins is not None:
+        data = sc.bin(data, edges=[wavelength_bins])
     return data
 
 
@@ -30,17 +25,18 @@ def compute_theta(data):
     """
     if data.meta["gravity"].value:
         # Temporary broadcast of position coord to all events
-        data.bins.constituents["data"].coords['position'] = sc.empty(
-            sizes=data.bins.constituents["data"].sizes,
-            dtype=sc.dtype.vector_3_float64,
-            unit='m')
-        data.bins.coords['position'][...] = data.meta['position']
+        # data.bins.constituents["data"].coords['position'] = sc.empty(
+        #     sizes=data.bins.constituents["data"].sizes,
+        #     dtype=sc.dtype.vector_3_float64,
+        #     unit='m')
+        # data.bins.coords['position'][...] = data.meta['position']
 
         nu_angle = corrections.angle_with_gravity(
-            data.bins.coords["velocity"],
-            data.bins.coords["position"],
+            data.meta["velocity"],
+            data.meta["position"],
             data.meta["sample_position"],
         )
+        # return {"y_dash": nu_angle}
         theta = -data.meta["sample_angle_offset"] + nu_angle
         # data.bins.constituents["data"].coords["theta"] = theta
         # data.bins.coords["theta"] = theta
@@ -61,11 +57,11 @@ def compute_theta(data):
         # data.bins.constituents['data'].attrs['offset_negative'] = offset_negative
         # data.bins.attrs['offset_positive'] = offset_positive
         # data.bins.attrs['offset_negative'] = offset_negative
-        angle_max = corrections.angle_with_gravity(data.bins.coords["velocity"],
-                                                   data.bins.coords["position"],
+        angle_max = corrections.angle_with_gravity(data.meta["velocity"],
+                                                   data.meta["position"],
                                                    offset_positive)
-        angle_min = corrections.angle_with_gravity(data.bins.coords["velocity"],
-                                                   data.bins.coords["position"],
+        angle_min = corrections.angle_with_gravity(data.meta["velocity"],
+                                                   data.meta["position"],
                                                    offset_negative)
         # del data.bins.constituents['data'].attrs['offset_positive']
         # del data.bins.constituents['data'].attrs['offset_negative']
@@ -97,6 +93,7 @@ def compute_theta(data):
             "theta": theta,
             # "sigma_theta_position": sigma_theta_position,
             # "sigma_gamma": sigma_gamma,
+            # "nu_angle": nu_angle,
             "sigma_theta_by_theta": sigma_theta
         }
     else:

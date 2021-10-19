@@ -20,11 +20,16 @@ def _tof_correction(data, tau, chopper_phase):
     Also fold the two pulses.
     TODO: generalise mechanism to fold any number of pulses.
     """
+    tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
-    edges = sc.array(dims=['tof'], values=[0., tau.value, 2 * tau.value], unit=tau.unit)
+    edges = sc.array(dims=['tof'],
+                     values=[
+                         -tof_offset.value, (tau - tof_offset).value,
+                         (2 * tau - tof_offset).value
+                     ],
+                     unit=tau.unit)
     data = sc.bin(data, edges=[edges])
     # Make one offset for each bin
-    tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     offset = sc.concatenate(tof_offset, tof_offset - tau, 'tof')
     # Apply the offset on both bins
     data.bins.coords['tof'] += offset
@@ -51,8 +56,11 @@ def load(filename,
          chopper_detector_distance=19.0 * sc.units.m,
          chopper_chopper_distance=0.49 * sc.units.m,
          chopper_phase=-8.0 * sc.units.deg,
-         wavelength_min=2.4 * sc.units.angstrom,
-         wavelength_max=None):
+         wavelength_bins=sc.linspace(dim='wavelength',
+                                     start=2.4,
+                                     stop=15.0,
+                                     num=201,
+                                     unit=sc.units.angstrom)):
     """
     Loader for a single Amor data file.
 
@@ -120,17 +128,14 @@ def load(filename,
         data.coords["position"].fields.z - data.coords["source_position"].fields.z)
     data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
 
-    data = refl.utils.to_wavelength(data,
-                                    wavelength_min=wavelength_min,
-                                    wavelength_max=wavelength_max)
+    data = refl.utils.to_wavelength(data, wavelength_bins=wavelength_bins)
 
-    data.bins.coords["velocity"] = refl.utils.compute_velocity(
-        data.bins.coords["wavelength"], "m/s")
-    # return data
+    data.coords["velocity"] = refl.utils.compute_velocity(data.coords["wavelength"],
+                                                          "m/s")
 
     attrs = refl.utils.compute_theta(data)
     for name, attr in attrs.items():
-        data.bins.coords[name] = attr
+        data.coords[name] = attr
 
     # data /= refl.corrections.illumination_correction(beam_size, sample_size,
     #                                                  data.bins.coords["theta"])
