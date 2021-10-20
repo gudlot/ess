@@ -13,17 +13,18 @@ def to_wavelength(data, background, transmission, direct_beam, direct_beam_trans
     transmission = normalization.transmission_fraction(transmission,
                                                         background,
                                                         direct_beam_transmission,
-                                                        wavelength_bins)
+                                                        wavelength_bins,
+                                                        min_bin,
+                                                        max_bin)
     for name, mask in masks.items():
         data.masks[name] = mask
     data = scn.convert(data, 'tof', 'wavelength', out=data, scatter=True)
     data = sc.rebin(data, 'wavelength', wavelength_bins)
 
     monitor = data.attrs['monitor2'].value
-    monitor = monitor - sc.mean(monitor['tof', min_bin * sc.units.us: max_bin * sc.units.us], 'tof')
+    monitor = monitor - sc.mean(monitor['tof', min_bin : max_bin], 'tof')
     monitor = scn.convert(monitor, 'tof', 'wavelength', out=monitor, scatter=False)
     monitor = sc.rebin(monitor, 'wavelength', wavelength_bins)
-
 
     direct_beam = contrib.map_to_bins(direct_beam, 'wavelength',
                                       monitor.coords['wavelength'])
