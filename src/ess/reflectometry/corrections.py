@@ -7,10 +7,11 @@ Corrections to be used for neutron reflectometry reduction processes.
 import numpy as np
 import scipp as sc
 from scipy.special import erf
-from .constants import HDM, G_ACC
+from .constants import G_ACC
+from .utils import compute_velocity
 
 
-def angle_with_gravity(data, pixel_position, sample_position):
+def angle_with_gravity(velocity, pixel_position, sample_position):
     """
     Find the angle of reflection when accounting for the presence of gravity.
 
@@ -27,14 +28,16 @@ def angle_with_gravity(data, pixel_position, sample_position):
     # At which point the args can be changed to wavelength
     # (where this is data.bins.constituents['data'].coords['wavelength'].astype(sc.dtype.float64) or similar)
     # instead of data
-    velocity = sc.to_unit(
-        HDM /
-        data.bins.constituents["data"].coords["wavelength"].astype(sc.dtype.float64),
-        "m/s",
-    )
-    data.bins.constituents["data"].coords["velocity"] = velocity
-    velocity = data.bins.coords["velocity"]
-    velocity.events.unit = sc.units.m / sc.units.s
+    # velocity = sc.to_unit(
+    #     HDM /
+    #     data.bins.constituents["data"].coords["wavelength"].astype(sc.dtype.float64),
+    #     "m/s",
+    # )
+    # velocity = compute_velocity(data.bins.coords["wavelength"], "m/s")
+    # data.bins.constituents["data"].coords["velocity"] = velocity
+    # data.bins.coords["velocity"] = compute_velocity(data.bins.coords["wavelength"],
+    #                                                 "m/s")
+    # velocity.events.unit = sc.units.m / sc.units.s
     y_measured = pixel_position.fields.y
     z_measured = pixel_position.fields.z
     z_origin = sample_position.fields.z
@@ -42,7 +45,8 @@ def angle_with_gravity(data, pixel_position, sample_position):
     y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
     intercept = y_origin - y_dash * z_origin
     y_true = z_measured * y_dash + intercept
-    angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
+    # angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
+    angle = sc.to_unit(sc.atan(y_true / z_measured), 'deg')
     return angle
 
 
@@ -60,6 +64,12 @@ def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
     Returns:
         (:py:class:`scipp._scipp.core.VariableView`): The gradient of the trajectory of the neutron at the origin position.
     """
+    # print("Velocity:\n", velocity, '\n', velocity.min(), '\n', velocity.max())
+    # print("z_origin:\n", z_origin, '\n', z_origin.min(), '\n', z_origin.max())
+    # print("y_origin:\n", y_origin, '\n', y_origin.min(), '\n', y_origin.max())
+    # print("z_measured:\n", z_measured, '\n', z_measured.min(), '\n', z_measured.max())
+    # print("y_measured:\n", y_measured, '\n', y_measured.min(), '\n', y_measured.max())
+
     velocity2 = velocity * velocity
     z_diff = z_measured - z_origin
     y_diff = y_measured - y_origin
