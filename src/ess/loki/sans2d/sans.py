@@ -1,9 +1,9 @@
 # SANS specific functions
 import scipp as sc
 import scippneutron as scn
-import contrib
-import reduction
-import normalization
+from ess.sans import contrib
+from ess.sans import reduction
+from ess.sans import normalization
 
 
 def to_wavelength(
