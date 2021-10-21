@@ -4,10 +4,16 @@ import scipp as sc
 import scippneutron as scn
 
 def simple_reducer(*, dim):
+    """
+    Helper function for full range reduction
+    """
     return lambda x: sc.sum(x, dim=dim)
 
 
 def grouping_reducer(*, dim, group):
+    """
+    Helper function for wavelength slices
+    """
     return lambda x: sc.groupby(x, group=group).sum(dim=dim)
 
 

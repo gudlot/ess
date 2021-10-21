@@ -1,15 +1,27 @@
 # Generic helpers that may end up as contributions to scipp if cleaned up
 import scipp as sc
 
+
 def midpoints(var, dim):
+    """
+    Utility function for finding middle points of variable
+    """
     return 0.5 * (var[dim, 1:] + var[dim, :-1])
 
+
 def to_bin_centers(d, dim):
+    """
+    Utility function for setting centers of bins
+    """
     edges = d.coords[dim].copy()
     del d.coords[dim]
     d.coords[dim] = 0.5 * (edges[dim, 1:] + edges[dim, :-1])
 
+
 def to_bin_edges(d, dim):
+    """
+    Utility function for setting bin edges
+    """
     centers = d.coords[dim].copy()
     del d.coords[dim]
     first = 1.5 * centers[dim, 0] - 0.5 * centers[dim, 1]
@@ -19,7 +31,11 @@ def to_bin_edges(d, dim):
     edges = sc.concatenate(edges, last, dim)
     d.coords[dim] = edges
 
+
 def map_to_bins(data, dim, edges):
+    """
+    Utility function for binning data according to preset edges
+    """
     data = data.copy()
     to_bin_edges(data, dim)
     bin_width = data.coords[dim][dim, 1:] - data.coords[dim][dim, :-1]
@@ -31,7 +47,11 @@ def map_to_bins(data, dim, edges):
     data /= bin_width
     return data
 
+
 def select_bins(array, dim, start, end):
+    """
+    Utility function for selecting bins
+    """
     coord = array.coords[dim]
     edges = coord.shape[0]
     # scipp treats bins as closed on left and open on right: [left, right)
@@ -39,9 +59,13 @@ def select_bins(array, dim, start, end):
     last = edges - sc.sum(sc.greater(coord, end), dim).value
     assert first >= 0
     assert last < edges
-    return array[dim, first:last + 1]
+    return array[dim, first : last + 1]
+
 
 def make_slices(var, dim, cutting_points):
+    """
+    Utility function for making slices
+    """
     points = var.shape[0]
     slices = []
     for i in range(cutting_points.shape[0] - 1):
