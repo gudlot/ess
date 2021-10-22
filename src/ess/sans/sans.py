@@ -1,17 +1,16 @@
 # SANS specific functions
 import scipp as sc
 import scippneutron as scn
-from ess.sans import contrib
-from ess.sans import reduction
-from ess.sans import normalization
+from .contrib import map_to_bins, to_bin_centers
+from .reduction import reduce_to_q, simple_reducer, grouping_reducer
+from .normalization import solid_angle, transmission_fraction
 
 
 def to_wavelength(
     data,
-    background,
     transmission,
     direct_beam,
-    direct_beam_transmission,
+    direct,
     masks,
     wavelength_bins,
     min_bin,
@@ -23,10 +22,9 @@ def to_wavelength(
     TOF to wavelength conversion
     """
     data = data.copy()
-    transmission = normalization.transmission_fraction(
+    transmission_frac = transmission_fraction(
         transmission,
-        background,
-        direct_beam_transmission,
+        direct,
         wavelength_bins,
         min_bin,
         max_bin,
@@ -41,28 +39,27 @@ def to_wavelength(
     monitor = scn.convert(monitor, "tof", "wavelength", out=monitor, scatter=False)
     monitor = sc.rebin(monitor, "wavelength", wavelength_bins)
 
-    direct_beam = contrib.map_to_bins(
+    direct_beam = map_to_bins(
         direct_beam, "wavelength", monitor.coords["wavelength"]
     )
-    direct_beam = monitor * transmission * direct_beam
+    direct_beam = monitor * transmission_frac * direct_beam
 
     d = sc.Dataset(
         {
             "data": data,
-            "norm": normalization.solid_angle(data, pixel_size, pixel_length)
+            "norm": solid_angle(data, pixel_size, pixel_length)
             * direct_beam,
         }
     )
-    contrib.to_bin_centers(d, "wavelength")
+    to_bin_centers(d, "wavelength")
     return d
 
 
 def to_q(
     data,
-    background,
     transmission,
     direct_beam,
-    direct_beam_transmission,
+    direct,
     masks,
     q_bins,
     min_bin,
@@ -78,10 +75,9 @@ def to_q(
     """
     wav = to_wavelength(
         data=data,
-        background=background,
         transmission=transmission,
         direct_beam=direct_beam,
-        direct_beam_transmission=direct_beam_transmission,
+        direct=direct,
         masks=masks,
         wavelength_bins=wavelength_bins,
         min_bin=min_bin,
@@ -89,16 +85,16 @@ def to_q(
         pixel_size=pixel_size,
         pixel_length=pixel_length,
     )
-    reducer = reduction.simple_reducer(dim="spectrum")
+    reducer = simple_reducer(dim="spectrum")
 
     if wavelength_bands == None:
-        return reduction.reduce_to_q(wav, q_bins=q_bins, reducer=reducer)
+        return reduce_to_q(wav, q_bins=q_bins, reducer=reducer)
     else:
         # TODO: Check if this the case only when one does slices or in general
         if groupby != None:
-            reducer = reduction.grouping_reducer(dim="spectrum", group=groupby)
+            reducer = grouping_reducer(dim="spectrum", group=groupby)
 
-        return reduction.reduce_to_q(
+        return reduce_to_q(
             wav, q_bins=q_bins, reducer=reducer, wavelength_bands=wavelength_bands
         )
 

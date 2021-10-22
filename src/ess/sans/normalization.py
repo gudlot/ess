@@ -11,7 +11,7 @@ def solid_angle(data, pixel_size, pixel_length):
 
 
 def transmission_fraction(
-    sample, background, direct, wavelength_bins, min_bin, max_bin
+    sample, direct, wavelength_bins, min_bin, max_bin
 ):
     """
     Approximation based on equations in CalculateTransmission documentation
@@ -31,15 +31,14 @@ def transmission_fraction(
         sample.attrs["monitor2"].value, min_bin, max_bin, scatter=False
     )
     sample_trans = setup(
-        sample.attrs["monitor4"].value, 50.0 * us, 3000.0 * us, scatter=False
+        sample.attrs["monitor4"].value,  50 * us, 3000 * us, scatter=False
     )
     direct_incident = setup(
         direct.attrs["monitor2"].value, min_bin, max_bin, scatter=False
     )
     direct_trans = setup(
-        direct.attrs["monitor4"].value, 50.0 * us, 3000.0 * us, scatter=False
+        direct.attrs["monitor4"].value,  50 * us, 3000 * us, scatter=False
     )
-    # direct_incident = setup(background.attrs['monitor2'].value, 85000.0 * us, 98000.0 * us, scatter=False)
-    # irect_trans = setup(background.attrs['monitor4'].value, 50.0 * us, 3000.0 * us, scatter=False)
 
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)
+    #return (direct_trans / sample_trans) * (sample_incident / direct_incident)
