@@ -47,7 +47,7 @@ extends:
     package: true
     deploy: true
     ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:  # nightly
-      conda_label: 'dev'
+      conda_label: 'test' # 'dev'
     ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:  # tagged release
-      conda_label: 'main'
+      conda_label: 'test' # 'main'
       release: true
