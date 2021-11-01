@@ -32,6 +32,7 @@ extends:
     conda_channels: '--channel scipp'
     gh_pages_subdirectory: 'ess'
     noarch: true
+    prefix: 'src'
     config:
       linux:
         py_versions: ['3.7']
