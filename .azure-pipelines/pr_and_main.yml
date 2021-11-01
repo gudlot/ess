@@ -14,7 +14,7 @@ resources:
     name: scipp/pipelines
     type: github
     endpoint: scipp
-    ref: main
+    ref: accomodate_ess_in_new_ci
 
 trigger:
   - main
