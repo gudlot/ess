@@ -14,7 +14,6 @@ dependencies:
   - astropy
   - matplotlib
   - tifffile
-  - python
   - ipython
   - jupyter
   - ipywidgets
