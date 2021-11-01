@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   # Build
-  - scippneutron
+  - scippneutron=0.4.*
   - gitpython
 
   # Run
