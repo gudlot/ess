@@ -14,12 +14,10 @@ resources:
     name: scipp/pipelines
     type: github
     endpoint: scipp
-    ref: refs/tags/1.0.0
+    ref: main
 
 trigger:
-  branches:
-    exclude:
-      - '*'
+  - main
 
 pr:
   autoCancel: true
