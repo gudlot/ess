@@ -2,5 +2,8 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 # flake8: noqa
 
+from .beamline import make_fake_beamline
 from .stitch import stitch
+from .tools import *
 from .wfm import get_frames
+from . import plot

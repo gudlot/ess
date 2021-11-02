@@ -46,11 +46,7 @@ def test_load_component_info_to_2d_geometry_bad_sizes(geom_file):
 
 @with_mantid_only
 def test_load_component_info_to_2d_geometry(geom_file):
-    geometry = mantid.load_component_info_to_2d(geom_file,
-                                                sizes={
-                                                    'x': 10,
-                                                    'y': 10
-                                                })
+    geometry = mantid.load_component_info_to_2d(geom_file, sizes={'x': 10, 'y': 10})
     assert geometry["position"].sizes == {'x': 10, 'y': 10}
     assert sc.identical(
         geometry["x"],
@@ -64,11 +60,7 @@ def test_load_component_info_to_2d_geometry(geom_file):
 
 @with_mantid_only
 def test_load_component_info_to_2d_geometry_irregular(geom_file):
-    geometry = mantid.load_component_info_to_2d(geom_file,
-                                                sizes={
-                                                    'y': 2,
-                                                    'x': 50
-                                                })
+    geometry = mantid.load_component_info_to_2d(geom_file, sizes={'y': 2, 'x': 50})
     assert geometry["position"].sizes == {'x': 50, 'y': 2}
     assert "x" in geometry
     assert "y" in geometry
@@ -76,11 +68,7 @@ def test_load_component_info_to_2d_geometry_irregular(geom_file):
 
 @with_mantid_only
 def test_load_component_info_to_2d_geometry_non_cartesian(geom_file):
-    geometry = mantid.load_component_info_to_2d(geom_file,
-                                                sizes={
-                                                    'u': 20,
-                                                    'v': 5
-                                                })
+    geometry = mantid.load_component_info_to_2d(geom_file, sizes={'u': 20, 'v': 5})
     assert geometry["position"].sizes == {'u': 20, 'v': 5}
     # Cannot extract x, y as fields
     assert "x" not in geometry

@@ -2,25 +2,33 @@ name: ess-developer
 
 channels:
   - conda-forge
-  - scipp/label/dev
+  - scipp
   - nodefaults
 
 dependencies:
+  # Build
   - scippneutron
-  - mantid-framework
-  - pytest
-  - sphinx>=1.6
-  - sphinx_rtd_theme
-  - tifffile
-  - astropy 
+  - gitpython
+
+  # Run
+  - astropy
   - matplotlib
+  - tifffile
   - python
-  - ipywidgets
-  - scipy
-  # For developement
-  - pytest
   - ipython
   - jupyter
-  - gitpython
+  - ipywidgets
+  - scipy
+  - ipympl
+
+  # Test
+  - pytest
+
+  # Formatting & static analysis
   - flake8
   - yapf
+
+  # Docs
+  - sphinx
+  - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
+  - nbsphinx

@@ -60,7 +60,7 @@ class AmorData(ReflData):
         detector_spatial_resolution=0.0025 * sc.units.m,
         chopper_sample_distance=15.0 * sc.units.m,
         chopper_speed=20 / 3 * 1e-6 / sc.units.us,
-        chopper_detector_distance=1.9e11 * sc.units.angstrom,
+        chopper_detector_distance=19.0 * sc.units.m,
         chopper_chopper_distance=0.49 * sc.units.m,
         chopper_phase=-8.0 * sc.units.deg,
         wavelength_cut=2.4 * sc.units.angstrom,
@@ -74,6 +74,15 @@ class AmorData(ReflData):
             detector_spatial_resolution=detector_spatial_resolution,
             data_file=data_file,
         )
+        # Convert tof nanoseconds to microseconds for convenience
+        # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
+        # the same as the dtype of the underlying event coordinate?
+        if self.data.coords['tof'].dtype != sc.dtype.float64:
+            self.data.bins.coords['tof'] = self.data.bins.coords['tof'].astype(
+                'float64')
+            self.data.coords['tof'] = self.data.coords['tof'].astype('float64')
+        self.data.bins.coords['tof'] = sc.to_unit(self.data.bins.coords['tof'], 'us')
+        self.data.coords['tof'] = sc.to_unit(self.data.coords['tof'], 'us')
         # These are Amor specific parameters
         self.tau = 1 / (2 * chopper_speed)
         self.chopper_detector_distance = chopper_detector_distance
@@ -82,29 +91,27 @@ class AmorData(ReflData):
         self.wavelength_cut = wavelength_cut
         # The source position is not the true source position due to the
         # use of choppers to define the pulse.
-        self.data.attrs["source_position"] = sc.geometry.position(
+        self.data.coords["source_position"] = sc.geometry.position(
             0.0 * sc.units.m, 0.0 * sc.units.m, -chopper_sample_distance)
         self.tof_correction()
         # The wavelength contribution to the resolution function, defined
         # by the distance between the two choppers.
         # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
-        self.data.coords[
-            "sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
-                self.data.coords["position"].fields.z -
-                self.data.attrs["source_position"].fields.z)
-        self.data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(
-            2 * np.log(2))
-        self.find_wavelength()
+        self.data.coords["sigma_lambda_by_lambda"] = self.chopper_chopper_distance / (
+            self.data.coords["position"].fields.z -
+            self.data.coords["source_position"].fields.z)
+        self.data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
+        self.find_wavelength(wavelength_cut=self.wavelength_cut)
         self.find_theta()
         self.illumination()
         self.find_qz()
         self._setup_orso(reduction_creator, reduction_creator_affiliation,
-                         sample_description, data_owner, experiment_id,
-                         experiment_date, reduction_file)
+                         sample_description, data_owner, experiment_id, experiment_date,
+                         reduction_file)
 
     def _setup_orso(self, reduction_creator, reduction_creator_affiliation,
-                    sample_description, data_owner, experiment_id,
-                    experiment_date, reduction_file):
+                    sample_description, data_owner, experiment_id, experiment_date,
+                    reduction_file):
         """
         Setup the ORSO header object.
 
@@ -134,15 +141,13 @@ class AmorData(ReflData):
         self.orso.columns.append(
             orso.Column(
                 'sQ/Qz', 'dimensionless',
-                'fractional description of sigma from Gaussian resolution function'
-            ))
+                'fractional description of sigma from Gaussian resolution function'))
         if reduction_creator is not None:
             self.orso.creator.name = reduction_creator
         if reduction_creator_affiliation is not None:
             self.orso.creator.affiliation = reduction_creator_affiliation
         if sample_description is not None:
-            self.orso.data_source.experiment.sample = orso.Sample(
-                sample_description)
+            self.orso.data_source.experiment.sample = orso.Sample(sample_description)
         if data_owner is not None:
             self.orso.data_source.owner = data_owner
         if experiment_id is not None:
@@ -152,8 +157,8 @@ class AmorData(ReflData):
         if reduction_file is not None:
             self.orso.reduction.script = reduction_file
         try:
-            self.orso.reduction.input_files = orso.Files(
-                [orso.File(self.data_file)], [None])
+            self.orso.reduction.input_files = orso.Files([orso.File(self.data_file)],
+                                                         [None])
         except TypeError:
             self.orso.reduction.input_files = orso.Files([None], [None])
             self.orso.reduction.comment = 'Live reduction'
@@ -161,25 +166,25 @@ class AmorData(ReflData):
     def tof_correction(self):
         """
         A correction for the presense of the chopper with respect to the "true" ToF.
+        Also fold the two pulses.
+        TODO: generalise mechanism to fold any number of pulses.
         """
-        self.data.coords["position"].unit = sc.units.m
-        buf = self.data.bins.constituents["data"]
-        tof = sc.to_unit(buf.coords["tof"].astype(sc.dtype.float64), 'us')
-        tof.unit = sc.units.us
-        del buf.coords["tof"]
-        buf.coords["tof"] = tof
         tof_offset = self.tau * self.chopper_phase / (180.0 * sc.units.deg)
-        tof_cut = self.wavelength_cut * self.chopper_detector_distance / HDM
-        tof_e = (sc.Variable(
-            values=np.remainder(
-                (tof - tof_cut + self.tau).values, self.tau.values),
-            unit=sc.units.us,
-            dims=["event"],
-        ) + tof_cut + tof_offset)
-        buf = self.data.bins.constituents["data"]
-        tof = tof_e.astype(sc.dtype.float64)
-        del buf.coords["tof"]
-        buf.coords["tof"] = tof
+        # Make 2 bins, one for each pulse
+        edges = sc.array(dims=['tof'],
+                         values=[
+                             -tof_offset.value, (self.tau - tof_offset).value,
+                             (2 * self.tau - tof_offset).value
+                         ],
+                         unit=self.tau.unit)
+        self.data = sc.bin(self.data, edges=[edges])
+        # Make one offset for each bin
+        offset = sc.concatenate(tof_offset, tof_offset - self.tau, 'tof')
+        # Apply the offset on both bins
+        self.data.bins.coords['tof'] += offset
+        # Rebin to exclude second (empty) pulse range
+        self.data = sc.bin(self.data,
+                           edges=[sc.concatenate(0. * sc.units.us, self.tau, 'tof')])
 
     def wavelength_masking(self, wavelength_min=None, wavelength_max=None):
         """
@@ -192,18 +197,17 @@ class AmorData(ReflData):
         if wavelength_min is None:
             wavelength_min = self.wavelength_cut
         if wavelength_max is None:
-            wavelength_max = wavelength_min + self.tau * (
-                HDM / self.chopper_detector_distance)
-            if (wavelength_max > sc.max(
-                    self.event.coords["wavelength"])).value:
+            wavelength_max = wavelength_min + sc.to_unit(
+                self.tau * (HDM / self.chopper_detector_distance), 'angstrom')
+            if (wavelength_max > sc.max(self.event.coords["wavelength"])).value:
                 wavelength_max = sc.max(self.event.coords["wavelength"])
         wavelength_max = sc.to_unit(wavelength_max,
                                     self.event.coords['wavelength'].unit)
         wavelength_min = sc.to_unit(wavelength_min,
                                     self.event.coords['wavelength'].unit)
         self.data.bins.masks["wavelength"] = (
-            self.data.bins.coords["wavelength"] < wavelength_min) | (
-                self.data.bins.coords["wavelength"] > wavelength_max)
+            self.data.bins.coords["wavelength"] <
+            wavelength_min) | (self.data.bins.coords["wavelength"] > wavelength_max)
 
 
 class AmorReference(AmorData):
@@ -267,24 +271,20 @@ class AmorReference(AmorData):
         # The normalisation between the min and max of the supermirror is
         # normalised based on the characteristic of the supermirror at Amor
         supermirror_max_q = self.m_value * supermirror_critical_edge
-        self.event.coords['normalisation'] = sc.ones(
-            dims=['event'], shape=self.event.data.shape)
-        self.event.masks[
-            'normalisation'] = self.event.coords['qz'] >= supermirror_max_q
-        self.event.coords['normalisation'].values[
-            self.event.coords['qz'].values < supermirror_max_q.
-            value] = self.event.coords['normalisation'].values[
-                self.event.coords['qz'].values < supermirror_max_q.value] / (
-                    1.0 - (supermirror_alpha) *
-                    (self.event.coords['qz'].values[
-                        self.event.coords['qz'].values < supermirror_max_q.
-                        value] - supermirror_critical_edge.value))
+        self.event.coords['normalisation'] = sc.ones(dims=['event'],
+                                                     shape=self.event.data.shape)
+        self.event.masks['normalisation'] = self.event.coords['qz'] >= supermirror_max_q
         self.event.coords['normalisation'].values[
             self.event.coords['qz'].values <
-            supermirror_critical_edge.value] = 1
-        self.data.bins.constituents[
-            'data'].data = self.event.data / self.event.coords[
-                'normalisation'].astype(sc.dtype.float32)
+            supermirror_max_q.value] = self.event.coords['normalisation'].values[
+                self.event.coords['qz'].values < supermirror_max_q.value] / (
+                    1.0 - (supermirror_alpha) * (self.event.coords['qz'].values[
+                        self.event.coords['qz'].values < supermirror_max_q.value] -
+                                                 supermirror_critical_edge.value))
+        self.event.coords['normalisation'].values[
+            self.event.coords['qz'].values < supermirror_critical_edge.value] = 1
+        self.data.bins.constituents['data'].data = self.event.data / self.event.coords[
+            'normalisation'].astype(sc.dtype.float32)
 
 
 class Normalisation:
@@ -330,9 +330,13 @@ class Normalisation:
                     sc.max(self.sample.event.coords['qz']).value,
                     sc.max(self.reference.event.coords['qz']).value
                 ]) * unit
-                bins = np.linspace(min_q.value, max_q.value, 200)
-            binned_sample = self.sample.q_bin(bins, unit)
-            binned_reference = self.reference.q_bin(bins, unit)
+                bins = sc.linspace(dim='qz',
+                                   start=min_q.value,
+                                   stop=max_q.value,
+                                   num=200,
+                                   unit=sc.Unit('1/angstrom'))
+            binned_sample = self.sample.q_bin(bins)
+            binned_reference = self.reference.q_bin(bins)
             del binned_reference.coords['sigma_qz_by_qz']
         else:
             raise sc.NotFoundError("qz coordinate cannot be found.")
@@ -348,8 +352,8 @@ class Normalisation:
         Returns:
             (:py:class:`scipp._scipp.core.DataArray`): Normalised data array binned into wavelength and theta.
         """
-        return self.sample.wavelength_theta_bin(bins).bins.sum(
-        ) / self.reference.wavelength_theta_bin(bins).bins.sum()
+        return self.sample.wavelength_theta_bin(
+            bins).bins.sum() / self.reference.wavelength_theta_bin(bins).bins.sum()
 
     def write_reflectometry(self, filename, bin_kwargs=None):
         """

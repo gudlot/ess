@@ -39,6 +39,5 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
         band = reducer(band)
         bands = sc.concatenate(bands, band,
                                'wavelength') if bands is not None else band
-
     bands.coords['wavelength'] = wavelength_bands
     return bands

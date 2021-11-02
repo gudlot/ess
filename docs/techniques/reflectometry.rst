@@ -1,5 +1,5 @@
-ess\.reflectometry
-==================
+Reflectometry
+=============
 
 .. toctree::
    :maxdepth: 4
