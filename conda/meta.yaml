@@ -26,8 +26,13 @@ test:
     - ess.v20.imaging
   requires:
     - pytest
+    - pandoc
+    - sphinx
+    - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
+    - nbsphinx
   source_files:
     - tests/
+    - docs/
   commands:
     - python -m pytest -v tests
     - python docs/build_and_test.py
