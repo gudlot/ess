@@ -13,8 +13,7 @@ def to_wavelength(
     direct,
     masks,
     wavelength_bins,
-    min_bin,
-    max_bin,
+    tof_bins_monitors,
     pixel_size,
     pixel_length,
 ):
@@ -22,12 +21,15 @@ def to_wavelength(
     TOF to wavelength conversion
     """
     data = data.copy()
+    min_bin_mon2, max_bin_mon2, min_bin_mon4, max_bin_mon4 = tof_bins_monitors
     transmission_frac = transmission_fraction(
         transmission,
         direct,
         wavelength_bins,
-        min_bin,
-        max_bin,
+        min_bin_mon2,
+        max_bin_mon2,
+        min_bin_mon4,
+        max_bin_mon4,
     )
     for name, mask in masks.items():
         data.masks[name] = mask
@@ -35,7 +37,7 @@ def to_wavelength(
     data = sc.rebin(data, "wavelength", wavelength_bins)
 
     monitor = data.attrs["monitor2"].value
-    monitor = monitor - sc.mean(monitor["tof", min_bin:max_bin], "tof")
+    monitor = monitor - sc.mean(monitor["tof", min_bin_mon2:max_bin_mon2], "tof")
     monitor = scn.convert(monitor, "tof", "wavelength", out=monitor, scatter=False)
     monitor = sc.rebin(monitor, "wavelength", wavelength_bins)
 
@@ -62,8 +64,7 @@ def to_q(
     direct,
     masks,
     q_bins,
-    min_bin,
-    max_bin,
+    tof_bins_monitors,
     pixel_size,
     pixel_length,
     wavelength_bins,
@@ -80,8 +81,7 @@ def to_q(
         direct=direct,
         masks=masks,
         wavelength_bins=wavelength_bins,
-        min_bin=min_bin,
-        max_bin=max_bin,
+        tof_bins_monitors = tof_bins_monitors,
         pixel_size=pixel_size,
         pixel_length=pixel_length,
     )
@@ -90,7 +90,6 @@ def to_q(
     if wavelength_bands == None:
         return reduce_to_q(wav, q_bins=q_bins, reducer=reducer)
     else:
-        # TODO: Check if this the case only when one does slices or in general
         if groupby != None:
             reducer = grouping_reducer(dim="spectrum", group=groupby)
 

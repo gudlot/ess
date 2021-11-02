@@ -11,12 +11,20 @@ def solid_angle(data, pixel_size, pixel_length):
 
 
 def transmission_fraction(
-    sample, direct, wavelength_bins, min_bin, max_bin
+    sample,
+    direct,
+    wavelength_bins,
+    min_bin_mon2,
+    max_bin_mon2,
+    min_bin_mon4,
+    max_bin_mon4,
 ):
     """
     Approximation based on equations in CalculateTransmission documentation
     p = \frac{S_T}{D_T}\frac{D_I}{S_I}
     This is equivalent to mantid.CalculateTransmission without fitting
+
+    Note: TOF ranges fro
     """
 
     def setup(data, begin, end, scatter):
@@ -26,19 +34,18 @@ def transmission_fraction(
         return transformed
 
     us = sc.units.us
-    # TODO: resolve TOF ranges and make sure these are actually correct sample atributes used
+
     sample_incident = setup(
-        sample.attrs["monitor2"].value, min_bin, max_bin, scatter=False
+        sample.attrs["monitor2"].value, min_bin_mon2, max_bin_mon2, scatter=False
     )
     sample_trans = setup(
-        sample.attrs["monitor4"].value,  50 * us, 3000 * us, scatter=False
+        sample.attrs["monitor4"].value, min_bin_mon4, max_bin_mon4, scatter=False
     )
     direct_incident = setup(
-        direct.attrs["monitor2"].value, min_bin, max_bin, scatter=False
+        direct.attrs["monitor2"].value, min_bin_mon2, max_bin_mon2, scatter=False
     )
     direct_trans = setup(
-        direct.attrs["monitor4"].value,  50 * us, 3000 * us, scatter=False
+        direct.attrs["monitor4"].value, min_bin_mon4, max_bin_mon4, scatter=False
     )
 
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)
-    #return (direct_trans / sample_trans) * (sample_incident / direct_incident)
