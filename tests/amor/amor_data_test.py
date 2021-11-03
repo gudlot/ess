@@ -96,7 +96,7 @@ class TestAmorData(unittest.TestCase):
                      ],
                      unit='angstrom'))
         assert sc.identical(
-            p.data.coords['source_position'],
+            p.data.meta['source_position'],
             sc.geometry.position(0. * sc.units.m, 0. * sc.units.m, -15. * sc.units.m))
         assert sc.allclose(p.data.coords['sigma_lambda_by_lambda'],
                            sc.array(dims=['detector_id'], values=[0.0130052] * 4))
@@ -138,7 +138,7 @@ class TestAmorData(unittest.TestCase):
                      ],
                      unit='angstrom'))
         assert sc.identical(
-            p.data.coords['source_position'],
+            p.data.meta['source_position'],
             sc.geometry.position(0. * sc.units.m, 0. * sc.units.m, -15. * sc.units.m))
         assert sc.allclose(p.data.coords['sigma_lambda_by_lambda'],
                            sc.array(dims=['detector_id'], values=[0.0079624] * 4))

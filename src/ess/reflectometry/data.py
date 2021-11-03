@@ -166,11 +166,11 @@ class ReflData:
             self.data.bins.constituents['data'].attrs[
                 'offset_negative'] = offset_negative
             angle_max = corrections.angle_with_gravity(
-                self.data, self.data.coords["position"],
+                self.data, self.data.meta["position"],
                 self.data.bins.attrs['offset_positive'])
             angle_min = corrections.angle_with_gravity(
                 self.data,
-                self.data.coords["position"],
+                self.data.meta["position"],
                 self.data.bins.attrs['offset_negative'],
             )
             del self.data.bins.constituents['data'].attrs['offset_positive']
@@ -183,7 +183,7 @@ class ReflData:
             # due to the detector's spatial resolution, which we will call
             # sigma_gamma
             sigma_gamma = resolution.detector_resolution(
-                self.detector_spatial_resolution, self.data.coords["position"].fields.z,
+                self.detector_spatial_resolution, self.data.meta["position"].fields.z,
                 self.data.meta["sample_position"].fields.z)
             self.data.attrs["sigma_gamma"] = sigma_gamma
             sigma_theta = sc.sqrt(
