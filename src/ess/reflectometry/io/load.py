@@ -42,7 +42,7 @@ def load(
     # self.data.bins.constituents["data"].variances = np.ones_like(
     #     self.data.bins.constituents["data"].values)
     da.attrs["sample_angle_offset"] = sample_angle_offset
-    da.attrs["gravity"] = sc.scalar(gravity)
+    # da.attrs["gravity"] = sc.scalar(gravity)
     da.attrs["beam_size"] = beam_size
     da.attrs["sample_size"] = sample_size
     da.attrs["detector_spatial_resolution"] = detector_spatial_resolution

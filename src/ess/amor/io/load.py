@@ -121,28 +121,28 @@ def load(filename,
                                                           -chopper_sample_distance)
     # tof_correction()
     data = _tof_correction(data, tau, chopper_phase)
-    # The wavelength contribution to the resolution function, defined
-    # by the distance between the two choppers.
-    # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
-    data.coords["sigma_lambda_by_lambda"] = chopper_chopper_distance / (
-        data.coords["position"].fields.z - data.coords["source_position"].fields.z)
-    data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
+    # # The wavelength contribution to the resolution function, defined
+    # # by the distance between the two choppers.
+    # # Division by 2np.sqrt(2*np.log(2)) converts from FWHM to std.
+    # data.coords["sigma_lambda_by_lambda"] = chopper_chopper_distance / (
+    #     data.coords["position"].fields.z - data.coords["source_position"].fields.z)
+    # data.coords["sigma_lambda_by_lambda"] /= 2 * np.sqrt(2 * np.log(2))
 
-    data = refl.utils.to_wavelength(data, wavelength_bins=wavelength_bins)
+    # data = refl.utils.to_wavelength(data, wavelength_bins=wavelength_bins)
 
-    data.coords["velocity"] = refl.utils.compute_velocity(data.coords["wavelength"],
-                                                          "m/s")
+    # data.coords["velocity"] = refl.utils.compute_velocity(data.coords["wavelength"],
+    #                                                       "m/s")
 
-    attrs = refl.utils.compute_theta(data)
-    for name, attr in attrs.items():
-        data.coords[name] = attr
+    # attrs = refl.utils.compute_theta(data)
+    # for name, attr in attrs.items():
+    #     data.coords[name] = attr
 
-    # data /= refl.corrections.illumination_correction(beam_size, sample_size,
-    #                                                  data.bins.coords["theta"])
-    # illumination()
-    data.coords["qz"] = refl.utils.compute_qz(theta=data.coords["theta"],
-                                              wavelength=data.coords["wavelength"])
-    # find_qz()
-    # _setup_orso(reduction_creator, reduction_creator_affiliation, sample_description,
-    #             data_owner, experiment_id, experiment_date, reduction_file)
+    # # data /= refl.corrections.illumination_correction(beam_size, sample_size,
+    # #                                                  data.bins.coords["theta"])
+    # # illumination()
+    # data.coords["qz"] = refl.utils.compute_qz(theta=data.coords["theta"],
+    #                                           wavelength=data.coords["wavelength"])
+    # # find_qz()
+    # # _setup_orso(reduction_creator, reduction_creator_affiliation, sample_description,
+    # #             data_owner, experiment_id, experiment_date, reduction_file)
     return data
