@@ -6,3 +6,4 @@ Amor
 
    amor/amor_data
    amor/tools
+   amor/reduction
