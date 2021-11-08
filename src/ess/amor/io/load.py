@@ -4,7 +4,8 @@ import scipp as sc
 from ... import reflectometry as refl
 
 
-def _tof_correction(data, tau, chopper_phase):
+def _tof_correction(data: sc.DaraArray, tau: sc.Variable,
+                    chopper_phase: sc.Variable) -> sc.DaraArray:
     """
     A correction for the presense of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
@@ -27,17 +28,19 @@ def _tof_correction(data, tau, chopper_phase):
     return sc.bin(data, edges=[sc.concatenate(0. * sc.units.us, tau, 'tof')])
 
 
-def load(filename,
-         sample_angle_offset: sc.Variable = 0 * sc.units.deg,
-         beam_size: sc.Variable = 0.001 * sc.units.m,
-         sample_size: sc.Variable = 0.01 * sc.units.m,
-         detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
-         chopper_sample_distance: sc.Variable = 15.0 * sc.units.m,
-         chopper_speed: sc.Variable = 20 / 3 * 1e-6 / sc.units.us,
-         chopper_detector_distance: sc.Variable = 19.0 * sc.units.m,
-         chopper_chopper_distance: sc.Variable = 0.49 * sc.units.m,
-         chopper_phase: sc.Variable = -8.0 * sc.units.deg,
-         gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g):
+def load(
+    filename,
+    sample_angle_offset: sc.Variable = 0 * sc.units.deg,
+    beam_size: sc.Variable = 0.001 * sc.units.m,
+    sample_size: sc.Variable = 0.01 * sc.units.m,
+    detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
+    chopper_sample_distance: sc.Variable = 15.0 * sc.units.m,
+    chopper_speed: sc.Variable = 20 / 3 * 1e-6 / sc.units.us,
+    chopper_detector_distance: sc.Variable = 19.0 * sc.units.m,
+    chopper_chopper_distance: sc.Variable = 0.49 * sc.units.m,
+    chopper_phase: sc.Variable = -8.0 * sc.units.deg,
+    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g
+) -> sc.DaraArray:
     """
     Loader for a single Amor data file.
 

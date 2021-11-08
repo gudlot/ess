@@ -1,33 +1,26 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-# flake8: noqa: E501
-"""
-Tools to help with Amor data reduction.
-"""
-
-# author: Andrew R. McCluskey (arm61)
+# @author Andrew R. McCluskey (arm61)
 
 import scipp as sc
 
 
-def q_grid(q_min=0.008 * sc.Unit('1/angstrom'),
-           q_fix=0.005 * sc.Unit('1/angstrom'),
-           q_max=0.08 * sc.Unit('1/angstrom'),
-           d_q=None):
+def q_grid(q_min: sc.Variable = 0.008 * sc.Unit('1/angstrom'),
+           q_fix: sc.Variable = 0.005 * sc.Unit('1/angstrom'),
+           q_max: sc.Variable = 0.08 * sc.Unit('1/angstrom'),
+           d_q: sc.Variable = None) -> sc.Variable:
     """
-    Obtain a q_grid based on the custom linear-log grid from Jochen Stahn at PSI. The units of the bins are reciprocal angstrom.
+    Generate bin edges for a `q_grid` based on the custom linear-log grid from
+    Jochen Stahn at PSI. The units of the bins are reciprocal angstrom.
 
-    :param q_min: The minimum q-value to be present in the data. Optional, defaults to 0.008 Å^{-1}
-    :type q_min: scipp._scipp.core.Variable
-    :param q_fix: The last point in the linear binning and first in the log binning. Optional, defaults to 0.005 Å^{-1}
-    :type: q_fix: scipp._scipp.core.Variable
-    :param q_max: The maximum q-value to be present in the data. Optional, defaults to 0.08 Å^{-1}
-    :type q_max: scipp._scipp.core.Variable
-    :param q_d: The q-spacing for the linear region, from which the log-spacing is defined. Optional, defaults to 0.05*q_fix Å^{-1}
-    :type q_d: scipp._scipp.core.Variable
-
-    :return: The bin edges to be used in q-binning.
-    :rtype: scipp._scipp.core.Variable
+    :param q_min: The minimum q-value to be present in the data.
+        Default is `0.008 Å^{-1}`.
+    :param q_fix: The last point in the linear binning and first in the log binning.
+        Default is `0.005 Å^{-1}`.
+    :param q_max: The maximum q-value to be present in the data.
+        Default is `0.08 Å^{-1}`.
+    :param q_d: The q-spacing for the linear region, from which the log-spacing is
+        defined. Default is `0.05*q_fix Å^{-1}`.
     """
     q_min = sc.to_unit(q_min, q_max.unit)
     q_fix = sc.to_unit(q_fix, q_max.unit)

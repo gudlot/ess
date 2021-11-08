@@ -1,82 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-# flake8: noqa: E501
-"""
-Corrections to be used for neutron reflectometry reduction processes.
-"""
 import numpy as np
 import scipp as sc
-from scipy.special import erf
-from .constants import G_ACC
-from .utils import compute_velocity
 
 
-def angle_with_gravity(velocity, pixel_position, sample_position):
-    """
-    Find the angle of reflection when accounting for the presence of gravity.
-
-    Args:
-        data (:py:class:`scipp._scipp.core.DataArray`): Reduction data array.
-        pixel_position (:py:class:`scipp._scipp.core.VariableView`): Detector pixel positions, should be a :py:attr:`vector_3_float64`-type object.
-        sample_position (:py:class:`scipp._scipp.core.VariableView`): Scattered neutron origin position.
-
-    Returns:
-        (:py:class:`scipp._scipp.core.Variable`): Gravity corrected angle values.
-    """
-    # This is a workaround until scipp #1819 is resolved, at which time the following should be used instead
-    # velocity = sc.to_unit(HDM / wavelength, 'm/s')
-    # At which point the args can be changed to wavelength
-    # (where this is data.bins.constituents['data'].coords['wavelength'].astype(sc.dtype.float64) or similar)
-    # instead of data
-    # velocity = sc.to_unit(
-    #     HDM /
-    #     data.bins.constituents["data"].coords["wavelength"].astype(sc.dtype.float64),
-    #     "m/s",
-    # )
-    # velocity = compute_velocity(data.bins.coords["wavelength"], "m/s")
-    # data.bins.constituents["data"].coords["velocity"] = velocity
-    # data.bins.coords["velocity"] = compute_velocity(data.bins.coords["wavelength"],
-    #                                                 "m/s")
-    # velocity.events.unit = sc.units.m / sc.units.s
-    y_measured = pixel_position.fields.y
-    z_measured = pixel_position.fields.z
-    z_origin = sample_position.fields.z
-    y_origin = sample_position.fields.y
-    y_dash = y_dash0(velocity, z_origin, y_origin, z_measured, y_measured)
-    intercept = y_origin - y_dash * z_origin
-    y_true = z_measured * y_dash + intercept
-    # angle = sc.to_unit(sc.atan(y_true / z_measured).bins.constituents["data"], 'deg')
-    angle = sc.to_unit(sc.atan(y_true / z_measured), 'deg')
-    return angle
-
-
-def y_dash0(velocity, z_origin, y_origin, z_measured, y_measured):
-    """
-    Evaluation of the first dervative of the kinematic equations for for the trajectory of a neutron reflected from a surface.
-
-    Args:
-        velocity (:py:class:`scipp._scipp.core.VariableView`): Neutron velocity.
-        z_origin (:py:class:`scipp._scipp.core.Variable`): The z-origin position for the reflected neutron.
-        y_origin (:py:class:`scipp._scipp.core.Variable`): The y-origin position for the reflected neutron.
-        z_measured (:py:class:`scipp._scipp.core.Variable`): The z-measured position for the reflected neutron.
-        y_measured (:py:class:`scipp._scipp.core.Variable`): The y-measured position for the reflected neutron.
-
-    Returns:
-        (:py:class:`scipp._scipp.core.VariableView`): The gradient of the trajectory of the neutron at the origin position.
-    """
-    # print("Velocity:\n", velocity, '\n', velocity.min(), '\n', velocity.max())
-    # print("z_origin:\n", z_origin, '\n', z_origin.min(), '\n', z_origin.max())
-    # print("y_origin:\n", y_origin, '\n', y_origin.min(), '\n', y_origin.max())
-    # print("z_measured:\n", z_measured, '\n', z_measured.min(), '\n', z_measured.max())
-    # print("y_measured:\n", y_measured, '\n', y_measured.min(), '\n', y_measured.max())
-
-    velocity2 = velocity * velocity
-    z_diff = z_measured - z_origin
-    y_diff = y_measured - y_origin
-    return -0.5 * sc.norm(G_ACC) * z_diff / velocity2 + y_diff / z_diff
-
-
-def illumination_correction(beam_size, sample_size, theta):
+def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
+                            theta: sc.Variable) -> sc.Variable:
     """
     The factor by which the intensity should be multiplied to account for the
     scattering geometry, where the beam is Gaussian in shape.
@@ -95,7 +24,8 @@ def illumination_correction(beam_size, sample_size, theta):
     return sc.Variable(values=scale_factor, dims=theta.dims)
 
 
-def illumination_of_sample(beam_size, sample_size, theta):
+def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
+                           theta: sc.Variable) -> sc.Variable:
     """
     Determine the illumination of the sample by the beam and therefore the size of this illuminated length.
 

@@ -3,8 +3,6 @@
 
 # flake8 : noqa
 
-from . import binning
-from . import constants
 from . import corrections
 from . import conversions
 from . import io

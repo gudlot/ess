@@ -6,7 +6,9 @@ from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype
 
 
-def reflectometry_theta(gravity, wavelength, incident_beam, scattered_beam):
+def reflectometry_theta(gravity: sc.Variable, wavelength: sc.Variable,
+                        incident_beam: sc.Variable,
+                        scattered_beam: sc.Variable) -> sc.Variable:
     """
     Compute the reflectometry theta angle, including gravity correction.
     It is similar to the classical two_theta in other techniques,
@@ -26,7 +28,7 @@ def reflectometry_theta(gravity, wavelength, incident_beam, scattered_beam):
     return sc.asin(sc.sqrt(x**2 + (y + drop)**2) / L2)
 
 
-def reflectometry_q(wavelength, two_theta):
+def reflectometry_q(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
     """
     The reflectometry theta angle corresponds to what is usually called theta in other
     techniques. Hence, the reflectometry q calculation overrides the default by
