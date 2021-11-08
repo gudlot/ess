@@ -2,6 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
+from scipy.special import erf
 
 
 def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
@@ -16,7 +17,8 @@ def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
     """
     beam_on_sample = beam_size / sc.sin(theta)
     fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
-    return sc.erf(sample_size / beam_on_sample * fwhm_to_std)
+    scale_factor = erf((sample_size / beam_on_sample * fwhm_to_std).values)
+    return sc.array(values=scale_factor, dims=theta.dims)
 
 
 def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
