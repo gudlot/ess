@@ -4,7 +4,8 @@ import scippneutron as scn
 
 def solid_angle(data, pixel_size, pixel_length):
     """
-    Solid angle function taking pixel_size and pixel_lenght as parameters
+    Solid angle function taking pixel_size and pixel_lenght as parameters.
+    The method assumes pixels are rectangular.
     """
     L2 = scn.L2(data)
     return (pixel_size * pixel_length) / (L2 * L2)
@@ -14,38 +15,42 @@ def transmission_fraction(
     sample,
     direct,
     wavelength_bins,
-    min_bin_mon2,
-    max_bin_mon2,
-    min_bin_mon4,
-    max_bin_mon4,
+    min_bin_incident_monitor,
+    max_bin_incident_monitor,
+    min_bin_transmission_monitor,
+    max_bin_transmission_monitor,
 ):
     """
     Approximation based on equations in CalculateTransmission documentation
     p = \frac{S_T}{D_T}\frac{D_I}{S_I}
     This is equivalent to mantid.CalculateTransmission without fitting
-
-    Note: TOF ranges fro
     """
 
-    def setup(data, begin, end, scatter):
+    def setup(data, begin, end):
         transformed = data - sc.mean(data["tof", begin:end], "tof")
-        transformed = scn.convert(transformed, "tof", "wavelength", scatter=scatter)
-        transformed = sc.rebin(transformed.copy(), "wavelength", wavelength_bins)
+        transformed = scn.convert(transformed, "tof", "wavelength", scatter=False)
+        transformed = sc.rebin(transformed, "wavelength", wavelength_bins)
         return transformed
 
-    us = sc.units.us
-
     sample_incident = setup(
-        sample.attrs["monitor2"].value, min_bin_mon2, max_bin_mon2, scatter=False
+        sample.attrs["monitor2"].value,
+        min_bin_incident_monitor,
+        max_bin_incident_monitor,
     )
     sample_trans = setup(
-        sample.attrs["monitor4"].value, min_bin_mon4, max_bin_mon4, scatter=False
+        sample.attrs["monitor4"].value,
+        min_bin_transmission_monitor,
+        max_bin_transmission_monitor,
     )
     direct_incident = setup(
-        direct.attrs["monitor2"].value, min_bin_mon2, max_bin_mon2, scatter=False
+        direct.attrs["monitor2"].value,
+        min_bin_incident_monitor,
+        max_bin_incident_monitor,
     )
     direct_trans = setup(
-        direct.attrs["monitor4"].value, min_bin_mon4, max_bin_mon4, scatter=False
+        direct.attrs["monitor4"].value,
+        min_bin_transmission_monitor,
+        max_bin_transmission_monitor,
     )
 
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)

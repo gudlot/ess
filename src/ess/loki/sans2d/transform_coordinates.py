@@ -15,7 +15,6 @@ def setup_offsets(
     Transformin coordinates according to instrument setup
     """
     for item in [sample, sample_trans, background, background_trans, direct_beam]:
-        # for item in [sample,sample_trans,background,background_trans,directbeam]:
         item.coords["sample_position"].fields.z += sample_pos_z_offset
         item.coords["position"].fields.y += bench_pos_y_offset
         item.attrs["monitor4"].value.coords["position"].fields.z += monitor4_pos_z_offset
