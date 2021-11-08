@@ -285,7 +285,8 @@ class TestData(unittest.TestCase):
         p = data.ReflData(BINNED.copy())
         p.event.coords["tof"] = sc.Variable(dims=["event"],
                                             values=DETECTORS,
-                                            dtype=sc.dtype.float64)
+                                            dtype=sc.dtype.float64,
+                                            unit='us')
         p.data.attrs["source_position"] = sc.geometry.position(
             0.0 * sc.units.m, 0.0 * sc.units.m, -15.0 * sc.units.m)
         p.data.attrs["sample_position"] = sc.geometry.position(

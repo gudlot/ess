@@ -14,12 +14,10 @@ resources:
     name: scipp/pipelines
     type: github
     endpoint: scipp
-    ref: refs/tags/1.0.0
+    ref: refs/tags/4.0.0
 
 trigger:
-  branches:
-    exclude:
-      - '*'
+  - main
 
 pr:
   autoCancel: true
@@ -28,12 +26,13 @@ pr:
       - '*'
 
 extends:
-  template: stages.yml@SharedPipelines
+  template: pipelines/stages.yml@SharedPipelines
   parameters:
     verbose: ${{ parameters.verbose }}
     conda_channels: '--channel scipp'
     gh_pages_subdirectory: 'ess'
     noarch: true
+    prefix: 'src'
     config:
       linux:
         py_versions: ['3.7']
