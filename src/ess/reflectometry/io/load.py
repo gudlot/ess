@@ -2,19 +2,18 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 # @author Andrew R. McCluskey (arm61)
 
-import numpy as np
 import scipp as sc
 import scippneutron as scn
-from ess.reflectometry import corrections, resolution, binning, orso, write
 
 
 def load(
-        filename: str,
-        sample_angle_offset: sc.Variable = 0 * sc.units.deg,
-        gravity: bool = True,
-        beam_size: sc.Variable = 0.001 * sc.units.m,
-        sample_size: sc.Variable = 0.01 * sc.units.m,
-        detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m) -> sc.DataArray:
+    filename: str,
+    sample_angle_offset: sc.Variable = 0 * sc.units.deg,
+    beam_size: sc.Variable = 0.001 * sc.units.m,
+    sample_size: sc.Variable = 0.01 * sc.units.m,
+    detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
+    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g
+) -> sc.DataArray:
     """
     The general reflectometry data loader.
 
@@ -29,25 +28,11 @@ def load(
     :param detector_spatial_resolution: Spatial resolution of the detector (Optional).
         Default is `2.5 mm`.
     """
-
     da = scn.load_nexus(filename)
-    da.attrs["filename"] = sc.scalar(filename)
-
-    # if isinstance(data, str):
-    #     self.data_file = data
-    #     self.data =
-    # else:
-    #     self.data_file = data_file
-    #     self.data = data
-    # self.data.bins.constituents["data"].variances = np.ones_like(
-    #     self.data.bins.constituents["data"].values)
+    # da.attrs["filename"] = sc.scalar(filename)
     da.attrs["sample_angle_offset"] = sample_angle_offset
-    # da.attrs["gravity"] = sc.scalar(gravity)
     da.attrs["beam_size"] = beam_size
     da.attrs["sample_size"] = sample_size
     da.attrs["detector_spatial_resolution"] = detector_spatial_resolution
-    # self.orso = orso.Orso(orso.Creator(name='scipp'), orso.DataSource(),
-    #                       orso.Reduction(), [])
-    # experiment = orso.Experiment(self.data.attrs['instrument_name'].value, 'neutron')
-    # self.orso.data_source.experiment = experiment
+    da.coords["gravity"] = gravity
     return da

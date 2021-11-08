@@ -28,7 +28,9 @@ def reflectometry_theta(gravity, wavelength, incident_beam, scattered_beam):
 
 def reflectometry_q(wavelength, two_theta):
     """
-    Convert either from Q to wavelength or vice-versa.
+    The reflectometry theta angle corresponds to what is usually called theta in other
+    techniques. Hence, the reflectometry q calculation overrides the default by
+    taking `sin(two_theta)` instead of `sin(two_theta/2)`.
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
@@ -36,6 +38,9 @@ def reflectometry_q(wavelength, two_theta):
 
 
 def reflectometry_graph():
+    """
+    Generate a coordinate transformation graph for reflectometry.
+    """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
     graph["two_theta"] = reflectometry_theta
     graph["Q"] = reflectometry_q

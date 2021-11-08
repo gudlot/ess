@@ -8,5 +8,4 @@ from . import constants
 from . import corrections
 from . import conversions
 from . import io
-from . import orso
 from . import utils
