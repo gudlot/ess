@@ -20,7 +20,7 @@ def to_wavelength(
     """
     TOF to wavelength conversion
     """
-    data = data.copy()
+    data = data.copy(deep=False)
     min_bin_incident_monitor, max_bin_incident_monitor, min_bin_transmission_monitor, max_bin_transmission_monitor = tof_bins_monitors
     transmission_frac = transmission_fraction(
         transmission,
@@ -33,7 +33,7 @@ def to_wavelength(
     )
     for name, mask in masks.items():
         data.masks[name] = mask
-    data = scn.convert(data, "tof", "wavelength", out=data, scatter=True)
+    data = scn.convert(data, "tof", "wavelength", scatter=True)
     data = sc.rebin(data, "wavelength", wavelength_bins)
 
     monitor = data.attrs["monitor2"].value

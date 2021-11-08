@@ -46,33 +46,3 @@ def map_to_bins(data, dim, edges):
     return data
 
 
-def select_bins(array, dim, start, end):
-    """
-    Utility function for selecting bins
-    """
-    coord = array.coords[dim]
-    edges = coord.shape[0]
-    # scipp treats bins as closed on left and open on right: [left, right)
-    first = sc.sum(sc.less_equal(coord, start), dim).value - 1
-    last = edges - sc.sum(sc.greater(coord, end), dim).value
-    assert first >= 0
-    assert last < edges
-    return array[dim, first : last + 1]
-
-
-def make_slices(var, dim, cutting_points):
-    """
-    Utility function for making slices
-    """
-    points = var.shape[0]
-    slices = []
-    for i in range(cutting_points.shape[0] - 1):
-        start = cutting_points[dim, i]
-        end = cutting_points[dim, i + 1]
-        # scipp treats ranges as closed on left and open on right: [left, right)
-        first = sc.sum(sc.less(var, start), dim).value
-        last = points - sc.sum(sc.greater_equal(var, end), dim).value
-        assert first >= 0
-        assert last <= points
-        slices.append(slice(first, last))
-    return slices
