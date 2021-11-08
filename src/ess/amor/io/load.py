@@ -4,8 +4,8 @@ import scipp as sc
 from ... import reflectometry as refl
 
 
-def _tof_correction(data: sc.DaraArray, tau: sc.Variable,
-                    chopper_phase: sc.Variable) -> sc.DaraArray:
+def _tof_correction(data: sc.DataArray, tau: sc.Variable,
+                    chopper_phase: sc.Variable) -> sc.DataArray:
     """
     A correction for the presense of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
@@ -40,7 +40,7 @@ def load(
     chopper_chopper_distance: sc.Variable = 0.49 * sc.units.m,
     chopper_phase: sc.Variable = -8.0 * sc.units.deg,
     gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g
-) -> sc.DaraArray:
+) -> sc.DataArray:
     """
     Loader for a single Amor data file.
 
