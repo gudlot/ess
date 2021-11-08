@@ -39,7 +39,7 @@ def reflectometry_q(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Varia
     return c * sc.sin(two_theta.astype(dtype, copy=False)) / wavelength
 
 
-def reflectometry_graph():
+def reflectometry_graph() -> dict:
     """
     Generate a coordinate transformation graph for reflectometry.
     """

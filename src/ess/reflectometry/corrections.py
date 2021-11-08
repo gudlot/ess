@@ -7,16 +7,12 @@ import scipp as sc
 def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
                             theta: sc.Variable) -> sc.Variable:
     """
-    The factor by which the intensity should be multiplied to account for the
+    Compute the factor by which the intensity should be multiplied to account for the
     scattering geometry, where the beam is Gaussian in shape.
 
-    Args:
-        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam.
-        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam.
-        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
-
-    Returns:
-        (:py:class:`scipp._scipp.core.Variable`): Correction factor.
+    :param beam_size: Width of incident beam.
+    :param sample_size: Width of sample in the dimension of the beam.
+    :param theta: Incident angle.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
@@ -27,15 +23,12 @@ def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
 def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
                            theta: sc.Variable) -> sc.Variable:
     """
-    Determine the illumination of the sample by the beam and therefore the size of this illuminated length.
+    Determine the illumination of the sample by the beam and therefore the size of its
+    illuminated length.
 
-    Args:
-        beam_size (:py:class:`scipp._scipp.core.Variable`): Width of incident beam, in metres.
-        sample_size (:py:class:`scipp._scipp.core.Variable`): Width of sample in the dimension of the beam, in metres.
-        theta (:py:class:`scipp._scipp.core.Variable`): Incident angle.
-
-    Returns:
-        (:py:class:`scipp._scipp.core.Variable`): The size of the beam, for each theta, on the sample.
+    :param beam_size: Width of incident beam.
+    :param sample_size: Width of sample in the dimension of the beam.
+    :param theta: Incident angle.
     """
     beam_on_sample = beam_size / sc.sin(theta)
     if ((sc.mean(beam_on_sample)) > sample_size).value:
