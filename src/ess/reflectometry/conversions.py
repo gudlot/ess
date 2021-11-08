@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from scipp.constants import m_n, h, g, pi
+from scipp.constants import m_n, h, pi
 from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype
 

@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
-import scipp as sc
-
 _version = '1'
 
 __all__ = ['get_path']

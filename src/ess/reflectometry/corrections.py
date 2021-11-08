@@ -16,8 +16,7 @@ def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
     """
     beam_on_sample = beam_size / sc.sin(theta)
     fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
-    scale_factor = erf((sample_size / beam_on_sample * fwhm_to_std).values)
-    return sc.Variable(values=scale_factor, dims=theta.dims)
+    return sc.erf(sample_size / beam_on_sample * fwhm_to_std)
 
 
 def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
