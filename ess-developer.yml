@@ -29,6 +29,7 @@ dependencies:
 
   # Docs
   - pooch
+  - python-graphviz
   - pythreejs
   - sphinx
   - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
