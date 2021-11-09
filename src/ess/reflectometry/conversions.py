@@ -36,7 +36,11 @@ def reflectometry_q(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Varia
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
-    return c * sc.sin(two_theta.astype(dtype, copy=False)) / wavelength
+    # TODO: once scipp v0.9 is released, we can remove the if statement and simply use
+    # two_theta = two_theta.astype(dtype, copy=False)
+    if _elem_dtype(two_theta) != dtype:
+        two_theta = two_theta.astype(dtype, copy=False)
+    return c * sc.sin(two_theta) / wavelength
 
 
 def reflectometry_graph() -> dict:
