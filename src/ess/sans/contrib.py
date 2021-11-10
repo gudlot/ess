@@ -13,7 +13,7 @@ def to_bin_centers(d, dim):
     """
     Utility function for setting centers of bins
     """
-    d.coords[dim] = midpoints(d.coords.pop(dim))
+    d.coords[dim] = midpoints(d.coords[dim], dim)
 
 def to_bin_edges(d, dim):
     """
@@ -23,8 +23,7 @@ def to_bin_edges(d, dim):
     del d.coords[dim]
     first = 1.5 * centers[dim, 0] - 0.5 * centers[dim, 1]
     last = 1.5 * centers[dim, -1] - 0.5 * centers[dim, -2]
-    bulk = 0.5 * (centers[dim, 1:] + centers[dim, :-1])
-    bulk = midpoints(centers.pop(dim))
+    bulk = midpoints(centers, dim)
     edges = sc.concatenate(first, bulk, dim)
     edges = sc.concatenate(edges, last, dim)
     d.coords[dim] = edges

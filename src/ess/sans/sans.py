@@ -3,7 +3,7 @@ import scipp as sc
 import scippneutron as scn
 from .contrib import map_to_bins, to_bin_centers
 from .reduction import reduce_to_q, simple_reducer, grouping_reducer
-from .normalization import solid_angle, transmission_fraction
+from .normalization import solid_angle, transmission_fraction, covert_and_rebin
 
 
 def to_wavelength(
@@ -21,15 +21,22 @@ def to_wavelength(
     TOF to wavelength conversion
     """
     data = data.copy(deep=False)
-    min_bin_incident_monitor, max_bin_incident_monitor, min_bin_transmission_monitor, max_bin_transmission_monitor = tof_bins_monitors
-    transmission_frac = transmission_fraction(
-        transmission,
-        direct,
-        wavelength_bins,
+
+    (
         min_bin_incident_monitor,
         max_bin_incident_monitor,
         min_bin_transmission_monitor,
         max_bin_transmission_monitor,
+    ) = tof_bins_monitors
+
+    transmission_frac = transmission_fraction(
+        sample=transmission,
+        direct=direct,
+        wavelength_bins=wavelength_bins,
+        min_bin_incident_monitor=min_bin_incident_monitor,
+        max_bin_incident_monitor=max_bin_incident_monitor,
+        min_bin_transmission_monitor=min_bin_transmission_monitor,
+        max_bin_transmission_monitor=max_bin_transmission_monitor,
     )
     for name, mask in masks.items():
         data.masks[name] = mask
@@ -37,20 +44,18 @@ def to_wavelength(
     data = sc.rebin(data, "wavelength", wavelength_bins)
 
     monitor = data.attrs["monitor2"].value
-    monitor = monitor - sc.mean(monitor["tof", min_bin_incident_monitor:max_bin_incident_monitor], "tof")
-    monitor = scn.convert(monitor, "tof", "wavelength", out=monitor, scatter=False)
-    monitor = sc.rebin(monitor, "wavelength", wavelength_bins)
 
-    direct_beam = map_to_bins(
-        direct_beam, "wavelength", monitor.coords["wavelength"]
+    monitor = covert_and_rebin(
+        monitor, wavelength_bins, min_bin_incident_monitor, max_bin_incident_monitor
     )
+
+    direct_beam = map_to_bins(direct_beam, "wavelength", monitor.coords["wavelength"])
     direct_beam = monitor * transmission_frac * direct_beam
 
     d = sc.Dataset(
         {
             "data": data,
-            "norm": solid_angle(data, pixel_size, pixel_length)
-            * direct_beam,
+            "norm": solid_angle(data, pixel_size, pixel_length) * direct_beam,
         }
     )
     to_bin_centers(d, "wavelength")
@@ -81,7 +86,7 @@ def to_q(
         direct=direct,
         masks=masks,
         wavelength_bins=wavelength_bins,
-        tof_bins_monitors = tof_bins_monitors,
+        tof_bins_monitors=tof_bins_monitors,
         pixel_size=pixel_size,
         pixel_length=pixel_length,
     )
