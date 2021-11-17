@@ -68,9 +68,8 @@ def load(
     # Convert tof nanoseconds to microseconds for convenience
     # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
     # the same as the dtype of the underlying event coordinate?
-    if data.coords['tof'].dtype != sc.dtype.float64:
-        data.bins.coords['tof'] = data.bins.coords['tof'].astype('float64')
-        data.coords['tof'] = data.coords['tof'].astype('float64')
+    data.bins.coords['tof'] = data.bins.coords['tof'].astype('float64', copy=False)
+    data.coords['tof'] = data.coords['tof'].astype('float64', copy=False)
     data.bins.coords['tof'] = sc.to_unit(data.bins.coords['tof'], 'us')
     data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us')
 
