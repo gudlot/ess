@@ -18,7 +18,7 @@ def load(filename: str,
     The general reflectometry data loader.
 
     :param filename: The path to the file to be reduced.
-    :param sample_angle_offset: Correction for omega or possibly misalignment of sample.
+    :param omega: Correction for omega or possibly misalignment of sample.
         Default is `0 degrees of arc`.
     :param gravity: Should gravity be accounted for (Optional). Default is `True`.
     :param beam_size: Size of the beam perpendicular to the scattering surface.
