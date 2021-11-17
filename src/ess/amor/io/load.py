@@ -13,12 +13,7 @@ def _tof_correction(data: sc.DataArray, tau: sc.Variable,
     """
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
-    edges = sc.array(dims=['tof'],
-                     values=[
-                         -tof_offset.value, (tau - tof_offset).value,
-                         (2 * tau - tof_offset).value
-                     ],
-                     unit=tau.unit)
+    edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], 'tof')
     data = sc.bin(data, edges=[edges])
     # Make one offset for each bin
     offset = sc.concatenate(tof_offset, tof_offset - tau, 'tof')
