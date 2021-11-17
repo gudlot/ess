@@ -10,9 +10,10 @@ def gamma(gravity: sc.Variable, wavelength: sc.Variable,
                         incident_beam: sc.Variable,
                         scattered_beam: sc.Variable) -> sc.Variable:
     """
-    Compute the reflectometry theta angle, including gravity correction.
+    Compute the gamma angle, including gravity correction.
     It is similar to the classical two_theta in other techniques,
     but we also neglect the x component of the scattered beam.
+    See the schematic in Fig 5 of doi: 10.1016/j.nima.2016.03.007.
     """
     scattered_beam = scattered_beam.copy()
     scattered_beam.fields.x *= 0
