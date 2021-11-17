@@ -39,7 +39,7 @@ def load(
     """
     Loader for a single Amor data file.
 
-    :param sample_angle_offset: Correction for omega or possibly misalignment of sample.
+    :param omega: Correction for omega or possibly misalignment of sample.
         Default is `0 degrees of arc`.
     :param beam_size: Size of the beam perpendicular to the scattering surface.
         Default is `0.001 m`.
