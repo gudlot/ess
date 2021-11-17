@@ -70,8 +70,8 @@ def load(
     # the same as the dtype of the underlying event coordinate?
     data.bins.coords['tof'] = data.bins.coords['tof'].astype('float64', copy=False)
     data.coords['tof'] = data.coords['tof'].astype('float64', copy=False)
-    data.bins.coords['tof'] = sc.to_unit(data.bins.coords['tof'], 'us')
-    data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us')
+    data.bins.coords['tof'] = sc.to_unit(data.bins.coords['tof'], 'us', copy=False)
+    data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us', copy=False)
 
     # These are Amor specific parameters
     tau = 1 / (2 * chopper_speed)
