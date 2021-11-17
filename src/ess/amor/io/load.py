@@ -59,7 +59,7 @@ def load(
         Default is `-8. degrees of arc`.
     """
     data = refl.io.load(filename=filename,
-                        sample_angle_offset=sample_angle_offset,
+                        omega=omega,
                         gravity=gravity,
                         beam_size=beam_size,
                         sample_size=sample_size,
