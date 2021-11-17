@@ -6,7 +6,7 @@ from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype
 
 
-def reflectometry_theta(gravity: sc.Variable, wavelength: sc.Variable,
+def gamma(gravity: sc.Variable, wavelength: sc.Variable,
                         incident_beam: sc.Variable,
                         scattered_beam: sc.Variable) -> sc.Variable:
     """
