@@ -16,7 +16,7 @@ def _tof_correction(data: sc.DataArray, tau: sc.Variable,
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], 'tof')
     data = sc.bin(data, edges=[edges])
     # Make one offset for each bin
-    offset = sc.concatenate(tof_offset, tof_offset - tau, 'tof')
+    offset = sc.concat([tof_offset, tof_offset - tau], 'tof')
     # Apply the offset on both bins
     data.bins.coords['tof'] += offset
     # Rebin to exclude second (empty) pulse range
