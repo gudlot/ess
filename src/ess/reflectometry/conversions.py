@@ -51,6 +51,7 @@ def reflectometry_graph() -> dict:
     Generate a coordinate transformation graph for reflectometry.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
-    graph["two_theta"] = reflectometry_theta
+    graph["gamma"] = gamma
+    graph["theta"] = theta
     graph["Q"] = reflectometry_q
     return graph
