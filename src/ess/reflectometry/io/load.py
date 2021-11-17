@@ -8,7 +8,7 @@ import warnings
 
 
 def load(filename: str,
-         sample_angle_offset: sc.Variable = 0 * sc.units.deg,
+         omega: sc.Variable = 0 * sc.units.deg,
          beam_size: sc.Variable = 0.001 * sc.units.m,
          sample_size: sc.Variable = 0.01 * sc.units.m,
          detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
