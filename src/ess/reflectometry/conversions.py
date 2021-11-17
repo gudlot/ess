@@ -27,6 +27,12 @@ def reflectometry_theta(gravity: sc.Variable, wavelength: sc.Variable,
     drop = grav * m_n**2 / (2 * h**2) * wavelength**2 * L2**2
     return sc.asin(sc.sqrt(x**2 + (y + drop)**2) / L2)
 
+def theta(gamma: sc.Variable, omega: sc.Variable) -> sc.Variable:
+    """
+    Determine the value of theta from the gamma and omega (the sample angle offset) angles.
+    """
+    return gamma - omega
+    
 
 def reflectometry_q(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
     """
