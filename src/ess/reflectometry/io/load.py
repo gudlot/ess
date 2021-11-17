@@ -37,7 +37,7 @@ def load(filename: str,
     else:
         da = scn.load_nexus(filename)
 
-    da.coords["sample_angle_offset"] = sample_angle_offset
+    da.coords["omega"] = omega
     da.coords["beam_size"] = beam_size
     da.coords["sample_size"] = sample_size
     da.coords["detector_spatial_resolution"] = detector_spatial_resolution
