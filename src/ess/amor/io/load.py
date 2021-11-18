@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ... import reflectometry as refl
+import scippneutron as scn
+from .beamline import make_beamline
+import warnings
 
 
 def _tof_correction(data: sc.DataArray, tau: sc.Variable,
@@ -12,6 +14,7 @@ def _tof_correction(data: sc.DataArray, tau: sc.Variable,
     TODO: generalise mechanism to fold any number of pulses.
     """
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
+    print(tof_offset)
     # Make 2 bins, one for each pulse
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], 'tof')
     data = sc.bin(data, edges=[edges])
@@ -23,19 +26,14 @@ def _tof_correction(data: sc.DataArray, tau: sc.Variable,
     return sc.bin(data, edges=[sc.concatenate(0. * sc.units.us, tau, 'tof')])
 
 
-def load(
-    filename,
-    omega: sc.Variable = 0 * sc.units.deg,
-    beam_size: sc.Variable = 0.001 * sc.units.m,
-    sample_size: sc.Variable = 0.01 * sc.units.m,
-    detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
-    chopper_sample_distance: sc.Variable = 15.0 * sc.units.m,
-    chopper_speed: sc.Variable = 20 / 3 * 1e-6 / sc.units.us,
-    chopper_detector_distance: sc.Variable = 19.0 * sc.units.m,
-    chopper_chopper_distance: sc.Variable = 0.49 * sc.units.m,
-    chopper_phase: sc.Variable = -8.0 * sc.units.deg,
-    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g
-) -> sc.DataArray:
+def load(filename,
+         sample_omega_angle: sc.Variable = 0 * sc.units.deg,
+         beam_size: sc.Variable = 0.001 * sc.units.m,
+         sample_size: sc.Variable = 0.01 * sc.units.m,
+         detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
+         gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g,
+         beamline: dict = make_beamline(),
+         disable_warnings: bool = True) -> sc.DataArray:
     """
     Loader for a single Amor data file.
 
@@ -58,12 +56,12 @@ def load(
     :param chopper_phase: Phase offset between chopper pulse and ToF zero.
         Default is `-8. degrees of arc`.
     """
-    data = refl.io.load(filename=filename,
-                        omega=omega,
-                        gravity=gravity,
-                        beam_size=beam_size,
-                        sample_size=sample_size,
-                        detector_spatial_resolution=detector_spatial_resolution)
+    if disable_warnings:
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            data = scn.load_nexus(filename)
+    else:
+        data = scn.load_nexus(filename)
 
     # Convert tof nanoseconds to microseconds for convenience
     # TODO: is it safe to assume that the dtype of the binned wrapper coordinate is
@@ -73,12 +71,21 @@ def load(
     data.bins.coords['tof'] = sc.to_unit(data.bins.coords['tof'], 'us', copy=False)
     data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us', copy=False)
 
+    data.coords['sample_omega_angle'] = sample_omega_angle
+    data.coords['beam_size'] = beam_size
+    data.coords['sample_size'] = sample_size
+    data.coords['detector_spatial_resolution'] = detector_spatial_resolution
+    data.coords['gravity'] = gravity
+    for key, value in beamline.items():
+        data.coords[key] = value
+
     # These are Amor specific parameters
-    tau = 1 / (2 * chopper_speed)
-    # The source position is not the true source position due to the
-    # use of choppers to define the pulse.
-    data.coords["source_position"] = sc.geometry.position(0.0 * sc.units.m,
-                                                          0.0 * sc.units.m,
-                                                          -chopper_sample_distance)
-    data = _tof_correction(data, tau, chopper_phase)
+    tau = 1 / (2 * data.coords['source_chopper'].value.frequency)
+    print(tau)
+    # # The source position is not the true source position due to the
+    # # use of choppers to define the pulse.
+    # data.coords["source_position"] = sc.geometry.position(0.0 * sc.units.m,
+    #                                                       0.0 * sc.units.m,
+    #                                                       -chopper_sample_distance)
+    data = _tof_correction(data, tau, data.coords['source_chopper'].value.phase)
     return data

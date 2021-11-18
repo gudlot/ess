@@ -30,24 +30,24 @@ class Chopper:
         self._opening_angles_close = opening_angles_close
         self._kind = kind
 
-        # Sanitize input parameters
-        if (sc.min(self.opening_angles_width) < sc.scalar(
-                0.0, unit=self.opening_angles_width.unit)).value:
-            raise ValueError("Negative window width found in chopper opening angles.")
-        lengths = []
-        for angles in [
-                opening_angles_center, opening_angles_width, opening_angles_open,
-                opening_angles_close
-        ]:
-            if angles is not None:
-                lengths.append(len(angles))
-        if lengths.count(lengths[0]) != len(lengths):
-            raise ValueError("All angle input arrays (centers, widths, open or close) "
-                             "must have the same length.")
-        if not np.all(np.diff(self.opening_angles_open.values) > 0):
-            raise ValueError("Chopper opening angles are not monotonic.")
-        if not np.all(np.diff(self.opening_angles_close.values) > 0):
-            raise ValueError("Chopper closing angles are not monotonic.")
+        # # Sanitize input parameters
+        # if (sc.min(self.opening_angles_width) < sc.scalar(
+        #         0.0, unit=self.opening_angles_width.unit)).value:
+        #     raise ValueError("Negative window width found in chopper opening angles.")
+        # lengths = []
+        # for angles in [
+        #         opening_angles_center, opening_angles_width, opening_angles_open,
+        #         opening_angles_close
+        # ]:
+        #     if angles is not None:
+        #         lengths.append(len(angles))
+        # if lengths.count(lengths[0]) != len(lengths):
+        #     raise ValueError("All angle input arrays (centers, widths, open or close) "
+        #                      "must have the same length.")
+        # if not np.all(np.diff(self.opening_angles_open.values) > 0):
+        #     raise ValueError("Chopper opening angles are not monotonic.")
+        # if not np.all(np.diff(self.opening_angles_close.values) > 0):
+        #     raise ValueError("Chopper closing angles are not monotonic.")
 
     def __eq__(self, other):
         """
