@@ -3,7 +3,7 @@
 import numpy as np
 import scipp as sc
 import pytest
-from ess.wfm.choppers import Chopper, ChopperKind
+from ess.choppers import Chopper, ChopperKind
 from .common import allclose
 
 

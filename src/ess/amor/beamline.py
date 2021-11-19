@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp.constants import g
 from ..choppers import Chopper
 
 
@@ -9,7 +10,7 @@ def make_beamline(
     beam_size: sc.Variable = 0.001 * sc.units.m,
     sample_size: sc.Variable = 0.01 * sc.units.m,
     detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
-    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * sc.constants.g,
+    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * g,
     chopper_frequency: sc.Variable = sc.scalar(20 / 3, unit='Hz'),
     chopper_phase: sc.Variable = sc.scalar(-8.0, unit='deg'),
     chopper_position: sc.Variable = sc.vector(value=[0, 0, -15.0], unit='m')

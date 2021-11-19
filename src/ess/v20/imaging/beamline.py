@@ -2,7 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
-from ...wfm.choppers import Chopper, ChopperKind
+from ...choppers import Chopper, ChopperKind
 
 
 def make_beamline() -> dict:
