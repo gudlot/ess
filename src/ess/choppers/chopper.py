@@ -5,6 +5,12 @@ import scipp as sc
 from enum import Enum
 
 
+def _check_identical(lhs, rhs):
+    if None not in (lhs, rhs):
+        return sc.identical(lhs, rhs)
+    return lhs is rhs is None
+
+
 class ChopperKind(Enum):
     WFM = 1
     FRAME_OVERLAP = 2
@@ -61,13 +67,13 @@ class Chopper:
         This will also be called for the != operator.
         """
         return all([
-            sc.identical(self.frequency, other.frequency),
-            sc.identical(self.position, other.position),
-            sc.identical(self.phase, other.phase),
-            sc.identical(self.opening_angles_center, other.opening_angles_center),
-            sc.identical(self.opening_angles_width, other.opening_angles_width),
-            sc.identical(self.opening_angles_open, other.opening_angles_open),
-            sc.identical(self.opening_angles_close, other.opening_angles_close),
+            _check_identical(self.frequency, other.frequency),
+            _check_identical(self.position, other.position),
+            _check_identical(self.phase, other.phase),
+            _check_identical(self.opening_angles_center, other.opening_angles_center),
+            _check_identical(self.opening_angles_width, other.opening_angles_width),
+            _check_identical(self.opening_angles_open, other.opening_angles_open),
+            _check_identical(self.opening_angles_close, other.opening_angles_close),
             self.kind == other.kind
         ])
 
@@ -98,8 +104,7 @@ class Chopper:
     @property
     def opening_angles_center(self):
         if self._opening_angles_center is None:
-            if (self._opening_angles_open is None) or (self._opening_angles_close is
-                                                       None):
+            if None in (self._opening_angles_open, self._opening_angles_close):
                 return None
             out = 0.5 * (self._opening_angles_open + self._opening_angles_close)
         else:
@@ -113,8 +118,7 @@ class Chopper:
     @property
     def opening_angles_width(self):
         if self._opening_angles_width is None:
-            if (self._opening_angles_close is None) or (self._opening_angles_open is
-                                                        None):
+            if None in (self._opening_angles_close, self._opening_angles_open):
                 return None
             out = self._opening_angles_close - self._opening_angles_open
         else:
@@ -128,8 +132,7 @@ class Chopper:
     @property
     def opening_angles_open(self):
         if self._opening_angles_open is None:
-            if (self._opening_angles_center is None) or (self._opening_angles_width is
-                                                         None):
+            if None in (self._opening_angles_center, self._opening_angles_width):
                 return None
             out = self._opening_angles_center - 0.5 * self._opening_angles_width
         else:
@@ -143,8 +146,7 @@ class Chopper:
     @property
     def opening_angles_close(self):
         if self._opening_angles_close is None:
-            if (self._opening_angles_center is None) or (self._opening_angles_width is
-                                                         None):
+            if None in (self._opening_angles_center, self._opening_angles_width):
                 return None
             out = self._opening_angles_center + 0.5 * self._opening_angles_width
         else:
