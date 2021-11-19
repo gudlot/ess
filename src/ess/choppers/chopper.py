@@ -30,24 +30,30 @@ class Chopper:
         self._opening_angles_close = opening_angles_close
         self._kind = kind
 
-        # # Sanitize input parameters
-        # if (sc.min(self.opening_angles_width) < sc.scalar(
-        #         0.0, unit=self.opening_angles_width.unit)).value:
-        #     raise ValueError("Negative window width found in chopper opening angles.")
-        # lengths = []
-        # for angles in [
-        #         opening_angles_center, opening_angles_width, opening_angles_open,
-        #         opening_angles_close
-        # ]:
-        #     if angles is not None:
-        #         lengths.append(len(angles))
-        # if lengths.count(lengths[0]) != len(lengths):
-        #     raise ValueError("All angle input arrays (centers, widths, open or close) "
-        #                      "must have the same length.")
-        # if not np.all(np.diff(self.opening_angles_open.values) > 0):
-        #     raise ValueError("Chopper opening angles are not monotonic.")
-        # if not np.all(np.diff(self.opening_angles_close.values) > 0):
-        #     raise ValueError("Chopper closing angles are not monotonic.")
+        # Sanitize input parameters
+        if self.opening_angles_width is not None:
+            if (sc.min(self.opening_angles_width) < sc.scalar(
+                    0.0, unit=self.opening_angles_width.unit)).value:
+                raise ValueError(
+                    "Negative window width found in chopper opening angles.")
+        lengths = []
+        for angles in [
+                opening_angles_center, opening_angles_width, opening_angles_open,
+                opening_angles_close
+        ]:
+            if angles is not None:
+                lengths.append(len(angles))
+        if len(lengths) > 0:
+            if lengths.count(lengths[0]) != len(lengths):
+                raise ValueError(
+                    "All angle input arrays (centers, widths, open or close) "
+                    "must have the same length.")
+        if self.opening_angles_open is not None:
+            if not np.all(np.diff(self.opening_angles_open.values) > 0):
+                raise ValueError("Chopper opening angles are not monotonic.")
+        if self.opening_angles_close is not None:
+            if not np.all(np.diff(self.opening_angles_close.values) > 0):
+                raise ValueError("Chopper closing angles are not monotonic.")
 
     def __eq__(self, other):
         """
@@ -83,7 +89,7 @@ class Chopper:
 
     @property
     def phase(self):
-        return sc.to_unit(self._phase, sc.units.rad)
+        return self._phase
 
     @phase.setter
     def phase(self, value):
@@ -92,6 +98,9 @@ class Chopper:
     @property
     def opening_angles_center(self):
         if self._opening_angles_center is None:
+            if (self._opening_angles_open is None) or (self._opening_angles_close is
+                                                       None):
+                return None
             out = 0.5 * (self._opening_angles_open + self._opening_angles_close)
         else:
             out = self._opening_angles_center
@@ -104,6 +113,9 @@ class Chopper:
     @property
     def opening_angles_width(self):
         if self._opening_angles_width is None:
+            if (self._opening_angles_close is None) or (self._opening_angles_open is
+                                                        None):
+                return None
             out = self._opening_angles_close - self._opening_angles_open
         else:
             out = self._opening_angles_width
@@ -116,6 +128,9 @@ class Chopper:
     @property
     def opening_angles_open(self):
         if self._opening_angles_open is None:
+            if (self._opening_angles_center is None) or (self._opening_angles_width is
+                                                         None):
+                return None
             out = self._opening_angles_center - 0.5 * self._opening_angles_width
         else:
             out = self._opening_angles_open
@@ -128,6 +143,9 @@ class Chopper:
     @property
     def opening_angles_close(self):
         if self._opening_angles_close is None:
+            if (self._opening_angles_center is None) or (self._opening_angles_width is
+                                                         None):
+                return None
             out = self._opening_angles_center + 0.5 * self._opening_angles_width
         else:
             out = self._opening_angles_close
@@ -147,12 +165,10 @@ class Chopper:
 
     @property
     def time_open(self):
-        return sc.to_unit(
-            (self.opening_angles_open + self.phase) / self.angular_frequency,
-            sc.units.us)
+        return sc.to_unit((self.opening_angles_open + sc.to_unit(self.phase, 'rad')) /
+                          self.angular_frequency, sc.units.us)
 
     @property
     def time_close(self):
-        return sc.to_unit(
-            (self.opening_angles_close + self.phase) / self.angular_frequency,
-            sc.units.us)
+        return sc.to_unit((self.opening_angles_close + sc.to_unit(self.phase, 'rad')) /
+                          self.angular_frequency, sc.units.us)

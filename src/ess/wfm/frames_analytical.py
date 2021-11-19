@@ -2,7 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from typing import Union
-from .choppers import ChopperKind
+from ..choppers import ChopperKind
 
 
 def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
