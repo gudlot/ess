@@ -56,6 +56,5 @@ def load(filename,
     for key, value in beamline.items():
         data.coords[key] = value
 
-    # Perform tof correction to fold two pulses
-    data = _tof_correction(data)
-    return data
+    # Perform tof correction and fold two pulses
+    return _tof_correction(data)
