@@ -35,15 +35,14 @@ def theta(gamma: sc.Variable, sample_omega_angle: sc.Variable) -> sc.Variable:
     return gamma - sc.to_unit(sample_omega_angle, 'rad')
 
 
-def reflectometry_q(wavelength: sc.Variable, two_theta: sc.Variable) -> sc.Variable:
+def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     """
-    The reflectometry theta angle corresponds to what is usually called theta in other
-    techniques. Hence, the reflectometry q calculation overrides the default by
-    taking `sin(two_theta)` instead of `sin(two_theta/2)`.
+    Compute the Q vector from the theta angle computed as the difference
+    between gamma and omega.
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
-    return c * sc.sin(two_theta.astype(dtype, copy=False)) / wavelength
+    return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
 
 
 def reflectometry_graph() -> dict:
