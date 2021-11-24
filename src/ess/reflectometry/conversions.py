@@ -6,8 +6,8 @@ from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype
 
 
-def gamma(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
-          scattered_beam: sc.Variable) -> sc.Variable:
+def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
+              scattered_beam: sc.Variable) -> sc.Variable:
     """
     Compute the gamma angle, including gravity correction,
     It is similar to the classical two_theta in other techniques (such as SANS
@@ -25,21 +25,20 @@ def gamma(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     return sc.asin(sc.abs(y + drop) / L2)
 
 
-def theta(gamma: sc.Variable, sample_omega_angle: sc.Variable) -> sc.Variable:
-    """
-    Determine the value of theta from the gamma and sample_omega_angle angles.
-    """
-    return gamma - sc.to_unit(sample_omega_angle, 'rad')
+# def theta(gamma: sc.Variable, sample_omega_angle: sc.Variable) -> sc.Variable:
+#     """
+#     Determine the value of theta from the gamma and sample_omega_angle angles.
+#     """
+#     return gamma - sc.to_unit(sample_omega_angle, 'rad')
 
-
-def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
-    """
-    Compute the Q vector from the theta angle computed as the difference
-    between gamma and omega.
-    """
-    dtype = _elem_dtype(wavelength)
-    c = (4 * pi).astype(dtype)
-    return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
+# def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
+#     """
+#     Compute the Q vector from the theta angle computed as the difference
+#     between gamma and omega.
+#     """
+#     dtype = _elem_dtype(wavelength)
+#     c = (4 * pi).astype(dtype)
+#     return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
 
 
 def reflectometry_graph() -> dict:
@@ -47,8 +46,8 @@ def reflectometry_graph() -> dict:
     Generate a coordinate transformation graph for reflectometry.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
-    graph["two_theta"] = gamma
-    graph["gamma"] = "two_theta"
-    graph["theta"] = theta
-    graph["Q"] = reflectometry_q
+    graph["two_theta"] = two_theta
+    # graph["gamma"] = "two_theta"
+    # graph["theta"] = theta
+    # graph["Q"] = reflectometry_q
     return graph
