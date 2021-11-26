@@ -38,13 +38,12 @@ def to_wavelength(
         min_bin_transmission_monitor=min_bin_transmission_monitor,
         max_bin_transmission_monitor=max_bin_transmission_monitor,
     )
+
     for name, mask in masks.items():
         data.masks[name] = mask
     data = scn.convert(data, "tof", "wavelength", scatter=True)
     data = sc.rebin(data, "wavelength", wavelength_bins)
-
     monitor = data.attrs["monitor2"].value
-
     monitor = covert_and_rebin(
         monitor, wavelength_bins, min_bin_incident_monitor, max_bin_incident_monitor
     )

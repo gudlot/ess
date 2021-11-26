@@ -22,12 +22,15 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
     Example:
     >>> reduced = reduce_to_q(data, q_bins=q_bins, reducer=simple_reducer('spectrum'))  # noqa: E501
     """
+    # TODO Backup of the coord is necessary until `convert` can keep original
     wavelength = data.coords['wavelength']
     data = scn.convert(data, 'wavelength', 'Q', scatter=True)
     if wavelength_bands is None:
         data = sc.histogram(data, q_bins)
         return reducer(data)
 
+    #TODO: Switch to this once moving to the latest version of scipp
+    #wavelength = wavelength.rename_dims({'wavelength': 'Q'})
     wavelength.rename_dims({'wavelength': 'Q'})
     data.coords['wavelength'] = wavelength
     bands = None

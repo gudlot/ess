@@ -2,11 +2,7 @@ import scipp as sc
 
 
 def setup_offsets(
-    sample,
-    sample_trans,
-    background,
-    background_trans,
-    direct_beam,
+    data_set,
     sample_pos_z_offset,
     bench_pos_y_offset,
     monitor4_pos_z_offset,
@@ -14,17 +10,16 @@ def setup_offsets(
     """
     Transformin coordinates according to instrument setup
     """
-    for item in [sample, sample_trans, background, background_trans, direct_beam]:
-        item.coords["sample_position"].fields.z += sample_pos_z_offset
-        item.coords["position"].fields.y += bench_pos_y_offset
-        item.attrs["monitor4"].value.coords["position"].fields.z += monitor4_pos_z_offset
+    data_set.coords["sample_position"].fields.z += sample_pos_z_offset
+    data_set.coords["position"].fields.y += bench_pos_y_offset
+    for item in data_set.keys():
+        data_set[item].attrs["monitor4"].value.coords["position"].fields.z += monitor4_pos_z_offset
 
 
-def setup_geometry(sample, background, direct, x_offset, y_offset, z_offset):
+def setup_geometry(data_set, x_offset, y_offset, z_offset):
     """
     Transforming coordinates according to beam center positons
     """
-    for item in [sample, background, direct]:
-        item.coords["base_position"] = item.coords["position"].copy()
-        offset = sc.geometry.position(x_offset, y_offset, z_offset)
-        item.coords["position"] = item.coords["base_position"] + offset
+    data_set.coords['position'].fields.x += x_offset
+    data_set.coords['position'].fields.y += y_offset
+    data_set.coords['position'].fields.z += z_offset

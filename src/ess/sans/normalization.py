@@ -60,5 +60,4 @@ def transmission_fraction(
         min_bin_transmission_monitor,
         max_bin_transmission_monitor,
     )
-
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)
