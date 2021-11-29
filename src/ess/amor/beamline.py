@@ -6,7 +6,7 @@ from ..choppers import Chopper
 
 
 def make_beamline(
-    sample_omega_angle: sc.Variable = 5 * sc.units.deg,
+    sample_rotation: sc.Variable = None,
     beam_size: sc.Variable = 0.001 * sc.units.m,
     sample_size: sc.Variable = 0.01 * sc.units.m,
     detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
@@ -18,8 +18,8 @@ def make_beamline(
     """
     Amor beamline components.
 
-    :param sample_omega_angle: Sample tilt (omega) angle.
-        Default is `0 degrees of arc`.
+    :param sample_rotation: Sample rotation (omega) angle.
+        Default is `None`.
     :param beam_size: Size of the beam perpendicular to the scattering surface.
         Default is `0.001 m`.
     :param sample_size: Size of the sample in direction of the beam.
@@ -36,7 +36,7 @@ def make_beamline(
         Default is `-15 m`.
     """
     beamline = {
-        'sample_omega_angle': sample_omega_angle,
+        'sample_rotation': sample_rotation,
         'beam_size': beam_size,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
@@ -46,7 +46,7 @@ def make_beamline(
         Chopper(frequency=chopper_frequency,
                 phase=chopper_phase,
                 position=chopper_position))
-    # The source position is not the true source position due to the
-    # use of choppers to define the pulse.
-    beamline["source_position"] = beamline["source_chopper"].value.position
+    # # The source position is not the true source position due to the
+    # # use of choppers to define the pulse.
+    # beamline["source_position"] = beamline["source_chopper"].value.position
     return beamline

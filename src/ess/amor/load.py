@@ -27,6 +27,13 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     return sc.bin(data, edges=[sc.concat([0. * sc.units.us, tau], dim)])
 
 
+def _pixel_position_correction(data: sc.DataArray):
+    offset = data.coords['position'].fields.z * sc.tan(2.0 *
+                                                       data.coords['sample_rotation'] -
+                                                       (0.955 * sc.units.deg))
+    data.coords['position'].fields.y += offset
+
+
 def load(filename,
          beamline: dict = make_beamline(),
          disable_warnings: bool = True) -> sc.DataArray:
@@ -57,4 +64,9 @@ def load(filename,
         data.coords[key] = value
 
     # Perform tof correction and fold two pulses
-    return _tof_correction(data)
+    data = _tof_correction(data)
+
+    # Shift the pixel coordinates
+    _pixel_position_correction(data)
+
+    return data
