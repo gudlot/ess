@@ -46,7 +46,4 @@ def make_beamline(
         Chopper(frequency=chopper_frequency,
                 phase=chopper_phase,
                 position=chopper_position))
-    # # The source position is not the true source position due to the
-    # # use of choppers to define the pulse.
-    # beamline["source_position"] = beamline["source_chopper"].value.position
     return beamline
