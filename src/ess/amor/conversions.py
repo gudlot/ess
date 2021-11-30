@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-from ..reflectometry import reflectometry_graph
+from ..reflectometry.conversions import reflectometry_graph
 
 
 def incident_beam(source_chopper: sc.Variable,
@@ -13,7 +13,7 @@ def incident_beam(source_chopper: sc.Variable,
     return sample_position - source_chopper.value.position
 
 
-def amor_graph() -> dict:
+def specular_reflection_graph() -> dict:
     """
     Generate a coordinate transformation graph for Amor reflectometry.
     """
