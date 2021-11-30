@@ -6,14 +6,6 @@ from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype
 
 
-def incident_beam(source_chopper, sample_position):
-    """
-    Compute the incident beam vector from the source chopper position vector,
-    instead of the source_position vector.
-    """
-    return sample_position - source_chopper.value.position
-
-
 def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
           scattered_beam: sc.Variable, sample_rotation: sc.Variable) -> sc.Variable:
     """
@@ -50,7 +42,6 @@ def reflectometry_graph() -> dict:
     del graph['dspacing']
     del graph['Q']
     del graph['energy']
-    graph['incident_beam'] = incident_beam
     graph["theta"] = theta
     graph["Q"] = reflectometry_q
     return graph
