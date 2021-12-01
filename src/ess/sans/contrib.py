@@ -24,9 +24,7 @@ def to_bin_edges(d, dim):
     first = 1.5 * centers[dim, 0] - 0.5 * centers[dim, 1]
     last = 1.5 * centers[dim, -1] - 0.5 * centers[dim, -2]
     bulk = midpoints(centers, dim)
-    edges = sc.concatenate(first, bulk, dim)
-    edges = sc.concatenate(edges, last, dim)
-    d.coords[dim] = edges
+    d.coords[dim] = sc.concat([first, bulk, last], dim)
 
 
 def map_to_bins(data, dim, edges):
