@@ -1,29 +1,46 @@
-.. currentmodule:: ess
+.. currentmodule:: ess.amor
 
-Amor
-====
+Reference
+=========
 
 Beamline
 --------
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
    make_beamline
 
-Data
-----
+Conversions
+-----------
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
-   get_path
+   conversions.specular_reflection_graph
+
+
+Instrument view
+---------------
+
+.. autosummary::
+   :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
+
+   instrument_view
 
 I/O
 ---
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
    load
 
@@ -32,5 +49,7 @@ Tools
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
    q_grid

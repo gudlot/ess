@@ -4,7 +4,19 @@ import scipp as sc
 import scippneutron as scn
 
 
-def instrument_view(da, components=None, pixel_size=0.0035, **kwargs):
+def instrument_view(da: sc.DataArray,
+                    components: dict = None,
+                    pixel_size: float = 0.0035,
+                    **kwargs) -> sc.plotting.objects.Plot:
+    """
+    Instrument view for the Amor instrument, which automatically populates a list of
+    additional beamline components, and sets the pixel size.
+
+    :param da: The input data for which to display the instrument view.
+    :param components: A dict of additional components to display. If `None`, the
+        sample and the source chopper are automatically added. Default is `None`.
+    :param pixel_size: The detector pixel size. Default is 0.0035.
+    """
     if components is None:
         components = {
             "sample": {

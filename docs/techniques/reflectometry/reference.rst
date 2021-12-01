@@ -1,30 +1,36 @@
-.. currentmodule:: ess
+.. currentmodule:: ess.reflectometry
 
-Reflectometry
-=============
+Reference
+=========
 
 Conversions
 -----------
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
-   reflectometry_graph
+   conversions.reflectometry_graph
 
 Corrections
 -----------
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
-   illumination_correction
-   illumination_of_sample
+   corrections.illumination_correction
+   corrections.illumination_of_sample
 
 Resolution
 ----------
 
 .. autosummary::
    :toctree: ../generated/functions
+   :template: ess-module-template.rst
+   :recursive:
 
-   detector_resolution
-   z_offset
+   resolution.detector_resolution
+   resolution.z_offset

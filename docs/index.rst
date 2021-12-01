@@ -34,14 +34,14 @@ Documentation
    :maxdepth: 3
    :caption: Instruments
 
-   instruments/amor
+   instruments/amor/amor
 
 .. toctree::
    :maxdepth: 3
    :caption: Techniques
 
-   techniques/reflectometry
-   techniques/wfm
+   techniques/reflectometry/reflectometry
+   techniques/wfm/wfm
 
 .. toctree::
    :caption: About
