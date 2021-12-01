@@ -89,17 +89,11 @@ def to_q(
         pixel_size=pixel_size,
         pixel_length=pixel_length,
     )
-    reducer = simple_reducer(dim="spectrum")
-
-    if wavelength_bands == None:
-        return reduce_to_q(wav, q_bins=q_bins, reducer=reducer)
+    if groupby is None:
+      reducer = simple_reducer(dim="spectrum")
     else:
-        if groupby != None:
-            reducer = grouping_reducer(dim="spectrum", group=groupby)
-
-        return reduce_to_q(
-            wav, q_bins=q_bins, reducer=reducer, wavelength_bands=wavelength_bands
-        )
+      reducer = grouping_reducer(dim="spectrum", group=groupby)
+    return reduce_to_q(wav, q_bins=q_bins, reducer=reducer, wavelength_bands=wavelength_bands)
 
 
 def normalize_and_subtract(sample, background):
