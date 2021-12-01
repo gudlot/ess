@@ -7,19 +7,19 @@ from ess.amor import tools
 
 
 def test_q_grid_linear():
-    q_lin = tools.q_grid(edges=sc.array(dims=['qz'],
-                                        values=[0.008, 0.08],
-                                        unit='1/angstrom'),
+    q_lin = tools.q_grid(dim='qz',
+                         edges=[0.008, 0.08],
                          scale='linear',
-                         num=50)
+                         num=50,
+                         unit='1/angstrom')
     expected = sc.linspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
     assert sc.allclose(q_lin, expected)
 
 
 def test_q_grid_linear_list_input():
-    q_lin = tools.q_grid(edges=sc.array(dims=['qz'],
-                                        values=[0.008, 0.08],
-                                        unit='1/angstrom'),
+    q_lin = tools.q_grid(dim='qz',
+                         edges=[0.008, 0.08],
+                         unit='1/angstrom',
                          scale=['linear'],
                          num=[50])
     expected = sc.linspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
@@ -27,9 +27,9 @@ def test_q_grid_linear_list_input():
 
 
 def test_q_grid_log():
-    q_log = tools.q_grid(edges=sc.array(dims=['qz'],
-                                        values=[0.008, 0.08],
-                                        unit='1/angstrom'),
+    q_log = tools.q_grid(dim='qz',
+                         edges=[0.008, 0.08],
+                         unit='1/angstrom',
                          scale='log',
                          num=50)
     expected = sc.geomspace(dim='qz', start=0.008, stop=0.08, num=50, unit='1/angstrom')
@@ -37,9 +37,9 @@ def test_q_grid_log():
 
 
 def test_q_grid_linear_log():
-    q_linlog = tools.q_grid(edges=sc.array(dims=['qz'],
-                                           values=[0.008, 0.03, 0.08],
-                                           unit='1/angstrom'),
+    q_linlog = tools.q_grid(dim='qz',
+                            edges=[0.008, 0.03, 0.08],
+                            unit='1/angstrom',
                             scale=['linear', 'log'],
                             num=[16, 20])
     exp_lin = sc.linspace(dim='qz', start=0.008, stop=0.03, num=16, unit='1/angstrom')
@@ -49,9 +49,9 @@ def test_q_grid_linear_log():
 
 
 def test_q_grid_log_linear():
-    q_loglin = tools.q_grid(edges=sc.array(dims=['qz'],
-                                           values=[0.008, 0.03, 0.08],
-                                           unit='1/angstrom'),
+    q_loglin = tools.q_grid(dim='qz',
+                            edges=[0.008, 0.03, 0.08],
+                            unit='1/angstrom',
                             scale=['log', 'linear'],
                             num=[16, 20])
     exp_log = sc.geomspace(dim='qz', start=0.008, stop=0.03, num=16, unit='1/angstrom')
@@ -61,9 +61,9 @@ def test_q_grid_log_linear():
 
 
 def test_q_grid_linear_log_linear():
-    q_linloglin = tools.q_grid(edges=sc.array(dims=['qz'],
-                                              values=[0.008, 0.03, 0.08, 0.12],
-                                              unit='1/angstrom'),
+    q_linloglin = tools.q_grid(dim='qz',
+                               edges=[0.008, 0.03, 0.08, 0.12],
+                               unit='1/angstrom',
                                scale=['linear', 'log', 'linear'],
                                num=[16, 20, 10])
     exp_lin = sc.linspace(dim='qz', start=0.008, stop=0.03, num=16, unit='1/angstrom')
@@ -75,8 +75,8 @@ def test_q_grid_linear_log_linear():
 
 def test_q_grid_bad_input():
     with pytest.raises(ValueError):
-        _ = tools.q_grid(edges=sc.array(dims=['qz'],
-                                        values=[0.008, 0.03, 0.08, 0.12],
-                                        unit='1/angstrom'),
+        _ = tools.q_grid(dim='qz',
+                         edges=[0.008, 0.03, 0.08, 0.12],
+                         unit='1/angstrom',
                          scale=['linear', 'log'],
                          num=[16, 20])
