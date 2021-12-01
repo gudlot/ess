@@ -11,7 +11,7 @@ def solid_angle(data, pixel_size, pixel_length):
     return (pixel_size * pixel_length) / (L2 * L2)
 
 
-def covert_and_rebin(data, wavelength_bins, begin, end):
+def convert_and_rebin(data, wavelength_bins, begin, end):
     """
     Convertining and rebinning shifted data
     """
@@ -36,25 +36,25 @@ def transmission_fraction(
     This is equivalent to mantid.CalculateTransmission without fitting
     """
 
-    sample_incident = covert_and_rebin(
+    sample_incident = convert_and_rebin(
         sample.attrs["monitor2"].value,
         wavelength_bins,
         min_bin_incident_monitor,
         max_bin_incident_monitor,
     )
-    sample_trans = covert_and_rebin(
+    sample_trans = convert_and_rebin(
         sample.attrs["monitor4"].value,
         wavelength_bins,
         min_bin_transmission_monitor,
         max_bin_transmission_monitor,
     )
-    direct_incident = covert_and_rebin(
+    direct_incident = convert_and_rebin(
         direct.attrs["monitor2"].value,
         wavelength_bins,
         min_bin_incident_monitor,
         max_bin_incident_monitor,
     )
-    direct_trans = covert_and_rebin(
+    direct_trans = convert_and_rebin(
         direct.attrs["monitor4"].value,
         wavelength_bins,
         min_bin_transmission_monitor,

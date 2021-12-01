@@ -3,7 +3,7 @@ import scipp as sc
 import scippneutron as scn
 from .contrib import map_to_bins, to_bin_centers
 from .reduction import reduce_to_q, simple_reducer, grouping_reducer
-from .normalization import solid_angle, transmission_fraction, covert_and_rebin
+from .normalization import solid_angle, transmission_fraction, convert_and_rebin
 
 
 def to_wavelength(
@@ -44,7 +44,7 @@ def to_wavelength(
     data = scn.convert(data, "tof", "wavelength", scatter=True)
     data = sc.rebin(data, "wavelength", wavelength_bins)
     monitor = data.attrs["monitor2"].value
-    monitor = covert_and_rebin(
+    monitor = convert_and_rebin(
         monitor, wavelength_bins, min_bin_incident_monitor, max_bin_incident_monitor
     )
 
