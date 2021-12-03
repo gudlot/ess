@@ -11,15 +11,24 @@ def solid_angle(data, pixel_size, pixel_length):
     return (pixel_size * pixel_length) / (L2 * L2)
 
 
+# def convert_and_rebin(data, wavelength_bins, begin, end):
+#     """
+#     Convertining and rebinning shifted data. Rebaselining background and shifiting the data
+#     TODO: Instead of defining magic numbers with the bins one can set a threshold on number of counts
+#     """
+#     transformed = data - sc.mean(data["tof", begin:end], "tof")
+#     transformed = scn.convert(transformed, "tof", "wavelength", scatter=False)
+#     transformed = sc.rebin(transformed, "wavelength", wavelength_bins)
+#     return transformed
+
+#TODO: Change name of function once all issues are sorted out
 def convert_and_rebin(data, wavelength_bins, begin, end):
     """
-    Convertining and rebinning shifted data
+    Shifts data by backgorund value and rebins it
     """
-    transformed = data - sc.mean(data["tof", begin:end], "tof")
-    transformed = scn.convert(transformed, "tof", "wavelength", scatter=False)
+    transformed = data - sc.mean(data["wavelength", begin:end], "wavelength")
     transformed = sc.rebin(transformed, "wavelength", wavelength_bins)
     return transformed
-
 
 def transmission_fraction(
     sample,
