@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from scipp.constants import pi
 
 
 def _cutout_angles(chopper, suffix):
@@ -23,7 +24,7 @@ def cutout_angles_close(chopper: sc.Dataset, unit="rad") -> sc.Variable:
 
 
 def angular_frequency(chopper):
-    return (2.0 * sc.constants.pi * sc.units.rad) * chopper["frequency"]
+    return (2.0 * pi * sc.units.rad) * chopper["frequency"]
 
 
 def time_open(chopper, unit="us"):

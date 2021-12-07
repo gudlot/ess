@@ -2,7 +2,6 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import g
-from ..choppers import Chopper
 
 
 def make_beamline(
@@ -47,12 +46,12 @@ def make_beamline(
         'gravity': gravity
     }
     beamline["source_chopper"] = sc.scalar(
-        sc.Dataset(
-            data={
-                'frequency': chopper_frequency,
-                'phase': chopper_phase,
-                'position': chopper_position
-            }))
+        sc.DataArray(data=sc.scalar(value="source_chopper"),
+                     coords={
+                         'frequency': chopper_frequency,
+                         'phase': chopper_phase,
+                         'position': chopper_position
+                     }))
     return beamline
 
 
