@@ -2,6 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import numpy as np
+from scipp.constants import m_n, h
 # from ..choppers import Chopper, ChopperKind
 
 
@@ -24,14 +25,15 @@ def make_fake_beamline(
     dim = 'frame'
     # Neutron mass to Planck constant ratio
     # TODO: would be nice to use physical constants in scipp or scippneutron
-    alpha = 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))
+    # alpha = m_n / h  # 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))
+    alpha = sc.to_unit(m_n / h, 's/m/angstrom')
     omega = (2.0 * np.pi * sc.units.rad) * frequency
 
     choppers = {}
 
-    opening_angles_center_wfm_1 = sc.empty(dims=[dim], shape=[nframes], unit='rad')
-    opening_angles_center_wfm_2 = sc.empty_like(opening_angles_center_wfm_1)
-    opening_angles_width = sc.empty_like(opening_angles_center_wfm_1)
+    cutout_angles_center_wfm_1 = sc.empty(dims=[dim], shape=[nframes], unit='rad')
+    cutout_angles_center_wfm_2 = sc.empty_like(cutout_angles_center_wfm_1)
+    cutout_angles_width = sc.empty_like(cutout_angles_center_wfm_1)
 
     for i in range(nframes):
         # Equation (3) in Schmakat et al. (2020)
@@ -50,33 +52,58 @@ def make_fake_beamline(
         phi_wfm_2 = omega * (pulse_t_0 + 1.5 * pulse_length + 0.5 * alpha * (
             (3.0 * lambda_min) - lambda_max) * sc.norm(chopper_positions["WFMC1"]))
 
-        opening_angles_width[dim, i] = theta
-        opening_angles_center_wfm_1[dim, i] = phi_wfm_1
-        opening_angles_center_wfm_2[dim, i] = phi_wfm_2
+        cutout_angles_width[dim, i] = theta
+        cutout_angles_center_wfm_1[dim, i] = phi_wfm_1
+        cutout_angles_center_wfm_2[dim, i] = phi_wfm_2
 
         lambda_min = lambda_max
 
-    choppers = {
-        "WFMC1":
-        Chopper(frequency=frequency,
-                phase=sc.scalar(0.0, unit='deg'),
-                position=chopper_positions["WFMC1"],
-                opening_angles_center=opening_angles_center_wfm_1,
-                opening_angles_width=opening_angles_width,
-                kind=ChopperKind.WFM),
-        "WFMC2":
-        Chopper(frequency=frequency,
-                phase=sc.scalar(0.0, unit='deg'),
-                position=chopper_positions["WFMC2"],
-                opening_angles_center=opening_angles_center_wfm_2,
-                opening_angles_width=opening_angles_width,
-                kind=ChopperKind.WFM),
-    }
+    # choppers = {
+    #     "WFMC1":
+    #     Chopper(frequency=frequency,
+    #             phase=sc.scalar(0.0, unit='deg'),
+    #             position=chopper_positions["WFMC1"],
+    #             cutout_angles_center=cutout_angles_center_wfm_1,
+    #             cutout_angles_width=cutout_angles_width,
+    #             kind=ChopperKind.WFM),
+    #     "WFMC2":
+    #     Chopper(frequency=frequency,
+    #             phase=sc.scalar(0.0, unit='deg'),
+    #             position=chopper_positions["WFMC2"],
+    #             cutout_angles_center=cutout_angles_center_wfm_2,
+    #             cutout_angles_width=cutout_angles_width,
+    #             kind=ChopperKind.WFM),
+    # }
 
     return {
-        'choppers': sc.scalar(choppers),
-        'position': sc.vector(value=[0., 0., 60.], unit='m'),
-        "source_pulse_length": sc.to_unit(pulse_length, 'us'),
-        "source_pulse_t_0": sc.to_unit(pulse_t_0, 'us'),
-        "source_position": sc.vector(value=[0.0, 0.0, 0.0], unit='m')
+        "chopper_wfm_1":
+        sc.scalar(
+            sc.Dataset(
+                data={
+                    "frequency": frequency,
+                    "phase": sc.scalar(0.0, unit='deg'),
+                    "position": chopper_positions["WFMC1"],
+                    "cutout_angles_center": cutout_angles_center_wfm_1,
+                    "cutout_angles_width": cutout_angles_width,
+                    "kind": sc.scalar('wfm')
+                })),
+        "chopper_wfm_2":
+        sc.scalar(
+            sc.Dataset(
+                data={
+                    "frequency": frequency,
+                    "phase": sc.scalar(0.0, unit='deg'),
+                    "position": chopper_positions["WFMC2"],
+                    "cutout_angles_center": cutout_angles_center_wfm_2,
+                    "cutout_angles_width": cutout_angles_width,
+                    "kind": sc.scalar('wfm')
+                })),
+        'position':
+        sc.vector(value=[0., 0., 60.], unit='m'),
+        "source_pulse_length":
+        sc.to_unit(pulse_length, 'us'),
+        "source_pulse_t_0":
+        sc.to_unit(pulse_t_0, 'us'),
+        "source_position":
+        sc.vector(value=[0.0, 0.0, 0.0], unit='m')
     }

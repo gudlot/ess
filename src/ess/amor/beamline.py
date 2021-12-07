@@ -45,13 +45,17 @@ def make_beamline(
         'detector_spatial_resolution': detector_spatial_resolution,
         'gravity': gravity
     }
+    # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
+    # of a DataArray, and the data value is a string containing the name of the
+    # chopper. This does not allow storing e.g. chopper cutout angles.
+    # We should change this to be a Dataset, which is what we do here.
     beamline["source_chopper"] = sc.scalar(
-        sc.DataArray(data=sc.scalar(value="source_chopper"),
-                     coords={
-                         'frequency': chopper_frequency,
-                         'phase': chopper_phase,
-                         'position': chopper_position
-                     }))
+        sc.Dataset(
+            data={
+                'frequency': chopper_frequency,
+                'phase': chopper_phase,
+                'position': chopper_position
+            }))
     return beamline
 
 
@@ -64,7 +68,7 @@ def instrument_view_components(da: sc.DataArray):
             'type': 'box'
         },
         "source_chopper": {
-            'center': da.meta['source_chopper'].value["position"],
+            'center': da.meta['source_chopper'].value["position"].data,
             'color': 'blue',
             'size': sc.vector(value=[0.5, 0, 0], unit=sc.units.m),
             'type': 'disk'

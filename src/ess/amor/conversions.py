@@ -10,7 +10,7 @@ def incident_beam(*, source_chopper: sc.Variable,
     Compute the incident beam vector from the source chopper position vector,
     instead of the source_position vector.
     """
-    return sample_position - source_chopper.value.position
+    return sample_position - source_chopper.value['position'].data
 
 
 def specular_reflection() -> dict:
