@@ -33,9 +33,9 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     return c * sc.sin(theta.astype(dtype, copy=False)) / wavelength
 
 
-def reflectometry_graph() -> dict:
+def specular_reflection() -> dict:
     """
-    Generate a coordinate transformation graph for reflectometry.
+    Generate a coordinate transformation graph for specular reflection reflectometry.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
     del graph['two_theta']
