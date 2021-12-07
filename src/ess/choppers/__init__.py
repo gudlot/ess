@@ -2,4 +2,4 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 # flake8: noqa
 
-from .chopper import Chopper, ChopperKind
+from .chopper import *

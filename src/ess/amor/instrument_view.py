@@ -2,6 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 import scippneutron as scn
+from .beamline import instrument_view_components
 
 
 def instrument_view(da: sc.DataArray,
@@ -13,27 +14,15 @@ def instrument_view(da: sc.DataArray,
     additional beamline components, and sets the pixel size.
 
     :param da: The input data for which to display the instrument view.
-    :param components: A dict of additional components to display. If `None`, the
-        sample and the source chopper are automatically added. Default is `None`.
+    :param components: A dict of additional components to display. By default, a
+        set of components defined in `beamline.instrument_view_components()` are added.
     :param pixel_size: The detector pixel size. Default is 0.0035.
     """
-    if components is None:
-        components = {
-            "sample": {
-                'center': da.meta['sample_position'],
-                'color': 'red',
-                'size': sc.vector(value=[0.2, 0.01, 0.2], unit=sc.units.m),
-                'type': 'box'
-            },
-            "source_chopper": {
-                'center': da.meta['source_chopper'].value.position,
-                'color': 'blue',
-                'size': sc.vector(value=[0.5, 0, 0], unit=sc.units.m),
-                'type': 'disk'
-            }
-        }
+    default_components = instrument_view_components(da)
+    if components is not None:
+        default_components = {**default_components, **components}
 
     return scn.instrument_view(da,
-                               components=components,
+                               components=default_components,
                                pixel_size=pixel_size,
                                **kwargs)

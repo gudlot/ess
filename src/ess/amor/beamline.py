@@ -47,7 +47,27 @@ def make_beamline(
         'gravity': gravity
     }
     beamline["source_chopper"] = sc.scalar(
-        Chopper(frequency=chopper_frequency,
-                phase=chopper_phase,
-                position=chopper_position))
+        sc.Dataset(
+            data={
+                'frequency': chopper_frequency,
+                'phase': chopper_phase,
+                'position': chopper_position
+            }))
     return beamline
+
+
+def instrument_view_components(da: sc.DataArray):
+    return {
+        "sample": {
+            'center': da.meta['sample_position'],
+            'color': 'red',
+            'size': sc.vector(value=[0.2, 0.01, 0.2], unit=sc.units.m),
+            'type': 'box'
+        },
+        "source_chopper": {
+            'center': da.meta['source_chopper'].value["position"],
+            'color': 'blue',
+            'size': sc.vector(value=[0.5, 0, 0], unit=sc.units.m),
+            'type': 'disk'
+        }
+    }
