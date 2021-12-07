@@ -28,8 +28,8 @@ nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercont
 # -- Project information -----------------------------------------------------
 
 project = u'ess'
-copyright = u'2020 scipp ess contributors'
-copyright = u'scipp ess contributors'
+copyright = u'2020 Scipp contributors'
+copyright = u'scipp contributors'
 
 # The full version, including alpha/beta/rc tags
 version = u''
@@ -50,6 +50,8 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx',
 ]
+
+autodoc_typehints = 'description'
 
 # autodocs includes everything, even irrelevant API internals. autosummary
 # looks more suitable in the long run when the API grows.

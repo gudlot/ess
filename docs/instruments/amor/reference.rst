@@ -3,53 +3,20 @@
 Reference
 =========
 
-Beamline
---------
+Modules
+-------
 
 .. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
 
-   make_beamline
-
-Conversions
------------
-
-.. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
-
-   conversions.specular_reflection_graph
+   beamline
+   conversions
+   tools
 
 
-Instrument view
----------------
+Functions
+---------
 
 .. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
 
-   instrument_view
-
-I/O
----
-
-.. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
-
-   load
-
-Tools
------
-
-.. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
-
-   q_grid
+   instrument_view.instrument_view
+   load.load

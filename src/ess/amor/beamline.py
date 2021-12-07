@@ -20,6 +20,7 @@ def make_beamline(
 
     :param sample_rotation: Sample rotation (omega) angle.
         Default is `None`.
+    :type sample_rotation: Variable.
     :param beam_size: Size of the beam perpendicular to the scattering surface.
         Default is `0.001 m`.
     :param sample_size: Size of the sample in direction of the beam.
@@ -34,6 +35,9 @@ def make_beamline(
         Default is `-8. degrees of arc`.
     :param chopper_position: Position of the chopper.
         Default is `-15 m`.
+
+    :returns: A dict.
+    :rtype: dict
     """
     beamline = {
         'sample_rotation': sample_rotation,

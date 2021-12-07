@@ -2,7 +2,7 @@ Amor
 ====
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    amor_reduction
    reference
