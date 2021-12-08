@@ -31,5 +31,5 @@ def z_offset(position: sc.Variable, offset: sc.Variable) -> sc.Variable:
     :param offset: Offset to be applied along the z-dimension.
     """
     position = position.copy()
-    position.fields.z += offset_value
+    position.fields.z += offset
     return position

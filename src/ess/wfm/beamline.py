@@ -24,8 +24,6 @@ def make_fake_beamline(
     alpha = sc.to_unit(m_n / h, 's/m/angstrom')
     omega = (2.0 * np.pi * sc.units.rad) * frequency
 
-    choppers = {}
-
     cutout_angles_center_wfm_1 = sc.empty(dims=[dim], shape=[nframes], unit='rad')
     cutout_angles_center_wfm_2 = sc.empty_like(cutout_angles_center_wfm_1)
     cutout_angles_width = sc.empty_like(cutout_angles_center_wfm_1)

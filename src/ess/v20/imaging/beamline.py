@@ -30,7 +30,7 @@ def make_beamline() -> dict:
                 "phase":
                 sc.scalar(47.10, unit='deg'),
                 "position":
-                source["source_position"] + sc.vector(value=[0, 0, 6.6], unit='m'),
+                beamline["source_position"] + sc.vector(value=[0, 0, 6.6], unit='m'),
                 "cutout_angles_begin":
                 sc.array(
                     dims=[dim],
@@ -55,7 +55,7 @@ def make_beamline() -> dict:
                 "phase":
                 sc.scalar(76.76, unit='deg'),
                 "position":
-                source["source_position"] + sc.vector(value=[0, 0, 7.1], unit='m'),
+                beamline["source_position"] + sc.vector(value=[0, 0, 7.1], unit='m'),
                 "cutout_angles_begin":
                 sc.array(
                     dims=[dim],
@@ -80,7 +80,7 @@ def make_beamline() -> dict:
                 "phase":
                 sc.scalar(62.40, unit='deg'),
                 "position":
-                source["source_position"] + sc.vector(value=[0, 0, 8.8], unit='m'),
+                beamline["source_position"] + sc.vector(value=[0, 0, 8.8], unit='m'),
                 "cutout_angles_begin":
                 sc.array(
                     dims=[dim],
@@ -104,7 +104,7 @@ def make_beamline() -> dict:
                 "phase":
                 sc.scalar(12.27, unit='deg'),
                 "position":
-                source["source_position"] + sc.vector(value=[0, 0, 15.9], unit='m'),
+                beamline["source_position"] + sc.vector(value=[0, 0, 15.9], unit='m'),
                 "cutout_angles_begin":
                 sc.array(
                     dims=[dim],
