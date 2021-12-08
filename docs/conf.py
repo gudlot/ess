@@ -28,7 +28,7 @@ nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercont
 # -- Project information -----------------------------------------------------
 
 project = u'ess'
-copyright = u'2020 Scipp contributors'
+copyright = u'2021 Scipp contributors'
 copyright = u'scipp contributors'
 
 # The full version, including alpha/beta/rc tags
