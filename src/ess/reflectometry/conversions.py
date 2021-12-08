@@ -11,16 +11,19 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     """
     Compute the theta angle, including gravity correction,
     This is similar to the theta calculation in SANS (see
-    https://docs.mantidproject.org/v3.9.0/algorithms/Q1D-v2.html#algm-q1d), but we
-    ignore the horizontal `x` component.
+    https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion),
+    but we ignore the horizontal `x` component.
     See the schematic in Fig 5 of doi: 10.1016/j.nima.2016.03.007.
     """
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
     wavelength = sc.to_unit(wavelength, "m", copy=False)
-    drop = grav * m_n**2 / (2 * h**2) * wavelength**2 * L2**2
-    return sc.asin(sc.abs(y + drop) / L2) - sc.to_unit(sample_rotation, 'rad')
+    drop = wavelength**2 * (L2**2)
+    # Note: make use of in-place operations for better performance
+    drop *= grav * (m_n**2 / (2 * h**2))
+    drop += y
+    return sc.asin(sc.abs(drop) / L2) - sc.to_unit(sample_rotation, 'rad')
 
 
 def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:

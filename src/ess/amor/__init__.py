@@ -6,4 +6,4 @@ from . import conversions
 from .beamline import make_beamline
 from .instrument_view import instrument_view
 from .load import load
-from .tools import q_grid
+from . import tools

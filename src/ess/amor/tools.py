@@ -5,14 +5,24 @@ import scipp as sc
 from typing import Union
 
 
-def q_grid(dim: str,
-           edges: Union[list, np.ndarray],
-           scale: Union[list, str],
-           num: Union[list, int],
-           unit: str = None) -> sc.Variable:
+def linlogspace(dim: str,
+                edges: Union[list, np.ndarray],
+                scale: Union[list, str],
+                num: Union[list, int],
+                unit: str = None) -> sc.Variable:
     """
-    Generate bin edges for a `q_grid` inspired by the custom linear-log grid from
-    Jochen Stahn at PSI.
+    Generate a 1d array of bin edges with a mixture of linear and/or logarithmic
+    spacings.
+
+    Examples:
+
+    - Create linearly spaced edges (equivalent to `sc.linspace`):
+        linlogspace(dim='x', edges=[0.008, 0.08], scale='linear', num=50, unit='m')
+    - Create logarithmically spaced edges (equivalent to `sc.geomspace`):
+        linlogspace(dim='x', edges=[0.008, 0.08], scale='log', num=50, unit='m')
+    - Create edges with a linear and a logarithmic part:
+        linlogspace(dim='x', edges=[1, 3, 8], scale=['linear', 'log', num=[16, 20])
+
 
     :param dim: The dimension of the ouptut Variable.
     :param edges: The edges for the different parts of the mesh.
