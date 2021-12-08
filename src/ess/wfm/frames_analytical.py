@@ -66,11 +66,6 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
 
     # Neutron mass to Planck constant ratio
     alpha = sc.to_unit(constants.m_n / constants.h, 'us/m/angstrom')
-    # # TODO: would be nice to use physical constants in scipp or scippneutron
-    # # Note that the wavelength-related values are for informative purposes only,
-    # # they are not used in the stitching process, so the exact value of alpha should
-    # # not impact the stitching results.
-    # alpha = 2.5278e+2 * (sc.Unit('us') / sc.Unit('angstrom') / sc.Unit('m'))
 
     # Frame time corrections: these are the mid-time point between the WFM choppers,
     # which is the same as the opening edge of the second WFM chopper in the case

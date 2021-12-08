@@ -1,16 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
+import ess.choppers as ch
 import scipp as sc
-from .common import allclose
+from scipp import constants
 
 
 def _frames_from_slopes(data):
     detector_pos_norm = sc.norm(data.meta["position"])
 
     # Get the number of WFM frames
-    choppers = data.meta["choppers"].value
-    nframes = choppers["WFMC1"].opening_angles_open.sizes["frame"]
+    choppers = {key: data.meta[key].value for key in ch.find_chopper_keys(data)}
+    nframes = ch.cutout_angles_begin(choppers["chopper_wfm_1"]).sizes["frame"]
 
     # Now find frame boundaries
     frames = sc.Dataset()
@@ -29,40 +30,41 @@ def _frames_from_slopes(data):
                                          shape=[nframes],
                                          unit=sc.units.us)
 
-    near_wfm_chopper = choppers["WFMC1"]
-    far_wfm_chopper = choppers["WFMC2"]
+    near_wfm_chopper = choppers["chopper_wfm_1"]
+    far_wfm_chopper = choppers["chopper_wfm_2"]
 
     # Distance between WFM choppers
-    dz_wfm = sc.norm(far_wfm_chopper.position - near_wfm_chopper.position)
+    dz_wfm = sc.norm(far_wfm_chopper["position"].data -
+                     near_wfm_chopper["position"].data)
     # Mid-point between WFM choppers
-    z_wfm = 0.5 * (near_wfm_chopper.position + far_wfm_chopper.position)
+    z_wfm = 0.5 * (near_wfm_chopper["position"].data + far_wfm_chopper["position"].data)
     # Distance between detector positions and wfm chopper mid-point
     zdet_minus_zwfm = sc.norm(data.meta["position"] - z_wfm)
     # Neutron mass to Planck constant ratio
-    # TODO: would be nice to use physical constants in scipp or scippneutron
-    alpha = 2.5278e+2 * (sc.Unit('us') / sc.Unit('angstrom') / sc.Unit('m'))
+    alpha = sc.to_unit(constants.m_n / constants.h, 'us/m/angstrom')
 
-    near_t_open = near_wfm_chopper.time_open
-    near_t_close = near_wfm_chopper.time_close
-    far_t_open = far_wfm_chopper.time_open
+    near_t_open = ch.time_open(near_wfm_chopper)
+    near_t_close = ch.time_closed(near_wfm_chopper)
+    far_t_open = ch.time_open(far_wfm_chopper)
 
     for i in range(nframes):
         dt_lambda_max = near_t_close["frame", i] - near_t_open["frame", i]
         slope_lambda_max = dz_wfm / dt_lambda_max
-        intercept_lambda_max = sc.norm(
-            near_wfm_chopper.position) - slope_lambda_max * near_t_close["frame", i]
+        intercept_lambda_max = sc.norm(near_wfm_chopper["position"].data
+                                       ) - slope_lambda_max * near_t_close["frame", i]
         t_lambda_max = (detector_pos_norm - intercept_lambda_max) / slope_lambda_max
 
-        slope_lambda_min = sc.norm(near_wfm_chopper.position) / (
+        slope_lambda_min = sc.norm(near_wfm_chopper["position"].data) / (
             near_t_close["frame", i] -
             (data.meta["source_pulse_length"] + data.meta["source_pulse_t_0"]))
-        intercept_lambda_min = sc.norm(
-            far_wfm_chopper.position) - slope_lambda_min * far_t_open["frame", i]
+        intercept_lambda_min = sc.norm(far_wfm_chopper["position"].data
+                                       ) - slope_lambda_min * far_t_open["frame", i]
         t_lambda_min = (detector_pos_norm - intercept_lambda_min) / slope_lambda_min
 
-        t_lambda_min_plus_dt = (detector_pos_norm -
-                                (sc.norm(near_wfm_chopper.position) - slope_lambda_min *
-                                 near_t_close["frame", i])) / slope_lambda_min
+        t_lambda_min_plus_dt = (
+            detector_pos_norm -
+            (sc.norm(near_wfm_chopper["position"].data) -
+             slope_lambda_min * near_t_close["frame", i])) / slope_lambda_min
         dt_lambda_min = t_lambda_min_plus_dt - t_lambda_min
 
         # Compute wavelength information
@@ -90,18 +92,10 @@ def _frames_from_slopes(data):
 def _check_against_reference(ds, frames):
     reference = _frames_from_slopes(ds)
     for key in frames:
-        # TODO: once scipp 0.8 is released, use sc.allclose here which also works on
-        # vector_3_float64.
-        # assert allclose(reference[key].data, frames[key].data)
-        if frames[key].dtype == sc.dtype.vector_3_float64:
-            for xyz in "xyz":
-                assert allclose(getattr(reference[key].data.fields, xyz),
-                                getattr(frames[key].data.fields, xyz))
-        else:
-            assert allclose(reference[key].data, frames[key].data)
+        assert sc.allclose(reference[key].data, frames[key].data)
     for i in range(frames.sizes['frame'] - 1):
-        assert allclose(frames["delta_time_max"]["frame", i].data,
-                        frames["delta_time_min"]["frame", i + 1].data)
+        assert sc.allclose(frames["delta_time_max"]["frame", i].data,
+                           frames["delta_time_min"]["frame", i + 1].data)
 
 
 def test_frames_analytical():
@@ -112,10 +106,8 @@ def test_frames_analytical():
 
 def test_frames_analytical_large_dz_wfm():
     ds = sc.Dataset(coords=wfm.make_fake_beamline(
-        chopper_positions={
-            "WFMC1": sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
-            "WFMC2": sc.vector(value=[0.0, 0.0, 8.0], unit='m')
-        }))
+        chopper_wfm_1_position=sc.vector(value=[0.0, 0.0, 6.0], unit='m'),
+        chopper_wfm_2_position=sc.vector(value=[0.0, 0.0, 8.0], unit='m')))
     frames = wfm.get_frames(ds)
     _check_against_reference(ds, frames)
 
