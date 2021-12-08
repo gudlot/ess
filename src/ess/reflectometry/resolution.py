@@ -18,19 +18,18 @@ def detector_resolution(spatial_resolution: sc.Variable, pixel_position: sc.Vari
     :param sample_position: The position of the sample in the dimension parallel to the
         beam.
     """
-    fwhm = sc.to_unit(
-        sc.atan(spatial_resolution / (pixel_position - sample_position)),
-        "deg",
-    )
+    fwhm = sc.to_unit(sc.atan(spatial_resolution / (pixel_position - sample_position)),
+                      "deg")
     return fwhm / (2 * np.sqrt(2 * np.log(2)))
 
 
-def z_offset(position: sc.Variable, offset_value: sc.Variable) -> sc.Variable:
+def z_offset(position: sc.Variable, offset: sc.Variable) -> sc.Variable:
     """
     Compute new positions that have been offset in the z-dimension.
 
     :param position: Position vectors (dtype `vector_3_float64`).
-    :param offset_value: Offset to be applied along the z-dimension.
+    :param offset: Offset to be applied along the z-dimension.
     """
-    return sc.geometry.position(position.fields.x, position.fields.y,
-                                position.fields.z + offset_value)
+    position = position.copy()
+    position.fields.z += offset_value
+    return position
