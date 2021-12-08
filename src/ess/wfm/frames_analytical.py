@@ -65,7 +65,7 @@ def frames_analytical(data: Union[sc.DataArray, sc.Dataset]) -> sc.Dataset:
     zdet_minus_zwfm = sc.norm(detector_positions - z_wfm)
 
     # Neutron mass to Planck constant ratio
-    alpha = sc.to_unit(constants.m_n / constants.h, 's/m/angstrom')
+    alpha = sc.to_unit(constants.m_n / constants.h, 'us/m/angstrom')
     # # TODO: would be nice to use physical constants in scipp or scippneutron
     # # Note that the wavelength-related values are for informative purposes only,
     # # they are not used in the stitching process, so the exact value of alpha should
