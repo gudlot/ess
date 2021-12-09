@@ -35,8 +35,8 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     """
     Compute the Q vector from the theta angle computed as the difference
     between gamma and omega.
-    Note that this is different from the 'normal' Q defined in scippneutron where
-    `two_theta / 2` is used, while we use `theta` (computed above) directly here.
+    Note that this is identical the 'normal' Q defined in scippneutron, except that
+    the `theta` angle is given as an input instead of `two_theta`.
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
