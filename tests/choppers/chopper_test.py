@@ -81,7 +81,6 @@ def test_angular_frequency(params):
 
 
 def test_cutout_angles_from_centers_widths(params):
-    dim = 'frame'
     chopper = ch.make_chopper(**params)
     assert sc.allclose(
         ch.cutout_angles_begin(chopper),
