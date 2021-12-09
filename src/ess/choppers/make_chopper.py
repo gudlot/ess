@@ -13,7 +13,24 @@ def make_chopper(frequency: sc.Variable,
                  cutout_angles_begin: sc.Variable = None,
                  cutout_angles_end: sc.Variable = None,
                  kind: str = None) -> sc.Dataset:
+    """
+    Create a Dataset that holds chopper parameters.
+    This ensures the Dataset is compatible with the other functions in the choppers
+    module.
+    Defining a chopper's cutout angles can either constructed from an array of cutout
+    centers and an array of angular widths, or two arrays containing the begin (leading)
+    and end (closing) angles of the cutout windows.
 
+    :param frequency: The rotational frequency of the chopper.
+    :param position: The position vector of the chopper.
+    :param phase: The chopper phase.
+    :param cutout_angles_center: The centers of the chopper cutout angles.
+    :param cutout_angles_width: The angular widths of the chopper cutouts.
+    :param cutout_angles_begin: The starting/opening angles of the chopper cutouts.
+    :param cutout_angles_end: The ending/closing angles of the chopper cutouts.
+    :param kind: The chopper kind. Any string can be supplied, but WFM choppers should
+        be given 'wfm' as their kind.
+    """
     data = {"frequency": frequency, "position": position}
     if phase is not None:
         data["phase"] = phase
