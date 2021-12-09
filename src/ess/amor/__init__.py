@@ -3,7 +3,7 @@
 # flake8: noqa: F401
 from . import data
 from . import conversions
-from .beamline import make_beamline
+from .beamline import make_beamline, instrument_view_components
 from .instrument_view import instrument_view
 from .load import load
 from . import tools

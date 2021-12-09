@@ -7,6 +7,8 @@ Modules
 -------
 
 .. autosummary::
+   :template: ess-module-template.rst
+   :recursive:
 
    beamline
    conversions

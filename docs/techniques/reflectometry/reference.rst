@@ -7,19 +7,13 @@ Conversions
 -----------
 
 .. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
 
-   conversions.reflectometry_graph
+   conversions.specular_reflection
 
 Corrections
 -----------
 
 .. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
 
    corrections.illumination_correction
    corrections.illumination_of_sample
@@ -28,9 +22,6 @@ Resolution
 ----------
 
 .. autosummary::
-   :toctree: ../generated/functions
-   :template: ess-module-template.rst
-   :recursive:
 
    resolution.detector_resolution
    resolution.z_offset

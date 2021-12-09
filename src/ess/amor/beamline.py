@@ -57,7 +57,14 @@ def make_beamline(
     return beamline
 
 
-def instrument_view_components(da: sc.DataArray):
+def instrument_view_components(da: sc.DataArray) -> dict:
+    """
+    Create a dict of instrument view components, containing:
+      - the sample
+      - the source chopper
+
+    :param da: The DataArray containing the sample and source chopper coordinates.
+    """
     return {
         "sample": {
             'center': da.meta['sample_position'],
