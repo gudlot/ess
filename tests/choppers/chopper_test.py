@@ -25,38 +25,107 @@ def params():
     }
 
 
+def test_make_chopper_bad_widths(params):
+    params['cutout_angles_width'].values[1] = -3.0
+    with pytest.raises(ValueError) as e_info:
+        _ = ch.make_chopper(**params)
+    assert str(e_info.value) == "Negative window width found in chopper cutout angles."
+
+
+def test_make_chopper_bad_centers(params):
+    params['cutout_angles_center'].values = params['cutout_angles_center'].values[[
+        1, 0, 2, 3, 4, 5
+    ]]
+    with pytest.raises(ValueError) as e_info:
+        _ = ch.make_chopper(**params)
+    assert str(e_info.value) == "Chopper begin cutout angles are not monotonic."
+
+
+def test_make_chopper_bad_begin_angles(params):
+    cutout_angles_begin = params[
+        'cutout_angles_center'] - 0.5 * params['cutout_angles_width']
+    cutout_angles_end = params[
+        'cutout_angles_center'] + 0.5 * params['cutout_angles_width']
+    cutout_angles_begin.values = cutout_angles_begin.values[[1, 0, 2, 3, 4, 5]]
+    with pytest.raises(ValueError) as e_info:
+        _ = ch.make_chopper(frequency=params['frequency'],
+                            phase=params['phase'],
+                            position=params['position'],
+                            cutout_angles_begin=cutout_angles_begin,
+                            cutout_angles_end=cutout_angles_end,
+                            kind=params['kind'])
+    # This will raise the error on the widths before it reaches the monotonicity check
+    assert str(e_info.value) == "Negative window width found in chopper cutout angles."
+
+
+def test_make_chopper_bad_close_angles(params):
+    dim = 'frame'
+    with pytest.raises(ValueError) as e_info:
+        _ = ch.make_chopper(frequency=params['frequency'],
+                            phase=params['phase'],
+                            position=params['position'],
+                            cutout_angles_begin=sc.array(dims=[dim],
+                                                         values=[0.0, 1.0, 2.0],
+                                                         unit='rad'),
+                            cutout_angles_end=sc.array(dims=[dim],
+                                                       values=[4.0, 3.0, 5.0],
+                                                       unit='rad'),
+                            kind=params['kind'])
+    assert str(e_info.value) == "Chopper end cutout angles are not monotonic."
+
+
 def test_angular_frequency(params):
-    chopper = sc.Dataset(data=params)
+    chopper = ch.make_chopper(**params)
     assert sc.identical(ch.angular_frequency(chopper),
                         (2.0 * np.pi * sc.units.rad) * params['frequency'])
 
 
-def test_cutout_angles(params):
+def test_cutout_angles_from_centers_widths(params):
     dim = 'frame'
-    chopper = sc.Dataset(data=params)
-    centers = sc.linspace(dim=dim, start=0.25, stop=2.0 * np.pi, num=6, unit='rad')
-    widths = sc.linspace(dim=dim, start=0.1, stop=0.6, num=6, unit='rad')
-    assert sc.allclose(ch.cutout_angles_begin(chopper), centers - 0.5 * widths)
-    assert sc.allclose(ch.cutout_angles_end(chopper), centers + 0.5 * widths)
+    chopper = ch.make_chopper(**params)
+    assert sc.allclose(
+        ch.cutout_angles_begin(chopper),
+        params["cutout_angles_center"] - 0.5 * params["cutout_angles_width"])
+    assert sc.allclose(
+        ch.cutout_angles_end(chopper),
+        params["cutout_angles_center"] + 0.5 * params["cutout_angles_width"])
+
+
+def test_cutout_angles_from_begin_end(params):
+    dim = 'frame'
+    del params['cutout_angles_center']
+    del params['cutout_angles_width']
+    params["cutout_angles_begin"] = sc.linspace(dim=dim,
+                                                start=0.0,
+                                                stop=1.5 * np.pi,
+                                                num=6,
+                                                unit='rad')
+    params["cutout_angles_end"] = sc.linspace(dim=dim,
+                                              start=0.1,
+                                              stop=2.0 * np.pi,
+                                              num=6,
+                                              unit='rad')
+    chopper = ch.make_chopper(**params)
+    assert sc.allclose(ch.cutout_angles_width(chopper),
+                       params["cutout_angles_end"] - params["cutout_angles_begin"])
+    assert sc.allclose(
+        ch.cutout_angles_center(chopper),
+        0.5 * (params["cutout_angles_begin"] + params["cutout_angles_end"]))
 
 
 def test_time_open_closed(params):
     dim = 'frame'
-    chopper = sc.Dataset(
-        data={
-            "frequency":
-            sc.scalar(0.5, unit=sc.units.one / sc.units.s),
-            "phase":
-            sc.scalar(0., unit='rad'),
-            "position":
-            params['position'],
-            "cutout_angles_begin":
-            sc.array(dims=[dim], values=np.pi * np.array([0.0, 0.5, 1.0]), unit='rad'),
-            "cutout_angles_end":
-            sc.array(dims=[dim], values=np.pi * np.array([0.5, 1.0, 1.5]), unit='rad'),
-            "kind":
-            params['kind']
-        })
+    chopper = ch.make_chopper(
+        frequency=sc.scalar(0.5, unit=sc.units.one / sc.units.s),
+        phase=sc.scalar(0., unit='rad'),
+        position=params['position'],
+        cutout_angles_begin=sc.array(dims=[dim],
+                                     values=np.pi * np.array([0.0, 0.5, 1.0]),
+                                     unit='rad'),
+        cutout_angles_end=sc.array(dims=[dim],
+                                   values=np.pi * np.array([0.5, 1.0, 1.5]),
+                                   unit='rad'),
+        kind=params['kind'])
 
     assert sc.allclose(
         ch.time_open(chopper),
