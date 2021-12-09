@@ -8,6 +8,7 @@ Modules
 
 .. autosummary::
    :template: ess-module-template.rst
+   :toctree: ../../generated
    :recursive:
 
    beamline
@@ -19,6 +20,7 @@ Functions
 ---------
 
 .. autosummary::
+   :toctree: ../../generated
 
    instrument_view.instrument_view
    load.load
