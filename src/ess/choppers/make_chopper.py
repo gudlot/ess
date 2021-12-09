@@ -30,12 +30,14 @@ def make_chopper(frequency: sc.Variable,
     chopper = sc.Dataset(data=data)
 
     # Sanitize input parameters
-    widths = utils.cutout_angles_width(chopper)
-    if (sc.min(widths) < sc.scalar(0.0, unit=widths.unit)).value:
-        raise ValueError("Negative window width found in chopper cutout angles.")
-    if not np.all(np.diff(utils.cutout_angles_begin(chopper).values) > 0):
-        raise ValueError("Chopper begin cutout angles are not monotonic.")
-    if not np.all(np.diff(utils.cutout_angles_end(chopper).values) > 0):
-        raise ValueError("Chopper end cutout angles are not monotonic.")
+    if (None not in [cutout_angles_begin, cutout_angles_end
+                     ]) or (None not in [cutout_angles_center, cutout_angles_width]):
+        widths = utils.cutout_angles_width(chopper)
+        if (sc.min(widths) < sc.scalar(0.0, unit=widths.unit)).value:
+            raise ValueError("Negative window width found in chopper cutout angles.")
+        if not np.all(np.diff(utils.cutout_angles_begin(chopper).values) > 0):
+            raise ValueError("Chopper begin cutout angles are not monotonic.")
+        if not np.all(np.diff(utils.cutout_angles_end(chopper).values) > 0):
+            raise ValueError("Chopper end cutout angles are not monotonic.")
 
     return chopper

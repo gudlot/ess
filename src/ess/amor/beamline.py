@@ -2,6 +2,7 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import g
+from ..choppers import make_chopper
 
 
 def make_beamline(
@@ -50,12 +51,9 @@ def make_beamline(
     # chopper. This does not allow storing e.g. chopper cutout angles.
     # We should change this to be a Dataset, which is what we do here.
     beamline["source_chopper"] = sc.scalar(
-        sc.Dataset(
-            data={
-                'frequency': chopper_frequency,
-                'phase': chopper_phase,
-                'position': chopper_position
-            }))
+        make_chopper(frequency=chopper_frequency,
+                     phase=chopper_phase,
+                     position=chopper_position))
     return beamline
 
 

@@ -3,6 +3,7 @@
 import scipp as sc
 import numpy as np
 from scipp.constants import m_n, h
+from ..choppers import make_chopper
 
 
 def make_fake_beamline(
@@ -53,26 +54,20 @@ def make_fake_beamline(
     return {
         "chopper_wfm_1":
         sc.scalar(
-            sc.Dataset(
-                data={
-                    "frequency": frequency,
-                    "phase": sc.scalar(0.0, unit='deg'),
-                    "position": chopper_wfm_1_position,
-                    "cutout_angles_center": cutout_angles_center_wfm_1,
-                    "cutout_angles_width": cutout_angles_width,
-                    "kind": sc.scalar('wfm')
-                })),
+            make_chopper(frequency=frequency,
+                         phase=sc.scalar(0.0, unit='deg'),
+                         position=chopper_wfm_1_position,
+                         cutout_angles_center=cutout_angles_center_wfm_1,
+                         cutout_angles_width=cutout_angles_width,
+                         kind=sc.scalar('wfm'))),
         "chopper_wfm_2":
         sc.scalar(
-            sc.Dataset(
-                data={
-                    "frequency": frequency,
-                    "phase": sc.scalar(0.0, unit='deg'),
-                    "position": chopper_wfm_2_position,
-                    "cutout_angles_center": cutout_angles_center_wfm_2,
-                    "cutout_angles_width": cutout_angles_width,
-                    "kind": sc.scalar('wfm')
-                })),
+            make_chopper(frequency=frequency,
+                         phase=sc.scalar(0.0, unit='deg'),
+                         position=chopper_wfm_2_position,
+                         cutout_angles_center=cutout_angles_center_wfm_2,
+                         cutout_angles_width=cutout_angles_width,
+                         kind=sc.scalar('wfm'))),
         'position':
         sc.vector(value=[0., 0., 60.], unit='m'),
         "source_pulse_length":
