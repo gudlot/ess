@@ -21,7 +21,7 @@ def linlogspace(dim: str,
     - Create logarithmically spaced edges (equivalent to `sc.geomspace`):
         linlogspace(dim='x', edges=[0.008, 0.08], scale='log', num=50, unit='m')
     - Create edges with a linear and a logarithmic part:
-        linlogspace(dim='x', edges=[1, 3, 8], scale=['linear', 'log', num=[16, 20])
+        linlogspace(dim='x', edges=[1, 3, 8], scale=['linear', 'log'], num=[16, 20])
 
 
     :param dim: The dimension of the ouptut Variable.

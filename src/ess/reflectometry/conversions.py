@@ -18,12 +18,17 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
-    wavelength = sc.to_unit(wavelength, "m", copy=False)
-    drop = wavelength**2 * (L2**2)
-    # Note: make use of in-place operations for better performance
+    wavelength = sc.to_unit(wavelength, "m", copy=True)
+    wavelength *= wavelength
+    drop = L2**2
     drop *= grav * (m_n**2 / (2 * h**2))
+    drop = wavelength * drop
     drop += y
-    return sc.asin(sc.abs(drop) / L2) - sc.to_unit(sample_rotation, 'rad')
+    out = sc.abs(drop, out=drop)
+    out /= L2
+    out = sc.asin(out, out=out)
+    out -= sc.to_unit(sample_rotation, 'rad')
+    return out
 
 
 def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
