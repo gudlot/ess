@@ -32,5 +32,6 @@ dependencies:
   - python-graphviz
   - pythreejs
   - sphinx
-  - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
+  - sphinx-book-theme
+  - sphinx-copybutton
   - nbsphinx
