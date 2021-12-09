@@ -18,13 +18,19 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
-    wavelength = sc.to_unit(wavelength, _elem_unit(L2), copy=True)
-    wavelength *= wavelength
+    y_correction = sc.to_unit(wavelength, _elem_unit(L2), copy=True)
+    y_correction *= y_correction
     drop = L2**2
     drop *= grav * (m_n**2 / (2 * h**2))
-    drop = wavelength * drop
-    drop += y
-    out = sc.abs(drop, out=drop)
+    # Optimization when handling either the dense or the event coord of binned data:
+    # - For the event coord, both operands have same dims, and we can multiply in place
+    # - For the dense coord, we need to broadcast using non in-place operation
+    if set(drop.dims).issubset(set(y_correction.dims)):
+        y_correction *= drop
+    else:
+        y_correction = y_correction * drop
+    y_correction += y
+    out = sc.abs(y_correction, out=y_correction)
     out /= L2
     out = sc.asin(out, out=out)
     out -= sc.to_unit(sample_rotation, 'rad')
