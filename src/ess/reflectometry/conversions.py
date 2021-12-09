@@ -3,7 +3,7 @@
 import scipp as sc
 from scipp.constants import m_n, h, pi
 from scippneutron.tof import conversions
-from scippneutron.core.conversions import _elem_dtype
+from scippneutron.core.conversions import _elem_dtype, _elem_unit
 
 
 def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
@@ -18,7 +18,7 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
-    wavelength = sc.to_unit(wavelength, "m", copy=True)
+    wavelength = sc.to_unit(wavelength, _elem_unit(L2), copy=True)
     wavelength *= wavelength
     drop = L2**2
     drop *= grav * (m_n**2 / (2 * h**2))
