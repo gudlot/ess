@@ -3,6 +3,40 @@
 Release Notes
 =============
 
+v0.2.0 (unreleased)
+-------------------
+
+Features
+~~~~~~~~
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* A major rewrite of the reflectometry code was undertaken `#61 <https://github.com/scipp/ess/pull/61>`_:
+
+  * The reflectometry and Amor Data classes were removed in favour of a formalism consisting of free-functions that accept Scipp DataArrays and Datasets.
+  * Moved the chopper class from the `wfm` submodule to free functions in its own ``choppers`` module.
+  * The unit conversion (computing wavelength and Q) now use ``transform_coords``.
+  * The Amor reduction notebook from ``ess-notebooks`` has been imported into the ``ess`` repository.
+
+Bugfixes
+~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+Stability, Maintainability, and Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+Owen Arnold :sup:`b, c`\ ,
+Simon Heybrock :sup:`a`\ ,
+Andrew McCluskey :sup:`a`\ ,
+Samuel Jones :sup:`b`\ ,
+and Neil Vaytet :sup:`a`\
+
 v0.1.0 (September 2021)
 -----------------------
 
