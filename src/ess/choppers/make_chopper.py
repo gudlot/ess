@@ -2,7 +2,6 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from . import utils
-import numpy as np
 
 
 def make_chopper(frequency: sc.Variable,
