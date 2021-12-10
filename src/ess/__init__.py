@@ -3,3 +3,7 @@
 from . import _version
 
 __version__ = _version.__version__
+
+from . import amor
+from . import reflectometry
+from . import wfm

@@ -7,7 +7,7 @@ channels:
 
 dependencies:
   # Build
-  - scippneutron=0.4.*
+  - scippneutron>=0.4.1
   - gitpython
 
   # Run
@@ -28,6 +28,9 @@ dependencies:
   - yapf
 
   # Docs
+  - pooch
+  - python-graphviz
+  - pythreejs
   - sphinx
   - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
   - nbsphinx

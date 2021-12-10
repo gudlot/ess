@@ -11,7 +11,7 @@ requirements:
     - sphinx_rtd_theme
     - gitpython
   run:
-    - scippneutron=0.4.*
+    - scippneutron>=0.4.1
     - tifffile
     - astropy
     - matplotlib

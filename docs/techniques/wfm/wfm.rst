@@ -2,7 +2,7 @@ Wavelength frame multiplication
 ===============================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
-   wfm/introduction-to-wfm.ipynb
-   wfm/reducing-wfm-data
+   introduction-to-wfm
+   reducing-wfm-data
