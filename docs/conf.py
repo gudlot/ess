@@ -17,13 +17,8 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import doctest
-import sphinx_rtd_theme
 
 html_show_sourcelink = True
-nbsphinx_prolog = """`Download this Jupyter notebook <https://raw.githubusercontent.com/scipp/scipp/main/docs/{{ env.doc2path(env.docname, base=None) }}>`_
-
-----
-"""  # noqa: E501
 
 # -- Project information -----------------------------------------------------
 
@@ -46,6 +41,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.doctest',
+    'sphinx_copybutton',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
     'nbsphinx',
@@ -79,16 +75,22 @@ todo_include_todos = False
 
 # -- Options for HTML output -------------------------------------------------
 # Should only use this theme on READTHEDOCS. TODO.
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_context = {'css_files': ['_static/theme_overrides.css']}
+html_theme = 'sphinx_book_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {'logo_only': True}
-
+html_theme_options = {
+    "logo_only": True,
+    "repository_url": "https://github.com/scipp/scipp",
+    "repository_branch": "main",
+    "path_to_docs": "docs",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+    "show_toc_level": 2,  # Show subheadings in secondary sidebar
+}
 html_logo = "_static/logo.png"
 html_favicon = "_static/favicon.ico"
 
