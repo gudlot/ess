@@ -7,23 +7,22 @@ source:
 
 requirements:
   build:
-    - sphinx>=1.6
-    - sphinx_rtd_theme
     - gitpython
   run:
-    - scippneutron>=0.4.1
-    - tifffile
     - astropy
-    - matplotlib
     - ipywidgets
+    - matplotlib
+    - pooch
+    - scippneutron>=0.4.1
     - scipy
+    - tifffile
 
 test:
   imports:
-    - scipp
     - ess
-    - ess.v20
-    - ess.v20.imaging
+    - ess.wfm
+    - ess.amor
+    - ess.reflectometry
   requires:
     - pytest
     - pandoc
