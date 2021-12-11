@@ -19,6 +19,7 @@ dependencies:
   - ipywidgets
   - scipy
   - ipympl
+  - pooch
 
   # Test
   - pytest
@@ -28,7 +29,6 @@ dependencies:
   - yapf
 
   # Docs
-  - pooch
   - python-graphviz
   - pythreejs
   - sphinx
