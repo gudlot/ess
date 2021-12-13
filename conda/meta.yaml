@@ -7,7 +7,7 @@ source:
 
 requirements:
   build:
-    - python
+    - setuptools
   run:
     - astropy
     - ipywidgets
