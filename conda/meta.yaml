@@ -7,7 +7,7 @@ source:
 
 requirements:
   build:
-    - gitpython
+    - python
   run:
     - astropy
     - ipywidgets
@@ -26,6 +26,8 @@ test:
   requires:
     - pytest
     - pandoc
+    - pythreejs
+    - python-graphviz
     - sphinx
     - sphinx-book-theme
     - sphinx-copybutton
