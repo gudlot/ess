@@ -4,7 +4,7 @@ import scippneutron as scn
 from scippneutron.tof.conversions import beamline, elastic
 from .contrib import map_to_bins, to_bin_centers
 from .reduction import reduce_to_q, simple_reducer, grouping_reducer
-from .normalization import solid_angle, transmission_fraction, convert_and_rebin
+from .normalization import solid_angle, transmission_fraction, substract_background_and_rebin
 
 def to_wavelength(ds):
     """
@@ -25,7 +25,7 @@ def reduce_data_set(
     direct,
     masks,
     wavelength_bins,
-    monitors_ranges,
+    threshold,
     pixel_size,
     pixel_length,
 ):
@@ -34,44 +34,35 @@ def reduce_data_set(
     """
     #data = data.copy(deep=False)
 
-    (
-        min_bin_incident_monitor,
-        max_bin_incident_monitor,
-        min_bin_transmission_monitor,
-        max_bin_transmission_monitor,
-    ) = monitors_ranges
 
     transmission_frac = transmission_fraction(
         sample=transmission,
         direct=direct,
         wavelength_bins=wavelength_bins,
-        min_bin_incident_monitor=min_bin_incident_monitor,
-        max_bin_incident_monitor=max_bin_incident_monitor,
-        min_bin_transmission_monitor=min_bin_transmission_monitor,
-        max_bin_transmission_monitor=max_bin_transmission_monitor,
+        threshold=threshold
     )
     #TODO: Are masks necessary here?
     for name, mask in masks.items():
         data.masks[name] = mask
 
     #TODO: Rebin doesn't work here
-    data = sc.rebin(data, "wavelength", wavelength_bins)
+    #data = sc.rebin(data, "wavelength", wavelength_bins)
 
     monitor = data.attrs["monitor2"].value
-    monitor = convert_and_rebin(
-        monitor, wavelength_bins, min_bin_incident_monitor, max_bin_incident_monitor
+    monitor = substract_background_and_rebin(
+        monitor, wavelength_bins, threshold,
     )
 
     direct_beam = map_to_bins(direct_beam, "wavelength", monitor.coords["wavelength"])
-    direct_beam = monitor * transmission_frac * direct_beam
+    #TODO: Direct beam doesn't have compatible attrs with monitor and thus are dropped during multiplication
+    direct_beam = monitor * transmission_frac * direct_beam.data
 
-    d = sc.Dataset(
-        {
+    d = {
             "data": data,
             "norm": solid_angle(data, pixel_size, pixel_length) * direct_beam,
         }
-    )
-    to_bin_centers(d, "wavelength")
+
+    #to_bin_centers(d, "wavelength")
     return d
 
 
@@ -82,7 +73,7 @@ def to_q(
     direct,
     masks,
     q_bins,
-    monitors_ranges,
+    threshold,
     pixel_size,
     pixel_length,
     wavelength_bins,
@@ -99,11 +90,11 @@ def to_q(
         direct=direct,
         masks=masks,
         wavelength_bins=wavelength_bins,
-        monitors_ranges=monitors_ranges,
+        threshold=threshold,
         pixel_size=pixel_size,
         pixel_length=pixel_length,
     )
-
+    return wav
     if groupby is None:
       reducer = simple_reducer(dim="spectrum")
     else:

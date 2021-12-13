@@ -30,8 +30,8 @@ def reduce_to_q(data, *, q_bins, reducer, wavelength_bands=None):
         return reducer(data)
 
     #TODO: Switch to this once moving to the latest version of scipp
-    #wavelength = wavelength.rename_dims({'wavelength': 'Q'})
-    wavelength.rename_dims({'wavelength': 'Q'})
+    wavelength = wavelength.rename_dims({'wavelength': 'Q'})
+    #wavelength.rename_dims({'wavelength': 'Q'})
     data.coords['wavelength'] = wavelength
     bands = None
 

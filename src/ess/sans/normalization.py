@@ -11,22 +11,15 @@ def solid_angle(data, pixel_size, pixel_length):
     return (pixel_size * pixel_length) / (L2 * L2)
 
 
-# def convert_and_rebin(data, wavelength_bins, begin, end):
-#     """
-#     Convertining and rebinning shifted data. Rebaselining background and shifiting the data
-#     TODO: Instead of defining magic numbers with the bins one can set a threshold on number of counts
-#     """
-#     transformed = data - sc.mean(data["tof", begin:end], "tof")
-#     transformed = scn.convert(transformed, "tof", "wavelength", scatter=False)
-#     transformed = sc.rebin(transformed, "wavelength", wavelength_bins)
-#     return transformed
-
 #TODO: Change name of function once all issues are sorted out
-def convert_and_rebin(data, wavelength_bins, begin, end):
+def substract_background_and_rebin(data, wavelength_bins, threshold):
     """
     Shifts data by backgorund value and rebins it
     """
-    transformed = data - sc.mean(data["wavelength", begin:end], "wavelength")
+    data_original = data.copy(deep=False)
+    data_original.masks['background'] = data_original.data > threshold
+    background = sc.mean(data_original)
+    transformed = data - background
     transformed = sc.rebin(transformed, "wavelength", wavelength_bins)
     return transformed
 
@@ -34,10 +27,7 @@ def transmission_fraction(
     sample,
     direct,
     wavelength_bins,
-    min_bin_incident_monitor,
-    max_bin_incident_monitor,
-    min_bin_transmission_monitor,
-    max_bin_transmission_monitor,
+    threshold
 ):
     """
     Approximation based on equations in CalculateTransmission documentation
@@ -45,28 +35,24 @@ def transmission_fraction(
     This is equivalent to mantid.CalculateTransmission without fitting
     """
 
-    sample_incident = convert_and_rebin(
+    sample_incident = substract_background_and_rebin(
         sample.attrs["monitor2"].value,
         wavelength_bins,
-        min_bin_incident_monitor,
-        max_bin_incident_monitor,
+        threshold
     )
-    sample_trans = convert_and_rebin(
+    sample_trans = substract_background_and_rebin(
         sample.attrs["monitor4"].value,
         wavelength_bins,
-        min_bin_transmission_monitor,
-        max_bin_transmission_monitor,
+        threshold
     )
-    direct_incident = convert_and_rebin(
+    direct_incident = substract_background_and_rebin(
         direct.attrs["monitor2"].value,
         wavelength_bins,
-        min_bin_incident_monitor,
-        max_bin_incident_monitor,
+        threshold
     )
-    direct_trans = convert_and_rebin(
+    direct_trans = substract_background_and_rebin(
         direct.attrs["monitor4"].value,
         wavelength_bins,
-        min_bin_transmission_monitor,
-        max_bin_transmission_monitor,
+        threshold
     )
     return (sample_trans / direct_trans) * (direct_incident / sample_incident)
