@@ -12,7 +12,7 @@ defaults:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yaml@v1
+    uses: scipp/ess/.github/workflows/build.yml@try_gh_actions
 
   # deploy:
   #   needs: build
