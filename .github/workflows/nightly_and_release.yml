@@ -1,0 +1,19 @@
+name: Nightly and Release
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: "0 0 * * *"
+
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
+
+jobs:
+  build:
+    uses: ./.github/workflows/build@v1
+
+  # deploy:
+  #   needs: build
+  #   uses: ./.github/workflows/deploy@v1
