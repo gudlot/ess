@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -23,7 +23,7 @@ html_show_sourcelink = True
 # -- Project information -----------------------------------------------------
 
 project = u'ess'
-copyright = u'2021 Scipp contributors'
+copyright = u'2022 Scipp contributors'
 copyright = u'scipp contributors'
 
 # The full version, including alpha/beta/rc tags
