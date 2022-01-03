@@ -41,6 +41,6 @@ if __name__ == '__main__':
     # However, keep the ones in the `_sources` folder,
     # as the download buttons links to them.
     sources_dir = os.path.join(build_dir, '_sources')
-    for path in Path(build_dir).rglob('*.ipynb'):
+    for path in pathlib.Path(build_dir).rglob('*.ipynb'):
         if not str(path).startswith(sources_dir):
             os.remove(path)
