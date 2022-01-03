@@ -12,8 +12,8 @@ defaults:
 
 jobs:
   build:
-    uses: ./.github/workflows/build@v1
+    uses: ./.github/workflows/build.yaml@v1
 
   # deploy:
   #   needs: build
-  #   uses: ./.github/workflows/deploy@v1
+  #   uses: ./.github/workflows/deploy.yml@v1
