@@ -1,14 +1,10 @@
-name: Nightly and Release
+name: Weekly and Release
 
 on:
   release:
     types: [published]
   schedule:
-    - cron: "0 0 * * *"
-
-defaults:
-  run:
-    shell: bash -l {0}  # required for conda env
+    - cron: "0 0 * * 0"
 
 jobs:
   build:
