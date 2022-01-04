@@ -10,6 +10,6 @@ jobs:
   build:
     uses: scipp/ess/.github/workflows/build.yml@try_github_actions
 
-  # deploy:
-  #   needs: build
-  #   uses: ./.github/workflows/deploy.yml@v1
+  deploy:
+    needs: build
+    uses: scipp/ess/.github/workflows/deploy.yml@try_github_actions
