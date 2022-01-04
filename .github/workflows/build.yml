@@ -23,6 +23,8 @@ jobs:
       DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # history required so cmake can determine version
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install --yes conda-build
       - run: conda build --channel conda-forge --channel scipp --no-anaconda-upload --override-channels --output-folder conda/package conda
