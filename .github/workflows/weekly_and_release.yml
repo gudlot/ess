@@ -1,0 +1,15 @@
+name: Weekly and Release
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: "0 0 * * 4"
+
+jobs:
+  build:
+    uses: scipp/ess/.github/workflows/build.yml@main
+
+  deploy:
+    needs: build
+    uses: scipp/ess/.github/workflows/deploy.yml@main

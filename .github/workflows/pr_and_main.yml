@@ -1,0 +1,15 @@
+name: PR and Main
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_number || github.ref }}
+  cancel-in-progress: true  # cancel jobs from previous push
+
+jobs:
+  build:
+    uses: scipp/ess/.github/workflows/build.yml@main

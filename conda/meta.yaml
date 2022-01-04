@@ -37,7 +37,7 @@ test:
     - docs/
   commands:
     - python -m pytest -v tests
-    - python docs/build_and_test.py
+    - python docs/make_docs.py
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
