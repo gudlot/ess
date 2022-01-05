@@ -47,3 +47,10 @@ def sans_elastic() -> dict:
     graph = {**conversions.beamline(scatter=True), **conversions.elastic_Q("tof")}
     graph["two_theta"] = two_theta
     return graph
+
+
+def sans_monitor() -> dict:
+    """
+    Generate a coordinate transformation graph for SANS monitor (no scattering).
+    """
+    return {**conversions.beamline(scatter=False), **conversions.elastic_Q("tof")}
