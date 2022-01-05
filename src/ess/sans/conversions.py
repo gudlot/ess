@@ -26,7 +26,7 @@ def two_theta(gravity, wavelength, incident_beam, scattered_beam):
     if set(drop.dims).issubset(set(y_term.dims)):
         y_term *= drop
     else:
-        y_term = y_term * drop
+        y_term = drop * y_term
     y_term += y
     y_term *= y_term
 
