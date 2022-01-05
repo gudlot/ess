@@ -1,11 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import scipp as sc
 from .wfm import get_frames
 from .stitch import stitch
+from .. import choppers as ch
 
 
 def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
@@ -65,10 +66,12 @@ def time_distance_diagram(data: sc.DataArray, **kwargs) -> plt.Figure:
             fontsize=6)
 
     # Plot the chopper openings as segments
-    for name, chopper in data.meta["choppers"].value.items():
-        yframe = sc.norm(chopper.position - source_pos).value
-        time_open = chopper.time_open.values
-        time_close = chopper.time_close.values
+    # for name, chopper in data.meta["choppers"].value.items():
+    for name in ch.find_chopper_keys(data):
+        chopper = data.meta[name].value
+        yframe = sc.norm(chopper["position"].data - source_pos).value
+        time_open = ch.time_open(chopper).values
+        time_close = ch.time_closed(chopper).values
         tmin = 0.0
         for fnum in range(len(time_open)):
             tmax = time_open[fnum]

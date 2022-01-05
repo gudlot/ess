@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import ess.wfm as wfm
+import ess.choppers as ch
 import scipp as sc
+from scipp import constants
 import scippneutron as scn
 import pytest
 
@@ -53,7 +55,7 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
 
     # They are all created half-way through the pulse.
     # Compute their arrival time at the detector.
-    alpha = 2.5278e-4 * (sc.Unit('s') / sc.Unit('angstrom') / sc.Unit('m'))
+    alpha = sc.to_unit(constants.m_n / constants.h, 's/m/angstrom')
     dz = sc.norm(coords['position'] - coords['source_position'])
     arrival_times = sc.to_unit(
         alpha * dz * wavelengths,
@@ -101,9 +103,10 @@ def _do_stitching_on_beamline(wavelengths, dim, event_mode=False):
                                         num=1001,
                                         unit='angstrom'))
 
-    choppers = da.meta["choppers"].value
+    choppers = {key: da.meta[key].value for key in ch.find_chopper_keys(da)}
     # Distance between WFM choppers
-    dz_wfm = sc.norm(choppers["WFMC2"].position - choppers["WFMC1"].position)
+    dz_wfm = sc.norm(choppers["chopper_wfm_2"]["position"].data -
+                     choppers["chopper_wfm_1"]["position"].data)
     # Delta_lambda  / lambda
     dlambda_over_lambda = dz_wfm / sc.norm(coords['position'] -
                                            frames['wfm_chopper_mid_point'].data)

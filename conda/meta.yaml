@@ -7,29 +7,37 @@ source:
 
 requirements:
   build:
-    - sphinx>=1.6
-    - sphinx_rtd_theme
-    - gitpython
+    - setuptools
   run:
-    - scippneutron {{ scippneutron }}
-    - tifffile
     - astropy
-    - matplotlib
     - ipywidgets
+    - matplotlib
+    - pooch
+    - scippneutron>=0.4.1
     - scipy
+    - tifffile
 
 test:
   imports:
-    - scipp
     - ess
-    - ess.v20
-    - ess.v20.imaging
+    - ess.wfm
+    - ess.amor
+    - ess.reflectometry
   requires:
     - pytest
+    - pandoc
+    - pythreejs
+    - python-graphviz
+    - sphinx
+    - sphinx-book-theme
+    - sphinx-copybutton
+    - nbsphinx
   source_files:
     - tests/
+    - docs/
   commands:
-    - python -m pytest -v
+    - python -m pytest -v tests
+    - python docs/make_docs.py
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}

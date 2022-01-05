@@ -7,19 +7,19 @@ channels:
 
 dependencies:
   # Build
-  - scippneutron
+  - scippneutron>=0.4.1
   - gitpython
 
   # Run
   - astropy
   - matplotlib
   - tifffile
-  - python
   - ipython
   - jupyter
   - ipywidgets
   - scipy
   - ipympl
+  - pooch
 
   # Test
   - pytest
@@ -29,6 +29,9 @@ dependencies:
   - yapf
 
   # Docs
+  - python-graphviz
+  - pythreejs
   - sphinx
-  - sphinx_rtd_theme=0.5.2 # 1.0.0 broken CSS?
+  - sphinx-book-theme
+  - sphinx-copybutton
   - nbsphinx

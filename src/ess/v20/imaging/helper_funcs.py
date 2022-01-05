@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
+# Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import csv
 import glob
 import os
@@ -7,8 +7,6 @@ import re
 
 import numpy as np
 import scipp as sc
-import tifffile
-from astropy.io import fits
 
 
 def read_x_values(tof_file, **kwargs):
@@ -51,6 +49,7 @@ def _load_images(image_dir, extension, loader):
 
 def _load_fits(image_dir):
     def loader(filenames):
+        from astropy.io import fits
         stack = []
         path_length = len(filenames) + 1
         nfiles = len(filenames)
@@ -72,10 +71,12 @@ def _load_fits(image_dir):
 
 
 def _load_tiffs(tiff_dir):
+    import tifffile
     return _load_images(tiff_dir, 'tiff', lambda f: tifffile.imread(f))
 
 
 def export_tiff_stack(dataset, key, base_name, output_dir, x_len, y_len, tof_values):
+    import tifffile
     to_save = dataset[key]
 
     num_bins = 1 if len(to_save.shape) == 1 else to_save.shape[0]
