@@ -5,13 +5,12 @@ import scipp as sc
 import scippneutron as scn
 
 
-def solid_angle(data, pixel_size, pixel_length):
+def solid_angle(data, pixel_width, pixel_height):
     """
-    Solid angle function taking pixel_size and pixel_lenght as parameters.
-    The method assumes pixels are rectangular.
+    Solid angle computed from rectangular pixels with a 'width' and a 'height'.
     """
     L2 = scn.L2(data)
-    return (pixel_size * pixel_length) / (L2 * L2)
+    return (pixel_width * pixel_height) / (L2 * L2)
 
 
 def subtract_background_and_rebin(data, wavelength_bins, threshold):
@@ -28,7 +27,7 @@ def subtract_background_and_rebin(data, wavelength_bins, threshold):
     return out
 
 
-def transmission_fraction(sample_incident, sample_transmission, direct_incident,
+def transmission_fraction(data_incident, data_transmission, direct_incident,
                           direct_transmission):
     """
     Approximation based on equations in CalculateTransmission documentation
@@ -36,5 +35,4 @@ def transmission_fraction(sample_incident, sample_transmission, direct_incident,
     This is equivalent to mantid.CalculateTransmission without fitting
     """
 
-    return (sample_transmission / direct_transmission) * (direct_incident /
-                                                          sample_incident)
+    return (data_transmission / direct_transmission) * (direct_incident / data_incident)

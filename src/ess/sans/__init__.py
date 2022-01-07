@@ -3,3 +3,4 @@
 
 from . import conversions
 from . import normalization
+from .q1d import q1d
