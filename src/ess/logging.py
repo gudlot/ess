@@ -5,7 +5,7 @@
 import functools
 import logging
 import inspect
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Literal, Optional, Union
 
 import scipp as sc
 import scippneutron as scn
@@ -21,8 +21,10 @@ def get_logger(instrument: Optional[str] = None) -> logging.Logger:
     return logging.getLogger(name)
 
 
-_INSTRUMENTS = ['amor', 'beer', 'bifrost', 'cspec', 'dream', 'estia', 'freia', 'heimdal', 'loki',
-                'magic', 'miracles', 'nmx', 'odin', 'skadi', 'trex', 'v20', 'vespa']
+_INSTRUMENTS = [
+    'amor', 'beer', 'bifrost', 'cspec', 'dream', 'estia', 'freia', 'heimdal', 'loki',
+    'magic', 'miracles', 'nmx', 'odin', 'skadi', 'trex', 'v20', 'vespa'
+]
 
 
 def _deduce_instrument_name(f: Any) -> Optional[str]:
@@ -45,7 +47,9 @@ def _function_name(f: Callable) -> str:
     return f.__name__
 
 
-def log_call(func: Optional[Callable] = None, *, instrument: Optional[str] = None,
+def log_call(func: Optional[Callable] = None,
+             *,
+             instrument: Optional[str] = None,
              level: int = logging.INFO):
     """Decorator that logs a message every time the function is called.
 
@@ -75,34 +79,51 @@ def set_level_all(logger: logging.Logger, level: int):
         handler.setLevel(level)
 
 
-def _handle_same_as_scipp(logger: logging.Logger):
-    for handler in list(logger.handlers):
-        logger.removeHandler(handler)
-    for handler in sc.get_logger().handlers:
-        logger.addHandler(handler)
+def _make_stream_handler(level: int) -> logging.StreamHandler:
+    handler = logging.StreamHandler()
+    handler.setLevel(max(level, logging.WARNING))
+    handler.setFormatter(
+        logging.Formatter('[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
+                          datefmt='%Y-%m-%dT%H:%M:%S'))
+    return handler
 
 
-def _configure_3rd_party(logger: logging.Logger, level: int):
-    _handle_same_as_scipp(logger)
-    set_level_all(logger, level)
+def _configure_root(level, reset):
+    root = logging.getLogger()
+    if reset:
+        for handler in root.handlers:
+            root.removeHandler(handler)
+
+    _configure_logger(root, level)
 
 
-def configure(level: int = logging.INFO):
+def _configure_logger(logger: logging.Logger, level: int):
+    logger.addHandler(_make_stream_handler(level))
+    logger.setLevel(level)
+    # TODO file
+    # TODO make it work when not in Jupyter
+    logger.addHandler(sc.logging.get_widget_handler())
+
+
+def configure(level: int = logging.INFO,
+              root: Union[bool, Literal['yes', 'no', 'overwrite']] = False):
     """Set up logging for the ess package.
 
     This function is meant as a helper for application (or notebook) developers.
-    It configures the loggers of ess, scippneutron, scipp, and some third party packages.
+    It configures the loggers of ess, scippneutron, scipp, and some
+    third party packages.
     Calling it from a library can thus mess up a user's setup.
+
+    TODO details
     """
+    if root is True or root in ('yes', 'overwrite'):
+        _configure_root(level, reset=root == 'overwrite')
+    # TODO don't configure twice -> update scipp
+    _configure_logger(sc.get_logger(), level)
     import pooch
-
-    set_level_all(sc.get_logger(), level)
-
-    _configure_3rd_party(pooch.get_logger(), level)
+    _configure_logger(pooch.get_logger(), level)
     # TODO mantid's own config
-    _configure_3rd_party(logging.getLogger('Mantid'), level)
-
-    # TODO file, console (stdlog or stderr?)
+    _configure_logger(logging.getLogger('Mantid'), level)
 
 
 def greet():
@@ -110,5 +131,5 @@ def greet():
     # TODO mantid? what if not used in workflow?
     # TODO add scn.greet()?
     from . import __version__
-    get_logger().info('ESS v%s\nscippneutron v%s\nscipp v%s',
-                      __version__, scn.__version__, sc.__version__)
+    get_logger().info('ESS v%s\nscippneutron v%s\nscipp v%s', __version__,
+                      scn.__version__, sc.__version__)
