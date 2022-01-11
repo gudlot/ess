@@ -8,5 +8,6 @@ except ImportError:
     pass
 
 from . import amor
+from . import logging
 from . import reflectometry
 from . import wfm
