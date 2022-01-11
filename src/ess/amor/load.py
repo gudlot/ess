@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from typing import Optional
+import warnings
 import scipp as sc
 import scippneutron as scn
 from .beamline import make_beamline
-import warnings
+from ..logging import get_logger
 
 
 def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
@@ -34,10 +35,14 @@ def load(filename,
     """
     Loader for a single Amor data file.
 
+    :param filename: Path of the file to load.
     :param beamline: A dict defining the beamline parameters.
     :param disable_warnings: Do not show warnings from file loading if `True`.
         Default is `True`.
     """
+    get_logger('amor').info(
+        "Loading '%s' as an Amor NeXus file",
+        filename.filename if hasattr(filename, 'filename') else filename)
     if disable_warnings:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
