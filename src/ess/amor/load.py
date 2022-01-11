@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+from typing import Optional
 import scipp as sc
 import scippneutron as scn
 from .beamline import make_beamline
@@ -28,7 +29,7 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
 
 
 def load(filename,
-         beamline: dict = make_beamline(),
+         beamline: Optional[dict] = None,
          disable_warnings: bool = True) -> sc.DataArray:
     """
     Loader for a single Amor data file.
@@ -53,6 +54,7 @@ def load(filename,
     data.coords['tof'] = sc.to_unit(data.coords['tof'], 'us', copy=False)
 
     # Add beamline parameters
+    beamline = make_beamline() if beamline is None else beamline
     for key, value in beamline.items():
         data.coords[key] = value
 
