@@ -5,6 +5,7 @@
 import functools
 import logging
 import inspect
+from os import PathLike
 from typing import Any, Callable, Literal, Optional, Union
 
 import scipp as sc
@@ -76,40 +77,55 @@ def log_call(func: Optional[Callable] = None,
     return deco(func)
 
 
-def set_level_all(logger: logging.Logger, level: int):
+def set_level_all(logger: logging.Logger, level: Union[str, int]):
     """Sets a log level for a logger and all its handlers."""
     logger.setLevel(level)
     for handler in logger.handlers:
         handler.setLevel(level)
 
 
-def _make_stream_handler(level: int) -> logging.StreamHandler:
+def _make_stream_handler(level: Union[str, int]) -> logging.StreamHandler:
     handler = logging.StreamHandler()
-    handler.setLevel(max(level, logging.WARNING))
+    handler.setLevel(level)
     handler.setFormatter(
         logging.Formatter('[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
                           datefmt='%Y-%m-%dT%H:%M:%S'))
     return handler
 
 
-def _configure_root(level, reset):
+# TODO share handler?
+def _make_file_handler(filename: Union[str, PathLike],
+                       level: Union[str, int]) -> logging.FileHandler:
+    handler = logging.FileHandler(filename, mode='w')
+    handler.setLevel(level)
+    handler.setFormatter(
+        logging.Formatter('[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
+                          datefmt='%Y-%m-%dT%H:%M:%S'))
+    return handler
+
+
+def _configure_root(level, filename, reset):
     root = logging.getLogger()
     if reset:
         for handler in root.handlers:
             root.removeHandler(handler)
 
-    _configure_logger(root, level)
+    _configure_logger(root, filename, level)
 
 
-def _configure_logger(logger: logging.Logger, level: int):
+# TODO separate levels for handlers
+def _configure_logger(logger: logging.Logger, filename: Optional[Union[str, PathLike]],
+                      level: Union[str, int]):
     logger.addHandler(_make_stream_handler(level))
-    logger.setLevel(level)
-    # TODO file
+    if filename is not None:
+        logger.addHandler(_make_file_handler(filename, level))
     # TODO make it work when not in Jupyter
     logger.addHandler(sc.logging.get_widget_handler())
+    logger.setLevel(level)
 
 
-def configure(level: int = logging.INFO,
+def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
+              level: Union[str, int] = logging.INFO,
               root: Union[bool, Literal['yes', 'no', 'overwrite']] = False):
     """Set up logging for the ess package.
 
@@ -121,13 +137,13 @@ def configure(level: int = logging.INFO,
     TODO details
     """
     if root is True or root in ('yes', 'overwrite'):
-        _configure_root(level, reset=root == 'overwrite')
+        _configure_root(level, filename, reset=root == 'overwrite')
     # TODO don't configure twice -> update scipp
-    _configure_logger(sc.get_logger(), level)
+    _configure_logger(sc.get_logger(), filename, level)
     import pooch
-    _configure_logger(pooch.get_logger(), level)
+    _configure_logger(pooch.get_logger(), filename, level)
     # TODO mantid's own config
-    _configure_logger(logging.getLogger('Mantid'), level)
+    _configure_logger(logging.getLogger('Mantid'), filename, level)
 
 
 def greet():
