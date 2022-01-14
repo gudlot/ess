@@ -130,6 +130,12 @@ def greet():
     """Log a message showing the versions of important packages."""
     # TODO mantid? what if not used in workflow?
     # TODO add scn.greet()?
+    # Import here so we don't import from a partially built package.
     from . import __version__
-    get_logger().info('ESS v%s\nscippneutron v%s\nscipp v%s', __version__,
-                      scn.__version__, sc.__version__)
+    get_logger().info(
+        '''ess: %s (https://scipp.github.io/ess/)
+scippneutron: %s (https://scipp.github.io/scippneutron/)
+scipp: %s (https://scipp.github.io/)''', __version__, scn.__version__, sc.__version__)
+
+
+# TODO store file name in datasets?
