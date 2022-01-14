@@ -3,13 +3,16 @@
 # @author Jan-Lukas Wynen
 
 import functools
+import logging.config
 import logging
 import inspect
+import re
 from os import PathLike
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Callable, Literal, MutableMapping, Optional, Union
 
 import scipp as sc
 import scippneutron as scn
+import structlog
 
 
 def get_logger(instrument: Optional[str] = None) -> logging.Logger:
@@ -124,6 +127,30 @@ def _configure_logger(logger: logging.Logger, filename: Optional[Union[str, Path
     logger.setLevel(level)
 
 
+def _thread_name_abbreviator(logger: logging.Logger, method_name: str,
+                             event_dict: MutableMapping[str, Any]):
+    name = event_dict['thread_name']
+    if name == 'MainThread':
+        event_dict['thread_name'] = '0'
+    else:
+        match = re.match(r'Thread-(\d+)', name)
+        if match:
+            event_dict['thread_name'] = match[1]
+    return event_dict
+
+
+def _key_value_inserter(logger, method_name, event_dict):
+    aux = dict(event_dict)
+    del aux['timestamp']
+    del aux['level']
+    del aux['logger']
+    del aux['event']
+    rend = structlog.processors.KeyValueRenderer()(logger, method_name, aux)
+    if rend:
+        event_dict['event'] += ' ' + rend
+    return event_dict
+
+
 def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
               level: Union[str, int] = logging.INFO,
               root: Union[bool, Literal['yes', 'no', 'overwrite']] = False):
@@ -136,6 +163,85 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
 
     TODO details
     """
+    timestamper = structlog.processors.TimeStamper(fmt='%Y-%m-%dT%H:%M:%S')
+    callsite_param_adder = structlog.processors.CallsiteParameterAdder(
+        {structlog.processors.CallsiteParameter.THREAD_NAME})
+    foreign_pre_chain = [
+        timestamper,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.ExtraAdder(),
+        callsite_param_adder,
+        _thread_name_abbreviator,
+    ]
+    logging.config.dictConfig({
+        'version': 1,
+        'disable_existing_loggers': False,
+        'incremental': False,  # TODO good choice?
+        'formatters': {
+            'plain': {
+                '()': 'logging.Formatter',
+                # TODO thread?
+                'format': '[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
+                'datefmt': '%Y-%m-%dT%H:%M:%S',
+            },
+            'json': {
+                '()':
+                structlog.stdlib.ProcessorFormatter,
+                'processors': [
+                    # TODO currently prints both logging and structlog fields
+                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                    structlog.processors.JSONRenderer(),
+                ],
+                'foreign_pre_chain':
+                foreign_pre_chain,
+            },
+        },
+        'handlers': {
+            'stream': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'plain',
+            },
+            'json_file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'formatter': 'json',
+                'filename': 'test.log.json',
+            },
+        },
+        'loggers': {
+            '': {
+                'handlers': ['stream', 'json_file'],
+                'level': 'INFO',
+                'propagate': True,
+            }
+        }
+    })
+    structlog.configure(
+        processors=[
+            structlog.stdlib.filter_by_level,
+            # add timestamp, level, name even though logging handles them separately
+            # need them for the JSON formatter
+            timestamper,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            callsite_param_adder,
+            # _thread_name_abbreviator,
+            # structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+            _key_value_inserter,
+            structlog.stdlib.render_to_log_kwargs,
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
+
+    return
     if root is True or root in ('yes', 'overwrite'):
         _configure_root(level, filename, reset=root == 'overwrite')
     # TODO don't configure twice -> update scipp
@@ -158,4 +264,5 @@ scippneutron: %s (https://scipp.github.io/scippneutron/)
 scipp: %s (https://scipp.github.io/)''', __version__, scn.__version__, sc.__version__)
 
 
+# TODO time zone in logs
 # TODO store file name in datasets?
