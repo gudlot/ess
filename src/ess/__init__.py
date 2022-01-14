@@ -8,6 +8,7 @@ except ImportError:
     __version__ = "0.0.0-unknown"
 
 from . import amor
+from .logging import get_logger
 from . import logging
 from . import reflectometry
 from . import wfm
