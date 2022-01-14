@@ -49,6 +49,7 @@ def _function_name(f: Callable) -> str:
 
 def log_call(func: Optional[Callable] = None,
              *,
+             message: str = None,
              instrument: Optional[str] = None,
              level: int = logging.INFO):
     """Decorator that logs a message every time the function is called.
@@ -62,7 +63,10 @@ def log_call(func: Optional[Callable] = None,
 
         @functools.wraps(f)
         def impl(*args, **kwargs):
-            get_logger(inst).log(level, 'Calling %s', _function_name(f))
+            if message is not None:
+                get_logger(inst).log(level, message)
+            else:
+                get_logger(inst).log(level, 'Calling %s', _function_name(f))
             return f(*args, **kwargs)
 
         return impl
