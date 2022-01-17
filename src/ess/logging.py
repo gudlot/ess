@@ -99,7 +99,7 @@ def _make_formatter(show_thread: bool, show_process: bool) -> logging.Formatter:
     fmt_pre = '[%(asctime)s] %(levelname)-8s '
     fmt_post = '<%(name)s> : %(message)s'
     fmt = fmt_pre + ('{' + fmt_proc_thread + '} ' if fmt_proc_thread else '') + fmt_post
-    return logging.Formatter(fmt, datefmt='%Y-%m-%dT%H:%M:%S')
+    return logging.Formatter(fmt, datefmt='%Y-%m-%dT%H:%M:%S%z')
 
 
 def _make_stream_handler(level: Union[str, int], show_thread: bool,
