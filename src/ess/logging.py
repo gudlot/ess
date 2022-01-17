@@ -85,27 +85,54 @@ def set_level_all(logger: logging.Logger, level: Union[str, int]):
         handler.setLevel(level)
 
 
-def _make_stream_handler(level: Union[str, int]) -> logging.StreamHandler:
+def _make_formatter(show_thread: bool, show_process: bool) -> logging.Formatter:
+    fmt_proc = '%(processName)s' if show_process else ''
+    fmt_thread = '%(threadName)s' if show_thread else ''
+    if show_process:
+        fmt_proc_thread = fmt_proc
+        if show_thread:
+            fmt_proc_thread += ',' + fmt_thread
+    elif show_thread:
+        fmt_proc_thread = fmt_thread
+    else:
+        fmt_proc_thread = ''
+    fmt_pre = '[%(asctime)s] %(levelname)-8s '
+    fmt_post = '<%(name)s> : %(message)s'
+    fmt = fmt_pre + ('{' + fmt_proc_thread + '} ' if fmt_proc_thread else '') + fmt_post
+    return logging.Formatter(fmt, datefmt='%Y-%m-%dT%H:%M:%S')
+
+
+def _make_stream_handler(level: Union[str, int], show_thread: bool,
+                         show_process: bool) -> logging.StreamHandler:
     handler = logging.StreamHandler()
     handler.setLevel(level)
-    handler.setFormatter(
-        logging.Formatter('[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
-                          datefmt='%Y-%m-%dT%H:%M:%S'))
+    handler.setFormatter(_make_formatter(show_thread, show_process))
     return handler
 
 
-def _make_file_handler(filename: Union[str, PathLike],
-                       level: Union[str, int]) -> logging.FileHandler:
+def _make_file_handler(filename: Union[str, PathLike], level: Union[str, int],
+                       show_thread: bool, show_process: bool) -> logging.FileHandler:
     handler = logging.FileHandler(filename, mode='w')
     handler.setLevel(level)
-    handler.setFormatter(
-        logging.Formatter('[%(asctime)s] <%(name)s> %(levelname)-8s : %(message)s',
-                          datefmt='%Y-%m-%dT%H:%M:%S'))
+    handler.setFormatter(_make_formatter(show_thread, show_process))
     return handler
 
 
 def _make_widget_handler(level: Union[str, int]) -> sc.logging.WidgetHandler:
     return sc.logging.WidgetHandler(level=level, widget=sc.logging.LogWidget())
+
+
+def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[str,
+                                                                               int],
+                   stream_level: Union[str, int], widget_level: Union[str, int],
+                   show_thread: bool, show_process: bool) -> List[logging.Handler]:
+    handlers = [_make_stream_handler(stream_level, show_thread, show_process)]
+    if filename is not None:
+        handlers.append(
+            _make_file_handler(filename, file_level, show_thread, show_process))
+    if sc.utils.running_in_jupyter():
+        handlers.append(_make_widget_handler(widget_level))
+    return handlers
 
 
 def _configure_root(handlers: List[logging.Handler], level: Union[str, int], reset):
@@ -126,28 +153,6 @@ def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
     logger.setLevel(level)
 
 
-def _thread_name_abbreviator(logger: logging.Logger, method_name: str,
-                             event_dict: MutableMapping[str, Any]):
-    name = event_dict['thread_name']
-    if name == 'MainThread':
-        event_dict['thread_name'] = '0'
-    else:
-        match = re.match(r'Thread-(\d+)', name)
-        if match:
-            event_dict['thread_name'] = match[1]
-    return event_dict
-
-def _make_handlers(filename: Optional[Union[str, PathLike]],
-                   file_level: Union[str, int], stream_level: Union[str, int],
-                   widget_level: Union[str, int]) -> List[logging.Handler]:
-    handlers = [_make_stream_handler(stream_level)]
-    if filename is not None:
-        handlers.append(_make_file_handler(filename, file_level))
-    if sc.utils.running_in_jupyter():
-        handlers.append(_make_widget_handler(widget_level))
-    return handlers
-
-
 def _base_level(levels: List[Union[str, int]]) -> int:
     return min((logging.getLevelName(level) if isinstance(level, str) else level
                 for level in levels))
@@ -157,6 +162,8 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
               file_level: Union[str, int] = logging.INFO,
               stream_level: Union[str, int] = logging.WARNING,
               widget_level: Union[str, int] = logging.INFO,
+              show_thread: bool = False,
+              show_process: bool = False,
               root: Union[bool, Literal['yes', 'no', 'overwrite']] = False):
     """Set up logging for the ess package.
 
@@ -167,7 +174,8 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
 
     TODO details
     """
-    handlers = _make_handlers(filename, file_level, stream_level, widget_level)
+    handlers = _make_handlers(filename, file_level, stream_level, widget_level,
+                              show_thread, show_process)
     base_level = _base_level([file_level, stream_level, widget_level])
     if root is True or root in ('yes', 'overwrite'):
         _configure_root(handlers, base_level, reset=root == 'overwrite')
