@@ -193,6 +193,7 @@ def greet():
     # Import here so we don't import from a partially built package.
     from . import __version__
     get_logger().info(
-        '''ess: %s (https://scipp.github.io/ess/)
+        '''Software Versions:
+ess: %s (https://scipp.github.io/ess/)
 scippneutron: %s (https://scipp.github.io/scippneutron/)
 scipp: %s (https://scipp.github.io/)''', __version__, scn.__version__, sc.__version__)
