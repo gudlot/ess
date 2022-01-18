@@ -57,8 +57,8 @@ def _stitch_dense_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
 def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim: str,
                        bins: Union[int, sc.Variable]) -> Union[sc.DataArray, dict]:
 
-    edges = sc.flatten(sc.transpose(sc.concatenate(frames["time_min"].data,
-                                                   frames["time_max"].data, 'dummy'),
+    edges = sc.flatten(sc.transpose(sc.concat(
+        [frames["time_min"].data, frames["time_max"].data], 'dummy'),
                                     dims=['frame', 'dummy']),
                        to=dim)
 
@@ -78,10 +78,10 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
     binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
                                   2).astype(sc.dtype.bool)
 
-    new_edges = sc.concatenate(
+    new_edges = sc.concat([
         (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,
-        (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data,
-        new_dim)
+        (frames["time_max"]["frame", -1] - frames["time_correction"]["frame", -1]).data
+    ], new_dim)
     return sc.bin(binned, edges=[new_edges], erase=erase)
 
 

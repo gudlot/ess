@@ -43,7 +43,7 @@ def test_simple_case_any_naming():
     grouped = groupby2D(ds, nx_target=5, ny_target=5, x='w', y='v', z='u')
     assert grouped['a'].shape == [2, 5, 5]
     projection = sc.array(dims=['v', 'w'], values=np.ones((5, 5))) * 4
-    expected_data = sc.concatenate(projection, projection, dim='u')
+    expected_data = sc.concat([projection, projection], dim='u')
     assert sc.all(
         sc.isclose(grouped['a'].data, expected_data, atol=1e-14 * sc.units.one)).value
 
