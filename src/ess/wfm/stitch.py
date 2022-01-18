@@ -76,7 +76,7 @@ def _stitch_event_data(item: sc.DataArray, frames: sc.Dataset, dim: str, new_dim
         erase = [dim]
 
     binned.masks['frame_gaps'] = (sc.arange(dim, 2 * frames.sizes["frame"] - 1) %
-                                  2).astype(sc.dtype.bool)
+                                  2).astype(bool)
 
     new_edges = sc.concat([
         (frames["time_min"]["frame", 0] - frames["time_correction"]["frame", 0]).data,

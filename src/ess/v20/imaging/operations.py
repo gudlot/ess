@@ -47,7 +47,7 @@ def mask_from_adj_pixels(mask):
                         shape=[
                             8,
                         ] + mask.shape,
-                        dtype=sc.dtype.bool)
+                        dtype=bool)
         flip['neighbor', 0] = _shift(mask, "x", True, fill)
         flip['neighbor', 1] = _shift(mask, "x", False, fill)
         flip['neighbor', 2] = _shift(mask, "y", True, fill)
