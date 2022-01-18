@@ -35,7 +35,8 @@ Owen Arnold :sup:`b, c`\ ,
 Simon Heybrock :sup:`a`\ ,
 Andrew McCluskey :sup:`a`\ ,
 Samuel Jones :sup:`b`\ ,
-and Neil Vaytet :sup:`a`\
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
 
 v0.1.0 (September 2021)
 -----------------------
