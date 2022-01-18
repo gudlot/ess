@@ -14,5 +14,5 @@ jobs:
   deploy:
     needs: build
     uses: scipp/ess/.github/workflows/deploy.yml@anaconda_not_found
-      secrets:
-        anaconda_token: ${{ secrets.ANACONDATOKEN }}
+    secrets:
+      anaconda_token: ${{ secrets.ANACONDATOKEN }}
