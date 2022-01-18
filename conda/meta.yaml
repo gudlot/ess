@@ -13,7 +13,7 @@ requirements:
     - ipywidgets
     - matplotlib
     - pooch
-    - scippneutron>=0.4.1
+    - scippneutron=0.4.1
     - scipy
     - tifffile
 
