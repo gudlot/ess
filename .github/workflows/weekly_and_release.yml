@@ -8,8 +8,8 @@ on:
 
 jobs:
   build:
-    uses: scipp/ess/.github/workflows/build.yml@main
+    uses: scipp/ess/.github/workflows/build.yml@fix_anaconda_upload
 
   deploy:
     needs: build
-    uses: scipp/ess/.github/workflows/deploy.yml@main
+    uses: scipp/ess/.github/workflows/deploy.yml@fix_anaconda_upload
