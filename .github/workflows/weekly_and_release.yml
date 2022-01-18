@@ -7,6 +7,10 @@ on:
     - cron: "0 2 * * 4"
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
+
 jobs:
   build:
     uses: scipp/ess/.github/workflows/build.yml@main
