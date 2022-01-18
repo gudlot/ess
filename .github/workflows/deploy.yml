@@ -2,6 +2,13 @@ name: Deploy
 
 on:
   workflow_call:
+    secrets:
+      anaconda_token:
+        required: true
+
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
 
 jobs:
   deploy:
@@ -9,11 +16,11 @@ jobs:
     env:
       conda_label: ${{ startsWith(github.ref, 'refs/tags/') && 'main' || 'dev' }}
     steps:
-      - uses: actions/checkout@v2  # Need to checkout repo so github-pages-deploy-action works
-      - uses: actions/download-artifact@v2
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install -c conda-forge --yes anaconda-client
-      - run: anaconda --token ${{ secrets.ANACONDATOKEN }} upload --user scipp --label ${{ env.conda_label }} $(ls conda-package-*/*/*.tar.bz2)
+      - uses: actions/checkout@v2  # Need to checkout repo so github-pages-deploy-action works
+      - uses: actions/download-artifact@v2
+      - run: anaconda --token ${{ secrets.anaconda_token }} upload --user scipp --label ${{ env.conda_label }} $(ls conda-package-*/*/*.tar.bz2)
 
       - uses: JamesIves/github-pages-deploy-action@v4.2.2
         with:

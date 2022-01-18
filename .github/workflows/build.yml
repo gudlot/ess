@@ -3,6 +3,10 @@ name: Build
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
+
 jobs:
   formatting:
     runs-on: ubuntu-latest
