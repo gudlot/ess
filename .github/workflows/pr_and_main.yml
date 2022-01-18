@@ -12,4 +12,4 @@ concurrency:
 
 jobs:
   build:
-    uses: scipp/ess/.github/workflows/build.yml@fix_anaconda_upload
+    uses: scipp/ess/.github/workflows/build.yml@main
