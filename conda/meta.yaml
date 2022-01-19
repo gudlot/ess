@@ -13,7 +13,7 @@ requirements:
     - ipywidgets
     - matplotlib
     - pooch
-    - scippneutron>=0.4.1
+    - scippneutron>=0.4.2
     - scipy
     - tifffile
 
@@ -24,6 +24,7 @@ test:
     - ess.amor
     - ess.reflectometry
   requires:
+    - ipympl
     - pytest
     - pandoc
     - pythreejs
@@ -43,7 +44,7 @@ build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
   noarch: python
   script:
-    - python setup.py install
+    - pip install .
 
 about:
   home: https://github.com/scipp/ess

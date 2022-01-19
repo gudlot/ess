@@ -3,6 +3,10 @@ name: Build
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash -l {0}  # required for conda env
+
 jobs:
   formatting:
     runs-on: ubuntu-latest
@@ -26,8 +30,8 @@ jobs:
         with:
           fetch-depth: 0  # history required so cmake can determine version
       - uses: conda-incubator/setup-miniconda@v2
-      - run: conda install --yes conda-build
-      - run: conda build --channel conda-forge --channel scipp --no-anaconda-upload --override-channels --output-folder conda/package conda
+      - run: conda install --channel conda-forge --yes conda-build mamba boa
+      - run: conda mambabuild --channel conda-forge --channel scipp --no-anaconda-upload --override-channels --output-folder conda/package conda
 
       - uses: actions/upload-artifact@v2
         with:

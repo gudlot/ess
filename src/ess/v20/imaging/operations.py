@@ -8,9 +8,9 @@ def _shift(var, dim, forward, out_of_bounds):
     fill = var[dim, 0:1].copy()
     fill.values = np.full_like(fill.values, out_of_bounds)
     if forward:
-        return sc.concatenate(fill, var[dim, :-1], dim)
+        return sc.concat([fill, var[dim, :-1]], dim)
     else:
-        return sc.concatenate(var[dim, 1:], fill, dim)
+        return sc.concat([var[dim, 1:], fill], dim)
 
 
 def mask_from_adj_pixels(mask):
@@ -47,7 +47,7 @@ def mask_from_adj_pixels(mask):
                         shape=[
                             8,
                         ] + mask.shape,
-                        dtype=sc.dtype.bool)
+                        dtype=bool)
         flip['neighbor', 0] = _shift(mask, "x", True, fill)
         flip['neighbor', 1] = _shift(mask, "x", False, fill)
         flip['neighbor', 2] = _shift(mask, "y", True, fill)

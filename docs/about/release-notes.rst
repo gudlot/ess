@@ -3,8 +3,33 @@
 Release Notes
 =============
 
-v0.2.0 (unreleased)
+v0.3.0 (unreleased)
 -------------------
+
+Features
+~~~~~~~~
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Bugfixes
+~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+Stability, Maintainability, and Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
+v0.2.0 (January 2022)
+---------------------
 
 Features
 ~~~~~~~~
@@ -35,7 +60,8 @@ Owen Arnold :sup:`b, c`\ ,
 Simon Heybrock :sup:`a`\ ,
 Andrew McCluskey :sup:`a`\ ,
 Samuel Jones :sup:`b`\ ,
-and Neil Vaytet :sup:`a`\
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
 
 v0.1.0 (September 2021)
 -----------------------
