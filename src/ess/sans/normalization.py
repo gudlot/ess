@@ -27,12 +27,17 @@ def subtract_background_and_rebin(data, wavelength_bins, threshold):
     return out
 
 
-def transmission_fraction(data_incident, data_transmission, direct_incident,
-                          direct_transmission):
+def transmission_fraction(data_incident_monitor, data_transmission_monitor,
+                          direct_incident_monitor, direct_transmission_monitor):
     """
     Approximation based on equations in CalculateTransmission documentation
     p = \frac{S_T}{D_T}\frac{D_I}{S_I}
-    This is equivalent to mantid.CalculateTransmission without fitting
+    This is equivalent to mantid.CalculateTransmission without fitting.
+
+    TODO: It seems we are always multiplying this by data_incident_monitor to compute
+    the normalization term. We could consider just returning
+    data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor
     """
 
-    return (data_transmission / direct_transmission) * (direct_incident / data_incident)
+    return (data_transmission_monitor / direct_transmission_monitor) * (
+        direct_incident_monitor / data_incident_monitor)
