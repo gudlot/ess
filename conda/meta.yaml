@@ -24,6 +24,7 @@ test:
     - ess.amor
     - ess.reflectometry
   requires:
+    - ipympl
     - pytest
     - pandoc
     - pythreejs
