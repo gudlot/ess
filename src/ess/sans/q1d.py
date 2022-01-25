@@ -17,7 +17,11 @@ def q1d(data,
         direct_beam,
         wavelength_bins,
         q_bins,
-        monitor_background_threshold=sc.scalar(30.0, unit='counts')):
+        number_of_wavelength_bands=1,
+        monitor_background_threshold=sc.scalar(30.0, unit='counts'),
+        histogram_output=True):
+
+    logger = sc.get_logger()
 
     # 1. Convert to wavelength =========================================================
 
@@ -82,10 +86,9 @@ def q1d(data,
     if interpolate_direct_beam:
         func = interp1d(sc.values(direct_beam), 'wavelength')
         direct_beam = func(wavelength_bins, midpoints=True)
-        logger = sc.get_logger()
-        logger.warning(
-            'WARNING: An interpolation was performed on the direct_beam function. '
-            'The variances in the direct_beam function have been ignored.')
+        logger.warning('ess.sans.q1d: An interpolation was performed on the '
+                       'direct_beam function. The variances in the direct_beam '
+                       'function have been ignored.')
 
     # Compute denominator and copy coords needed for conversion to Q
     denominator = (solid_angle * direct_beam * monitors_wav['data_incident_monitor'] *
@@ -97,7 +100,29 @@ def q1d(data,
     denominator.coords['wavelength'] = to_bin_centers(denominator.coords['wavelength'],
                                                       dim='wavelength')
 
-    # 3. Convert from wavelength to Q ==================================================
+    # 3. Make wavelength bands if necessary ============================================
+
+    if number_of_wavelength_bands > 1:
+        if wavelength_bins.sizes['wavelength'] % number_of_wavelength_bands != 0:
+            logger.warning('ess.sans.q1d: The number of wavelength bins is not an '
+                           'integer multiple of the number of wavelength bands.')
+        data = sc.fold(data,
+                       dim='wavelength',
+                       sizes={
+                           'band': number_of_wavelength_bands,
+                           'wavelength': 1
+                       })
+        denominator = sc.fold(denominator,
+                              dim='wavelength',
+                              sizes={
+                                  'band':
+                                  number_of_wavelength_bands,
+                                  'wavelength':
+                                  wavelength_bins.sizes['wavelength'] //
+                                  number_of_wavelength_bands
+                              })
+
+    # 4. Convert from wavelength to Q ==================================================
 
     data = data.transform_coords("Q", graph=graph)
     q_boundaries = sc.concat([q_bins.min(), q_bins.max()], dim='Q')
@@ -108,7 +133,9 @@ def q1d(data,
     den_hist = sc.histogram(den_q, bins=q_bins)
     den_q_summed = den_hist.sum('spectrum')
 
-    # 4. Normalize =====================================================================
+    # 5. Normalize =====================================================================
 
     normalized = q_summed.bins / sc.lookup(func=den_q_summed, dim='Q')
-    return sc.histogram(normalized, bins=q_bins)
+    if histogram_output:
+        normalized = sc.histogram(normalized, bins=q_bins)
+    return normalized
