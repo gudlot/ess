@@ -106,7 +106,12 @@ def q1d(data,
         if wavelength_bins.sizes['wavelength'] % number_of_wavelength_bands != 0:
             logger.warning('ess.sans.q1d: The number of wavelength bins is not an '
                            'integer multiple of the number of wavelength bands.')
-        data = sc.fold(data,
+        wavelength_bands = sc.linspace(dim='wavelength',
+                                       start=wavelength_bins.min().value,
+                                       stop=wavelength_bins.max().value,
+                                       num=number_of_wavelength_bands + 1,
+                                       unit=wavelength_bins.unit)
+        data = sc.fold(sc.bin(data, edges=[wavelength_bands]),
                        dim='wavelength',
                        sizes={
                            'band': number_of_wavelength_bands,
