@@ -4,7 +4,7 @@
 import scipp as sc
 
 
-def smooth_data(variable, dim=None, NPoints=3):
+def smooth_data(variable, *, dim, NPoints=3):
     """
     Function that smooths data by assigning the value of each point to the
     mean of the values from surrounding points and itself. The number of points
@@ -25,13 +25,15 @@ def smooth_data(variable, dim=None, NPoints=3):
             The number of points to use in the mean (odd number)
     """
 
-    if dim is None:
-        raise ValueError("smooth_data was not given a dim to smooth.")
-
     if NPoints < 3:
         raise ValueError("smooth_data needs NPoints of 3 or higher.")
 
-    data_length = dict(zip(variable.dims, variable.shape))[dim]
+    if variable.variances is not None:
+        # TODO log properly
+        print('WARNING ignoring variances')
+        variable = sc.variances(variable)
+
+    data_length = variable.sizes[dim]
     out = variable.copy()  # preallocate output variable
 
     hr = NPoints // 2  # half range rounded down
