@@ -2,9 +2,9 @@
 # Copyright (c) 2021 Scipp contributors (https://github.com/scipp)
 
 import scipp as sc
-from scipp.constants import m_n, h, pi
+from scipp.constants import m_n, h
 from scippneutron.tof import conversions
-from scippneutron.core.conversions import _elem_dtype, _elem_unit
+from scippneutron.core.conversions import _elem_unit
 
 
 def two_theta(gravity, wavelength, incident_beam, scattered_beam):

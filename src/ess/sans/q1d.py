@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import scipp as sc
 from scipp.constants import g
-import scippneutron as scn
 from . import conversions
 from . import normalization
 from ..wfm.tools import to_bin_centers, to_bin_edges
