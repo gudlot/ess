@@ -8,7 +8,6 @@ source:
 requirements:
   build:
     - setuptools
-    - mantid-framework
   run:
     - astropy
     - ipywidgets
@@ -26,6 +25,7 @@ test:
     - ess.reflectometry
   requires:
     - ipympl
+    - mantid-framework
     - pytest
     - pandoc
     - pythreejs
