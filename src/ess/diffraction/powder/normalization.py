@@ -8,7 +8,7 @@ from .smoothing import smooth_data
 from .tools import unwrap_attr
 
 
-def normalize_by_monitor(data: sc.DataArray, monitor: str,
+def normalize_by_monitor(data: sc.DataArray, *, monitor: str,
                          wavelength_edges: sc.Variable) -> sc.DataArray:
     """
 
@@ -28,7 +28,9 @@ def normalize_by_monitor(data: sc.DataArray, monitor: str,
 
     mon = sc.rebin(mon, 'wavelength', wavelength_edges)
     # TODO why does this produce different values?
-    # mi, ma, _ = wavelength_binning
-    # mon = mon['wavelength', mi*sc.units.angstrom:ma*sc.units.angstrom]
+    #   How do we know what is the correct binning?
+    # mi = wavelength_edges.min()
+    # ma = wavelength_edges.max()
+    # mon = mon['wavelength', mi:ma]
 
     return data.bins / sc.lookup(func=mon, dim='wavelength')
