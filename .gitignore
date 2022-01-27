@@ -1,7 +1,6 @@
 # Build artifacts
 build
 *.pyc
-_fixed_version.py
 docs/generated
 ess.egg-info
 src/ess/_version.py
