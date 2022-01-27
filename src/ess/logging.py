@@ -95,7 +95,8 @@ def default_loggers_to_configure() -> List[logging.Logger]:
     ]
 
 
-def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
+def configure(*,
+              filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
               file_level: Union[str, int] = logging.INFO,
               stream_level: Union[str, int] = logging.WARNING,
               widget_level: Union[str, int] = logging.INFO,
@@ -121,6 +122,17 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
     for logger in loggers:
         _configure_logger(logger, handlers, base_level)
     # TODO mantid's own config
+
+
+def configure_workflow(workflow_name: Optional[str]=None, *, display:bool=True, **kwargs):
+    """
+    TODO
+    """
+    configure(**kwargs)
+    greet()
+    if display:
+        sc.display_logs()
+    return get_logger(workflow_name)
 
 
 def greet():
