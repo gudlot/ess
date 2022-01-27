@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Jan-Lukas Wynen
 
+from copy import copy
 import functools
 import logging.config
 import logging
@@ -85,28 +86,39 @@ def set_level_all(logger: logging.Logger, level: Union[str, int]):
         handler.setLevel(level)
 
 
-def _make_formatter(show_thread: bool, show_process: bool) -> logging.Formatter:
-    fmt_proc = '%(processName)s' if show_process else ''
-    fmt_thread = '%(threadName)s' if show_thread else ''
-    if show_process:
-        fmt_proc_thread = fmt_proc
-        if show_thread:
-            fmt_proc_thread += ',' + fmt_thread
-    elif show_thread:
-        fmt_proc_thread = fmt_thread
-    else:
-        fmt_proc_thread = ''
-    fmt_pre = '[%(asctime)s] %(levelname)-8s '
-    fmt_post = '<%(name)s> : %(message)s'
-    fmt = fmt_pre + ('{' + fmt_proc_thread + '} ' if fmt_proc_thread else '') + fmt_post
-    return logging.Formatter(fmt, datefmt='%Y-%m-%dT%H:%M:%S%z')
+class Formatter(logging.Formatter):
+    """
+    Logging formatter that indents messages and optionally shows threading information.
+    """
+
+    def __init__(self, show_thread: bool, show_process: bool):
+        fmt_proc = '%(processName)s' if show_process else ''
+        fmt_thread = '%(threadName)s' if show_thread else ''
+        if show_process:
+            fmt_proc_thread = fmt_proc
+            if show_thread:
+                fmt_proc_thread += ',' + fmt_thread
+        elif show_thread:
+            fmt_proc_thread = fmt_thread
+        else:
+            fmt_proc_thread = ''
+        fmt_pre = '[%(asctime)s] %(levelname)-8s '
+        fmt_post = '<%(name)s> : %(message)s'
+        fmt = fmt_pre + ('{' + fmt_proc_thread +
+                         '} ' if fmt_proc_thread else '') + fmt_post
+        super().__init__(fmt, datefmt='%Y-%m-%dT%H:%M:%S%z')
+
+    def format(self, record: logging.LogRecord) -> str:
+        record = copy(record)
+        record.msg = '\n    ' + record.msg.replace('\n', '\n    ')
+        return super().format(record)
 
 
 def _make_stream_handler(level: Union[str, int], show_thread: bool,
                          show_process: bool) -> logging.StreamHandler:
     handler = logging.StreamHandler()
     handler.setLevel(level)
-    handler.setFormatter(_make_formatter(show_thread, show_process))
+    handler.setFormatter(Formatter(show_thread, show_process))
     return handler
 
 
@@ -114,7 +126,7 @@ def _make_file_handler(filename: Union[str, PathLike], level: Union[str, int],
                        show_thread: bool, show_process: bool) -> logging.FileHandler:
     handler = logging.FileHandler(filename, mode='w')
     handler.setLevel(level)
-    handler.setFormatter(_make_formatter(show_thread, show_process))
+    handler.setFormatter(Formatter(show_thread, show_process))
     return handler
 
 
@@ -200,10 +212,10 @@ def greet():
     # Import here so we don't import from a partially built package.
     from . import __version__
     msg = f'''Software Versions:
-ess: {__version__} (https://scipp.github.io/ess)
-scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
-scipp: {sc.__version__} (https://scipp.github.io)'''
+  ess: {__version__} (https://scipp.github.io/ess)
+  scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
+  scipp: {sc.__version__} (https://scipp.github.io)'''
     mantid_version = _mantid_version()
     if mantid_version:
-        msg += f'\nMantid: {mantid_version} (https://www.mantidproject.org)'
+        msg += f'\n  Mantid: {mantid_version} (https://www.mantidproject.org)'
     get_logger().info(msg)
