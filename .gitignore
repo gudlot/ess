@@ -13,5 +13,6 @@ src/ess/_version.py
 
 # Caches
 .ipynb_checkpoints
+.mypy_cache
 .virtual_documents
 __pycache__
