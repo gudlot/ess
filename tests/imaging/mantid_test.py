@@ -7,6 +7,7 @@ import numpy as np
 
 
 def mantid_is_available():
+    return False
     try:
         import mantid  # noqa: F401
         return True
