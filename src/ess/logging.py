@@ -24,32 +24,6 @@ def get_logger(instrument: Optional[str] = None) -> logging.Logger:
     return logging.getLogger(name)
 
 
-_INSTRUMENTS = [
-    'amor', 'beer', 'bifrost', 'cspec', 'dream', 'estia', 'freia', 'heimdal', 'loki',
-    'magic', 'miracles', 'nmx', 'odin', 'skadi', 'trex', 'v20', 'vespa'
-]
-
-
-def _deduce_instrument_name(f: Any) -> Optional[str]:
-    # Assumes package name: ess.<instrument>[.subpackage]
-    package = inspect.getmodule(f).__package__
-    components = package.split('.', 2)
-    try:
-        if components[0] == 'ess':
-            candidate = components[1]
-            if candidate in _INSTRUMENTS:
-                return candidate
-    except IndexError:
-        pass
-    return None
-
-
-def _function_name(f: Callable) -> str:
-    if hasattr(f, '__module__'):
-        return f'{f.__module__}.{f.__name__}'
-    return f.__name__
-
-
 def log_call(func: Optional[Callable] = None,
              *,
              message: str = None,
@@ -79,13 +53,6 @@ def log_call(func: Optional[Callable] = None,
     return deco(func)
 
 
-def set_level_all(logger: logging.Logger, level: Union[str, int]):
-    """Sets a log level for a logger and all its handlers."""
-    logger.setLevel(level)
-    for handler in logger.handlers:
-        handler.setLevel(level)
-
-
 class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
@@ -112,6 +79,86 @@ class Formatter(logging.Formatter):
         record = copy(record)
         record.msg = '\n    ' + record.msg.replace('\n', '\n    ')
         return super().format(record)
+
+
+def default_loggers_to_configure() -> List[logging.Logger]:
+    """
+    Return a list of all loggers that get configured by ess by default.
+    """
+    import pooch
+    return [
+        sc.get_logger(),
+        logging.getLogger('Mantid'),
+        pooch.get_logger(),
+    ]
+
+
+def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
+              file_level: Union[str, int] = logging.INFO,
+              stream_level: Union[str, int] = logging.WARNING,
+              widget_level: Union[str, int] = logging.INFO,
+              show_thread: bool = False,
+              show_process: bool = False,
+              loggers: Optional[Sequence[Union[str, logging.Logger]]] = None):
+    """Set up logging for the ess package.
+
+    This function is meant as a helper for application (or notebook) developers.
+    It configures the loggers of ess, scippneutron, scipp, and some
+    third party packages.
+    Calling it from a library can thus mess up a user's setup.
+
+    TODO details
+    """
+    handlers = _make_handlers(filename, file_level, stream_level, widget_level,
+                              show_thread, show_process)
+    base_level = _base_level([file_level, stream_level, widget_level])
+    loggers = {
+        logging.getLogger(logger) if isinstance(logger, str) else logger
+        for logger in (default_loggers_to_configure() if loggers is None else loggers)
+    }
+    for logger in loggers:
+        _configure_logger(logger, handlers, base_level)
+    # TODO mantid's own config
+
+
+def greet():
+    """Log a message showing the versions of important packages."""
+    # Import here so we don't import from a partially built package.
+    from . import __version__
+    msg = f'''Software Versions:
+  ess: {__version__} (https://scipp.github.io/ess)
+  scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
+  scipp: {sc.__version__} (https://scipp.github.io)'''
+    mantid_version = _mantid_version()
+    if mantid_version:
+        msg += f'\n  Mantid: {mantid_version} (https://www.mantidproject.org)'
+    get_logger().info(msg)
+
+
+_INSTRUMENTS = [
+    'amor', 'beer', 'bifrost', 'cspec', 'dream', 'estia', 'freia', 'heimdal', 'loki',
+    'magic', 'miracles', 'nmx', 'odin', 'skadi', 'trex', 'v20', 'vespa'
+]
+
+
+def _deduce_instrument_name(f: Any) -> Optional[str]:
+    # Assumes package name: ess.<instrument>[.subpackage]
+    package = inspect.getmodule(f).__package__
+    components = package.split('.', 2)
+    try:
+        if components[0] == 'ess':
+            candidate = components[1]
+            if candidate in _INSTRUMENTS:
+                return candidate
+    except IndexError:
+        pass
+    return None
+
+
+def _function_name(f: Callable) -> str:
+    if hasattr(f, '__module__'):
+        return f'{f.__module__}.{f.__name__}'
+    return f.__name__
 
 
 def _make_stream_handler(level: Union[str, int], show_thread: bool,
@@ -147,18 +194,6 @@ def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[s
     return handlers
 
 
-def default_loggers_to_configure() -> List[logging.Logger]:
-    """
-    Return a list of all loggers that get configured by ess by default.
-    """
-    import pooch
-    return [
-        sc.get_logger(),
-        logging.getLogger('Mantid'),
-        pooch.get_logger(),
-    ]
-
-
 def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
                       level: Union[str, int]):
     for handler in handlers:
@@ -171,51 +206,9 @@ def _base_level(levels: List[Union[str, int]]) -> int:
                 for level in levels))
 
 
-def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
-              file_level: Union[str, int] = logging.INFO,
-              stream_level: Union[str, int] = logging.WARNING,
-              widget_level: Union[str, int] = logging.INFO,
-              show_thread: bool = False,
-              show_process: bool = False,
-              loggers: Optional[Sequence[Union[str, logging.Logger]]] = None):
-    """Set up logging for the ess package.
-
-    This function is meant as a helper for application (or notebook) developers.
-    It configures the loggers of ess, scippneutron, scipp, and some
-    third party packages.
-    Calling it from a library can thus mess up a user's setup.
-
-    TODO details
-    """
-    handlers = _make_handlers(filename, file_level, stream_level, widget_level,
-                              show_thread, show_process)
-    base_level = _base_level([file_level, stream_level, widget_level])
-    loggers = {
-        logging.getLogger(logger) if isinstance(logger, str) else logger
-        for logger in (default_loggers_to_configure() if loggers is None else loggers)
-    }
-    for logger in loggers:
-        _configure_logger(logger, handlers, base_level)
-    # TODO mantid's own config
-
-
 def _mantid_version() -> Optional[str]:
     try:
         import mantid
         return mantid.__version__
     except ImportError:
         return None
-
-
-def greet():
-    """Log a message showing the versions of important packages."""
-    # Import here so we don't import from a partially built package.
-    from . import __version__
-    msg = f'''Software Versions:
-  ess: {__version__} (https://scipp.github.io/ess)
-  scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
-  scipp: {sc.__version__} (https://scipp.github.io)'''
-    mantid_version = _mantid_version()
-    if mantid_version:
-        msg += f'\n  Mantid: {mantid_version} (https://www.mantidproject.org)'
-    get_logger().info(msg)
