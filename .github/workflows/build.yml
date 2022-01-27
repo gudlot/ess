@@ -32,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0  # history required so cmake can determine version
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install --channel conda-forge --yes conda-build mamba boa
