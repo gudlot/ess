@@ -1,6 +1,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 # @author Jan-Lukas Wynen
+"""
+Utilities for logging.
+
+All code in the ess package should log auxiliary information
+through this module.
+Loggers should be obtained through :py:func:`ess.logging.get_logger`
+and pass a name that reflects the current context.
+E.g., in the loki package, pass ``'loki'`` (all lowercase).
+
+Logging can be configured using :py:func:`ess.logging.configure` or
+:py:func:`ess.logging.configure_workflow`.
+Use the latter at the beginning of workflow notebooks.
+"""
 
 from copy import copy
 import functools
@@ -10,12 +23,14 @@ import inspect
 from os import PathLike
 from typing import Any, Callable, List, Optional, Sequence, Union
 
+from scipp.utils import running_in_jupyter
 import scipp as sc
 import scippneutron as scn
 
 
 def get_logger(subname: Optional[str] = None) -> logging.Logger:
-    """Return one of ess's loggers.
+    """
+    Return one of ess's loggers.
 
     :param subname: Name of an instrument, technique, or workflow.
                     If given, return the logger with the given name
@@ -31,7 +46,8 @@ def log_call(func: Optional[Callable] = None,
              message: str = None,
              instrument: Optional[str] = None,
              level: int = logging.INFO):
-    """Decorator that logs a message every time the function is called.
+    """
+    Decorator that logs a message every time the function is called.
 
     Tries to deduce the instrument name from the module of `func`.
     This can be overridden by specifying a name explicitly.
@@ -61,6 +77,13 @@ class Formatter(logging.Formatter):
     """
 
     def __init__(self, show_thread: bool, show_process: bool):
+        """
+        Initialize the formatter.
+
+        The general as well as date formats are fixed.
+        But the arguments can be used to toggle printing of
+        thread and processor names.
+        """
         fmt_proc = '%(processName)s' if show_process else ''
         fmt_thread = '%(threadName)s' if show_thread else ''
         if show_process:
@@ -108,9 +131,29 @@ def configure(*,
     This function is meant as a helper for application (or notebook) developers.
     It configures the loggers of ess, scippneutron, scipp, and some
     third party packages.
-    Calling it from a library can thus mess up a user's setup.
+    *Calling it from a library should be avoided because*
+    it can mess up a user's setup.
 
-    TODO details
+    Up to 3 handlers are configured:
+
+      - *File Handler* Writes files to a file with given name.
+        Can be disabled using the `filename` argument.
+      - *Stream Handler* Writes to `sys.stderr`.
+      - *Widget Handler* Writes to a :py:class:`scipp.logging.LogWidget`
+        if Python is running in a Jupyter notebook.
+
+    :param filename: Name of the log file.
+                     Overwrites existing files.
+                     Settings this to `None` disables logging to file.
+    :param file_level: Log level for the file handler.
+    :param stream_level: Log level for the stream handler.
+    :param widget_level: Log level for the widget handler.
+    :param show_thread: If `True`, log messages include the name of the thread
+                        the message originates from.
+    :param show_process: If `True`, log messages include the name of the process
+                         the message originates from.
+    :param loggers: Collection of loggers or names of loggers to configure.
+                    If not given, uses :py:func:`default_loggers_to_configure`.
     """
     handlers = _make_handlers(filename, file_level, stream_level, widget_level,
                               show_thread, show_process)
@@ -124,9 +167,20 @@ def configure(*,
     # TODO mantid's own config
 
 
-def configure_workflow(workflow_name: Optional[str]=None, *, display:bool=True, **kwargs):
+def configure_workflow(workflow_name: Optional[str] = None,
+                       *,
+                       display: bool = running_in_jupyter(),
+                       **kwargs) -> logging.Logger:
     """
-    TODO
+    Configure logging for a reduction workflow.
+
+    :param workflow_name: Used as the name of the returned logger.
+    :param display: If `True`, show a :py:class:`scipp.logging.LogWidget`
+                    in the outputs of the current cell.
+                    Defaults to `True` in Jupyter and `False` otherwise.
+    :param kwargs: Forwarded to :py:func:`ess.logging.configure`.
+                   Refer to that function for details.
+    :return: A logger for use in the workflow.
     """
     configure(**kwargs)
     greet()
