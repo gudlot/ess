@@ -186,14 +186,23 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
     # TODO mantid's own config
 
 
+def _mantid_version() -> Optional[str]:
+    try:
+        import mantid
+        return mantid.__version__
+    except ImportError:
+        return None
+
+
 def greet():
     """Log a message showing the versions of important packages."""
-    # TODO mantid? what if not used in workflow?
-    # TODO add scn.greet()?
     # Import here so we don't import from a partially built package.
     from . import __version__
-    get_logger().info(
-        '''Software Versions:
-ess: %s (https://scipp.github.io/ess/)
-scippneutron: %s (https://scipp.github.io/scippneutron/)
-scipp: %s (https://scipp.github.io/)''', __version__, scn.__version__, sc.__version__)
+    msg = f'''Software Versions:
+ess: {__version__} (https://scipp.github.io/ess)
+scippneutron: {scn.__version__} (https://scipp.github.io/scippneutron)
+scipp: {sc.__version__} (https://scipp.github.io)'''
+    mantid_version = _mantid_version()
+    if mantid_version:
+        msg += f'\nMantid: {mantid_version} (https://www.mantidproject.org)'
+    get_logger().info(msg)
