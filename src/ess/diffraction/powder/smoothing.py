@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
+from scipp.signal import butter
 import scipp as sc
 
 
@@ -31,7 +32,7 @@ def smooth_data(variable, *, dim, NPoints=3):
     if variable.variances is not None:
         # TODO log properly
         print('WARNING ignoring variances')
-        variable = sc.variances(variable)
+        variable = sc.values(variable)
 
     data_length = variable.sizes[dim]
     out = variable.copy()  # preallocate output variable
@@ -44,3 +45,22 @@ def smooth_data(variable, *, dim, NPoints=3):
         out[dim, index] = sc.mean(variable[dim, begin:end], dim)
 
     return out
+
+
+# TODO remove when scipp finally supports this
+def _to_bin_centers(coord):
+    return coord[:-1] + (coord[1:] - coord[:-1]) / 2
+
+
+def fft_smooth(data, *, dim, order, Wn):
+    if data.variances is not None:
+        # TODO log properly
+        print('WARNING ignoring variances')
+        data = sc.values(data)
+
+    if data.coords[dim].sizes[dim] == data.sizes[dim] + 1:
+        # TODO allow dim in attrs
+        data = data.copy(deep=False)
+        data.coords[dim] = _to_bin_centers(data.coords[dim])
+
+    return butter(data.coords[dim], N=order, Wn=Wn).filtfilt(data, dim)
