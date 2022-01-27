@@ -52,7 +52,6 @@ def log_call(func: Optional[Callable] = None,
     Tries to deduce the instrument name from the module of `func`.
     This can be overridden by specifying a name explicitly.
     """
-
     def deco(f: Callable):
         inst = _deduce_instrument_name(f) if instrument is None else instrument
 
@@ -75,7 +74,6 @@ class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
     """
-
     def __init__(self, show_thread: bool, show_process: bool):
         """
         Initialize the formatter.
