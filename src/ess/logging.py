@@ -7,7 +7,7 @@ import logging.config
 import logging
 import inspect
 from os import PathLike
-from typing import Any, Callable, List, Literal, Optional, Union
+from typing import Any, Callable, List, Optional, Sequence, Union
 
 import scipp as sc
 import scippneutron as scn
@@ -135,15 +135,16 @@ def _make_handlers(filename: Optional[Union[str, PathLike]], file_level: Union[s
     return handlers
 
 
-def _configure_root(handlers: List[logging.Handler], level: Union[str, int], reset):
-    root = logging.getLogger()
-    if reset:
-        for handler in list(root.handlers):
-            root.removeHandler(handler)
-        for filt in list(root.filters):
-            root.removeFilter(filt)
-
-    _configure_logger(root, handlers, level)
+def default_loggers_to_configure() -> List[logging.Logger]:
+    """
+    Return a list of all loggers that get configured by ess by default.
+    """
+    import pooch
+    return [
+        sc.get_logger(),
+        logging.getLogger('Mantid'),
+        pooch.get_logger(),
+    ]
 
 
 def _configure_logger(logger: logging.Logger, handlers: List[logging.Handler],
@@ -164,7 +165,7 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
               widget_level: Union[str, int] = logging.INFO,
               show_thread: bool = False,
               show_process: bool = False,
-              root: Union[bool, Literal['yes', 'no', 'overwrite']] = False):
+              loggers: Optional[Sequence[Union[str, logging.Logger]]] = None):
     """Set up logging for the ess package.
 
     This function is meant as a helper for application (or notebook) developers.
@@ -177,11 +178,11 @@ def configure(filename: Optional[Union[str, PathLike]] = 'scipp.ess.log',
     handlers = _make_handlers(filename, file_level, stream_level, widget_level,
                               show_thread, show_process)
     base_level = _base_level([file_level, stream_level, widget_level])
-    if root is True or root in ('yes', 'overwrite'):
-        _configure_root(handlers, base_level, reset=root == 'overwrite')
-    # TODO don't configure twice -> update scipp
-    import pooch
-    for logger in (sc.get_logger(), pooch.get_logger(), logging.getLogger('Mantid')):
+    loggers = {
+        logging.getLogger(logger) if isinstance(logger, str) else logger
+        for logger in (default_loggers_to_configure() if loggers is None else loggers)
+    }
+    for logger in loggers:
         _configure_logger(logger, handlers, base_level)
     # TODO mantid's own config
 
