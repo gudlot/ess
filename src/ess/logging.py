@@ -14,13 +14,15 @@ import scipp as sc
 import scippneutron as scn
 
 
-def get_logger(instrument: Optional[str] = None) -> logging.Logger:
+def get_logger(subname: Optional[str] = None) -> logging.Logger:
     """Return one of ess's loggers.
 
-    :param instrument: If given, return the logger for the specified instrument.
-                       Otherwise, return the general ess logger.
+    :param subname: Name of an instrument, technique, or workflow.
+                    If given, return the logger with the given name
+                    as a child of the ess logger.
+                    Otherwise, return the general ess logger.
     """
-    name = 'scipp.ess' + ('.' + instrument if instrument else '')
+    name = 'scipp.ess' + ('.' + subname if subname else '')
     return logging.getLogger(name)
 
 
