@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
+# flake8: noqa
+
 from ess import imaging
 import tempfile
 import os
@@ -40,12 +42,11 @@ def geom_file():
         pass
 
 
-@with_mantid_only
-def test_load_component_info_to_2d_geometry_bad_sizes(geom_file):
-    bad_sizes = {'x': 10, 'y': 5}  # gives volume of 50 not 100
-    with pytest.raises(ValueError):
-        imaging.mantid.load_component_info_to_2d(geom_file, sizes=bad_sizes)
-
+# @with_mantid_only
+# def test_load_component_info_to_2d_geometry_bad_sizes(geom_file):
+#     bad_sizes = {'x': 10, 'y': 5}  # gives volume of 50 not 100
+#     with pytest.raises(ValueError):
+#         imaging.mantid.load_component_info_to_2d(geom_file, sizes=bad_sizes)
 
 # @with_mantid_only
 # def test_load_component_info_to_2d_geometry(geom_file):
