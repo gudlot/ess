@@ -1,3 +1,17 @@
+# Build artifacts
+build
 *.pyc
+docs/generated
+ess.egg-info
+src/ess/_version.py
+
+# IDE / Editor settings
 .idea
-_fixed_version.py
+.vscode
+.vs
+
+# Caches
+.ipynb_checkpoints
+.mypy_cache
+.virtual_documents
+__pycache__
