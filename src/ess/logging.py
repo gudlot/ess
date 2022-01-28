@@ -130,8 +130,8 @@ def configure(*,
     This function is meant as a helper for application (or notebook) developers.
     It configures the loggers of ess, scippneutron, scipp, and some
     third party packages.
-    *Calling it from a library should be avoided because*
-    it can mess up a user's setup.
+    *Calling it from a library should be avoided*
+    because it can mess up a user's setup.
 
     Up to 3 handlers are configured:
 
@@ -143,7 +143,7 @@ def configure(*,
 
     :param filename: Name of the log file.
                      Overwrites existing files.
-                     Settings this to `None` disables logging to file.
+                     Setting this to `None` disables logging to file.
     :param file_level: Log level for the file handler.
     :param stream_level: Log level for the stream handler.
     :param widget_level: Log level for the widget handler.
