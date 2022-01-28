@@ -10,39 +10,41 @@ import pytest
 # import scipp as sc
 # import numpy as np
 
+try:
+    import mantid  # noqa: F401
+except ImportError:
+    pytest.skip("Mantid module is unavailable", allow_module_level=True)
 
-def mantid_is_available():
-    try:
-        import mantid  # noqa: F401
-        return True
-    except ModuleNotFoundError:
-        return False
+# def mantid_is_available():
+#     try:
+#         import mantid  # noqa: F401
+#         return True
+#     except ModuleNotFoundError:
+#         return False
+
+# with_mantid_only = pytest.mark.skipif(not mantid_is_available(),
+#                                       reason='Mantid framework is unavailable')
 
 
-with_mantid_only = pytest.mark.skipif(not mantid_is_available(),
-                                      reason='Mantid framework is unavailable')
-
-
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def geom_file():
     import mantid.simpleapi as sapi
-    # # 100 output positions (10 by 10)
-    # ws = sapi.CreateSampleWorkspace(NumBanks=1,
-    #                                 BankPixelWidth=10,
-    #                                 PixelSpacing=0.01,
-    #                                 StoreInADS=False)
-    # file_name = "example_geometry.nxs"
-    # geom_path = os.path.join(tempfile.gettempdir(), file_name)
-    # sapi.SaveNexusGeometry(ws, geom_path)
-    # assert os.path.isfile(geom_path)  # sanity check
-    # yield geom_path
-    # try:
-    #     os.remove(geom_path)
-    # except Exception:
-    #     pass
+    # 100 output positions (10 by 10)
+    ws = sapi.CreateSampleWorkspace(NumBanks=1,
+                                    BankPixelWidth=10,
+                                    PixelSpacing=0.01,
+                                    StoreInADS=False)
+    file_name = "example_geometry.nxs"
+    geom_path = os.path.join(tempfile.gettempdir(), file_name)
+    sapi.SaveNexusGeometry(ws, geom_path)
+    assert os.path.isfile(geom_path)  # sanity check
+    yield geom_path
+    try:
+        os.remove(geom_path)
+    except Exception:
+        pass
 
 
-@with_mantid_only
 def test_dummy(geom_file):
     assert True
 
