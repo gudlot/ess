@@ -26,6 +26,8 @@ dependencies:
 
   # Formatting & static analysis
   - flake8
+  - pip:
+    - nb-clean
   - yapf
 
   # Docs
