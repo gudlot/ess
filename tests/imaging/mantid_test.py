@@ -5,8 +5,8 @@ from ess import imaging
 import tempfile
 import os
 import pytest
-import scipp as sc
-import numpy as np
+# import scipp as sc
+# import numpy as np
 
 
 def mantid_is_available():
