@@ -26,20 +26,25 @@ with_mantid_only = pytest.mark.skipif(not mantid_is_available(),
 @pytest.fixture(scope="module")
 def geom_file():
     import mantid.simpleapi as sapi
-    # 100 output positions (10 by 10)
-    ws = sapi.CreateSampleWorkspace(NumBanks=1,
-                                    BankPixelWidth=10,
-                                    PixelSpacing=0.01,
-                                    StoreInADS=False)
-    file_name = "example_geometry.nxs"
-    geom_path = os.path.join(tempfile.gettempdir(), file_name)
-    sapi.SaveNexusGeometry(ws, geom_path)
-    assert os.path.isfile(geom_path)  # sanity check
-    yield geom_path
-    try:
-        os.remove(geom_path)
-    except Exception:
-        pass
+    # # 100 output positions (10 by 10)
+    # ws = sapi.CreateSampleWorkspace(NumBanks=1,
+    #                                 BankPixelWidth=10,
+    #                                 PixelSpacing=0.01,
+    #                                 StoreInADS=False)
+    # file_name = "example_geometry.nxs"
+    # geom_path = os.path.join(tempfile.gettempdir(), file_name)
+    # sapi.SaveNexusGeometry(ws, geom_path)
+    # assert os.path.isfile(geom_path)  # sanity check
+    # yield geom_path
+    # try:
+    #     os.remove(geom_path)
+    # except Exception:
+    #     pass
+
+
+@with_mantid_only
+def test_dummy(geom_file):
+    assert True
 
 
 # @with_mantid_only
