@@ -35,6 +35,7 @@ Documentation
    :caption: Instruments
 
    instruments/amor/amor
+   instruments/loki/loki
 
 .. toctree::
    :maxdepth: 3
