@@ -45,7 +45,7 @@ def log_call(func: Optional[Callable] = None,
              *,
              message: str = None,
              instrument: Optional[str] = None,
-             level: int = logging.INFO):
+             level: Union[int, str] = logging.INFO):
     """
     Decorator that logs a message every time the function is called.
 
