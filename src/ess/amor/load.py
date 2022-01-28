@@ -31,7 +31,7 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
 
 def load(filename,
          beamline: Optional[dict] = None,
-         disable_warnings: bool = True) -> sc.DataArray:
+         disable_warnings: Optional[bool] = True) -> sc.DataArray:
     """
     Loader for a single Amor data file.
 
