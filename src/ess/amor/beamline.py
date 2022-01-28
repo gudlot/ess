@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import logging
 import scipp as sc
 from scipp.constants import g
 from ..choppers import make_chopper
@@ -60,7 +59,7 @@ def make_beamline(
     return beamline
 
 
-@log_call(level=logging.DEBUG)
+@log_call(level='DEBUG')
 def instrument_view_components(da: sc.DataArray) -> dict:
     """
     Create a dict of instrument view components, containing:
