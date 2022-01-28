@@ -78,9 +78,10 @@ class Formatter(logging.Formatter):
         """
         Initialize the formatter.
 
-        The general as well as date formats are fixed.
-        But the arguments can be used to toggle printing of
-        thread and processor names.
+        The formatting is mostly fixed.
+        Only printing of thread and processor names cna be toggled using the
+        corresponding arguments.
+        Times are always printed in ISO 8601 format.
         """
         fmt_proc = '%(processName)s' if show_process else ''
         fmt_thread = '%(threadName)s' if show_thread else ''
