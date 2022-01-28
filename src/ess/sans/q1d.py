@@ -102,6 +102,10 @@ def q1d(data,
 
     data = data.transform_coords("Q", graph=graph)
     q_boundaries = sc.concat([q_bins.min(), q_bins.max()], dim='Q')
+
+    # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
+    data.bins.coords['wavelength'] = data.bins.attrs.pop('wavelength')
+
     q_binned = sc.bin(data, edges=[wavelength_bands, q_boundaries])
     q_summed = q_binned.bins.concat('spectrum')
 
