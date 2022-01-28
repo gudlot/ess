@@ -54,6 +54,8 @@ def log_call(func: Optional[Callable] = None,
     """
     def deco(f: Callable):
         inst = _deduce_instrument_name(f) if instrument is None else instrument
+        nonlocal level
+        level = logging.getLevelName(level) if isinstance(level, str) else level
 
         @functools.wraps(f)
         def impl(*args, **kwargs):
