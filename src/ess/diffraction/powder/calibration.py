@@ -35,9 +35,9 @@ def load_calibration(filename: Union[str, Path],
 
     mantid_args = {} if mantid_args is None else mantid_args
 
-    with scn.mantid.run_mantid_alg('LoadDiffCal', Filename=filename,
+    with scn.mantid.run_mantid_alg('LoadDiffCal', Filename=str(filename),
                                    **mantid_args) as ws:
-        cal = scn.from_mantid(ws.OutputCalWorkspace)
+        ds = scn.from_mantid(ws.OutputCalWorkspace)
 
         # Note that despite masking and grouping stored in separate workspaces,
         # there is no need to handle potentially mismatching ordering: All
@@ -58,17 +58,25 @@ def load_calibration(filename: Union[str, Path],
     # subsequent handling, e.g., with groupby, more complicated. The mask
     # is conceptually not masking rows in this table, i.e., it is not
     # marking invalid rows, but rather describes masking for other data.
-    cal["mask"] = mask
-    cal["group"] = group
+    ds["mask"] = mask
+    ds["group"] = group
 
     # The file does not define units
     # TODO why those units? Can we verify?
-    cal["difc"].unit = 'us / angstrom'
-    cal["difa"].unit = 'us / angstrom**2'
-    cal["tzero"].unit = 'us'
+    ds["difc"].unit = 'us / angstrom'
+    ds["difa"].unit = 'us / angstrom**2'
+    ds["tzero"].unit = 'us'
 
-    cal = cal.rename_dims({'row': 'detector'})
-    cal.coords['detector'] = cal['detid'].data
-    del cal['detid']
+    ds = ds.rename_dims({'row': 'detector'})
+    ds.coords['detector'] = ds['detid'].data
+    del ds['detid']
 
-    return cal
+    return ds
+
+
+def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
+    res = into.copy(deep=False)
+    # TODO compare detector / spectrum
+    for name in ('difa', 'difc', 'tzero'):
+        res.attrs[name] = calibration[name].data
+    return res
