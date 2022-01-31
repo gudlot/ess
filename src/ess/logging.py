@@ -52,6 +52,7 @@ def log_call(func: Optional[Callable] = None,
     Tries to deduce the instrument name from the module of `func`.
     This can be overridden by specifying a name explicitly.
     """
+
     def deco(f: Callable):
         inst = _deduce_instrument_name(f) if instrument is None else instrument
         nonlocal level
@@ -76,6 +77,7 @@ class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
     """
+
     def __init__(self, show_thread: bool, show_process: bool):
         """
         Initialize the formatter.
@@ -156,6 +158,11 @@ def configure(*,
     :param loggers: Collection of loggers or names of loggers to configure.
                     If not given, uses :py:func:`default_loggers_to_configure`.
     """
+    if configure.is_configured:
+        get_logger().warning(
+            'Called `logging.configure` but logging is already configured')
+        return
+
     handlers = _make_handlers(filename, file_level, stream_level, widget_level,
                               show_thread, show_process)
     base_level = _base_level([file_level, stream_level, widget_level])
@@ -166,6 +173,11 @@ def configure(*,
     for logger in loggers:
         _configure_logger(logger, handlers, base_level)
     # TODO mantid's own config
+
+    configure.is_configured = True
+
+
+configure.is_configured = False
 
 
 def configure_workflow(workflow_name: Optional[str] = None,
