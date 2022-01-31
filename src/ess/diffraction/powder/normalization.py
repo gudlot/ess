@@ -30,7 +30,7 @@ def normalize_by_monitor(data: sc.DataArray,
 
     mon = sc.rebin(mon, 'wavelength', wavelength_edges)
     if smooth_args is not None:
-        print(f'Smoothing monitor {monitor} for normalisation with {smooth_args}.')
+        print(f"Smoothing monitor '{monitor}' for normalisation with {smooth_args}.")
         mon = fft_smooth(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
