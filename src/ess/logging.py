@@ -172,7 +172,7 @@ configure.is_configured = False
 
 def configure_workflow(workflow_name: Optional[str] = None,
                        *,
-                       display: bool = running_in_jupyter(),
+                       display: Optional[bool] = None,
                        **kwargs) -> logging.Logger:
     """
     Configure logging for a reduction workflow.
@@ -187,7 +187,7 @@ def configure_workflow(workflow_name: Optional[str] = None,
     """
     configure(**kwargs)
     greet()
-    if display:
+    if (display is None and running_in_jupyter()) or display:
         sc.display_logs()
     return get_logger(workflow_name)
 
