@@ -61,14 +61,14 @@ def load_calibration(filename: Union[str, Path],
     cal["mask"] = mask
     cal["group"] = group
 
-    # Mantid does not define units
+    # The file does not define units
     # TODO why those units? Can we verify?
     cal["difc"].unit = 'us / angstrom'
     cal["difa"].unit = 'us / angstrom**2'
     cal["tzero"].unit = 'us'
 
-    cal.rename_dims({'row': 'detector'})
-    cal.coords['detector'] = cal['detid'].data.astype('int32')
+    cal = cal.rename_dims({'row': 'detector'})
+    cal.coords['detector'] = cal['detid'].data
     del cal['detid']
 
     return cal
