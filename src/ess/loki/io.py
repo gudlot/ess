@@ -5,13 +5,18 @@ import scipp as sc
 import scippneutron as scn
 
 
-def load_sans2d(filename: str, spectrum_size: int,
-                tof_bins: sc.Variable) -> sc.DataArray:
+def load_sans2d(filename: str,
+                spectrum_size: int,
+                tof_bins: sc.Variable = None) -> sc.DataArray:
     """
     Loading wrapper for ISIS SANS2D files
     """
-    events = scn.load(filename=filename, mantid_args={"LoadMonitors": True})
-    return sc.bin(events["spectrum", :spectrum_size], edges=[tof_bins])
+    out = scn.load(filename=filename, mantid_args={"LoadMonitors": True})
+    out = out["spectrum", :spectrum_size]
+    if tof_bins is None:
+        return out.copy()
+    else:
+        return sc.bin(out, edges=[tof_bins])
 
 
 def load_rkh_wav(filename: str) -> sc.DataArray:
