@@ -41,41 +41,35 @@ def get_logger(subname: Optional[str] = None) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def log_call(func: Optional[Callable] = None,
-             *,
+def log_call(*,
+             instrument: str,
              message: str = None,
-             instrument: Optional[str] = None,
              level: Union[int, str] = logging.INFO):
     """
     Decorator that logs a message every time the function is called.
-
-    Tries to deduce the instrument name from the module of `func`.
-    This can be overridden by specifying a name explicitly.
     """
+    level = logging.getLevelName(level) if isinstance(level, str) else level
+
     def deco(f: Callable):
-        inst = _deduce_instrument_name(f) if instrument is None else instrument
-        nonlocal level
-        level = logging.getLevelName(level) if isinstance(level, str) else level
 
         @functools.wraps(f)
         def impl(*args, **kwargs):
             if message is not None:
-                get_logger(inst).log(level, message)
+                get_logger(instrument).log(level, message)
             else:
-                get_logger(inst).log(level, 'Calling %s', _function_name(f))
+                get_logger(instrument).log(level, 'Calling %s', _function_name(f))
             return f(*args, **kwargs)
 
         return impl
 
-    if func is None:
-        return deco
-    return deco(func)
+    return deco
 
 
 class Formatter(logging.Formatter):
     """
     Logging formatter that indents messages and optionally shows threading information.
     """
+
     def __init__(self, show_thread: bool, show_process: bool):
         """
         Initialize the formatter.
