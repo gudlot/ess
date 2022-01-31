@@ -68,15 +68,43 @@ def load_calibration(filename: Union[str, Path],
     ds["tzero"].unit = 'us'
 
     ds = ds.rename_dims({'row': 'detector'})
-    ds.coords['detector'] = ds['detid'].data
+    # TODO conversion to int32 required to match type in detector_info
+    #      loaded by Mantid. Do we ultimately need that compatibility?
+    #      If int32 large enough for everything we do as ESS?
+    ds.coords['detector'] = ds['detid'].data.astype('int32')
     del ds['detid']
 
     return ds
 
 
+def find_spectra(*, calibration, detector_info):
+    # Merge cal with detector-info, which contains information on how
+    # `dataset` groups its detectors. At the same time, the coord
+    # comparison in `merge` ensures that detector IDs of `dataset` match
+    # those of `calibration`.
+    cal = sc.merge(detector_info, calibration)
+
+    # Masking and grouping information in the calibration table interferes
+    # with `groupby.mean`, dropping.
+    # TODO still true? Seems to work
+    for name in ("mask", "group"):
+        if name in cal:
+            del cal[name]
+
+    # Translate detector-based calibration information into coordinates
+    # of data. We are hard-coding some information here: the existence of
+    # "spectra", since we require labels named "spectrum" and a
+    # corresponding dimension. Given that this is in a branch that is
+    # access only if "detector_info" is present this should probably be ok.
+    return sc.groupby(cal, group='spectrum').mean('detector')
+
+
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
+    dim = calibration.dim
+    if not sc.identical(into.coords[dim], calibration.coords[dim]):
+        raise ValueError(
+            f'Coordinate {dim} of calibration and target dataset do not agree.')
     out = into.copy(deep=False)
-    # TODO compare detector / spectrum
     for name in ('difa', 'difc', 'tzero'):
         out.attrs[name] = calibration[name].data
     return out
