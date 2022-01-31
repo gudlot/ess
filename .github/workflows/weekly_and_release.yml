@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.head_ref }}
       # Run this before any other commands so that git diff does not pick up formatting changes.
       - run: |
           find . -type f -not -path '.git/*' -exec sed -ri "s/[0-9]{4} (Scipp contributors)/$(date +%Y) \1/g" {} +
@@ -38,7 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.head_ref }}
           fetch-depth: 0  # history required so cmake can determine version
       - uses: conda-incubator/setup-miniconda@v2
       - run: conda install --channel conda-forge --yes conda-build mamba boa
