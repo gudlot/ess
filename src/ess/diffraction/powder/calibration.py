@@ -75,8 +75,8 @@ def load_calibration(filename: Union[str, Path],
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
-    res = into.copy(deep=False)
+    out = into.copy(deep=False)
     # TODO compare detector / spectrum
     for name in ('difa', 'difc', 'tzero'):
-        res.attrs[name] = calibration[name].data
-    return res
+        out.attrs[name] = calibration[name].data
+    return out
