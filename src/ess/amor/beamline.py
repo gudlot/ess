@@ -3,8 +3,11 @@
 import scipp as sc
 from scipp.constants import g
 from ..choppers import make_chopper
+from ..logging import log_call
 
 
+@log_call(instrument='amor',
+          message='Constructing AMOR beamline from default parameters')
 def make_beamline(
     sample_rotation: sc.Variable = None,
     beam_size: sc.Variable = 0.001 * sc.units.m,
@@ -57,6 +60,7 @@ def make_beamline(
     return beamline
 
 
+@log_call(instrument='amor', level='DEBUG')
 def instrument_view_components(da: sc.DataArray) -> dict:
     """
     Create a dict of instrument view components, containing:

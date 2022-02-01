@@ -44,6 +44,12 @@ Documentation
    techniques/wfm/wfm
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Utilities
+
+   utilities/utilities
+
+.. toctree::
    :caption: About
    :maxdepth: 3
 
