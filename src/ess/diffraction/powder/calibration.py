@@ -8,6 +8,14 @@ import scipp as sc
 import scippneutron as scn
 
 
+def _as_boolean_mask(var):
+    if var.dtype in ('float32', 'float64'):
+        if sc.any(var != var.to(dtype='int64')).value:
+            raise ValueError(
+                'Cannot construct boolean mask, the input mask has fractional values.')
+    return var.to(dtype=bool)
+
+
 def load_calibration(filename: Union[str, Path],
                      *,
                      mantid_args: Optional[dict] = None) -> sc.Dataset:
@@ -58,7 +66,7 @@ def load_calibration(filename: Union[str, Path],
     # subsequent handling, e.g., with groupby, more complicated. The mask
     # is conceptually not masking rows in this table, i.e., it is not
     # marking invalid rows, but rather describes masking for other data.
-    ds["mask"] = mask
+    ds["mask"] = _as_boolean_mask(mask)
     ds["group"] = group
 
     # The file does not define units
@@ -87,16 +95,19 @@ def find_spectra(*, calibration, detector_info):
     # Masking and grouping information in the calibration table interferes
     # with `groupby.mean`, dropping.
     # TODO still true? Seems to work
-    for name in ("mask", "group"):
-        if name in cal:
-            del cal[name]
+    # for name in ("mask", "group"):
+    #     if name in cal:
+    #         del cal[name]
 
     # Translate detector-based calibration information into coordinates
     # of data. We are hard-coding some information here: the existence of
     # "spectra", since we require labels named "spectrum" and a
     # corresponding dimension. Given that this is in a branch that is
     # access only if "detector_info" is present this should probably be ok.
-    return sc.groupby(cal, group='spectrum').mean('detector')
+    cal = sc.groupby(cal, group='spectrum').mean('detector')
+    # `mean` turns the mask into floats, convert back.
+    cal['mask'] = _as_boolean_mask(cal['mask'].data)
+    return cal
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
