@@ -116,6 +116,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         raise ValueError(
             f'Coordinate {dim} of calibration and target dataset do not agree.')
     out = into.copy(deep=False)
-    for name in ('difa', 'difc', 'tzero'):
+    for name in ('difa', 'difc', 'tzero', 'group'):
         out.attrs[name] = calibration[name].data
+    out.masks['cal'] = calibration['mask'].data
     return out
