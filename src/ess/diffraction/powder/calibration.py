@@ -120,3 +120,12 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         out.attrs[name] = calibration[name].data
     out.masks['cal'] = calibration['mask'].data
     return out
+
+
+def calibrate_and_focus(*, sample, calibration):
+    # Import here to avoid cycle from importing at module level.
+    from .conversions import to_dspacing_with_calibration
+
+    sample = merge_calibration(into=sample, calibration=calibration)
+    dspacing = to_dspacing_with_calibration(sample)
+    return sc.groupby(dspacing, group='group').bins.concat('spectrum')
