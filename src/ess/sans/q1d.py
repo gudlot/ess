@@ -134,7 +134,6 @@ def _convert_dense_to_q_and_merge_spectra(
     Convert dense data to momentum vector Q.
     """
     bands = []
-    print(wavelength_bands.sizes['wavelength'])
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
         band = data['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
         q_band = band.transform_coords("Q", graph=graph)
@@ -185,9 +184,10 @@ def q1d(data: sc.DataArray,
                                             data_graph=data_graph,
                                             monitor_graph=monitor_graph)
 
-    monitors = _denoise_and_rebin_monitors(monitors=monitors,
-                                           wavelength_bins=wavelength_bins,
-                                           non_background_range=non_background_range)
+    monitors = _denoise_and_rebin_monitors(
+        monitors=monitors,
+        wavelength_bins=wavelength_bins,
+        non_background_range=monitor_non_background_range)
 
     transmission_fraction = normalization.transmission_fraction(**monitors)
 
