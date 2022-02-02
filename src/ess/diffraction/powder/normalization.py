@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
+import uuid
+
 import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
 
@@ -35,14 +37,14 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def _common_wavelength_edges(*data):
+def _common_edges(*data, dim):
     """
-    The data has wavelength bin edges for each spectrum:
+    The data has separate bin edges for each spectrum:
 
         ^      |---|
     spectrum  |--|
         v        |--|
-            < wavelength >
+              < dim >
 
     This function computes common edges for all spectra
     for the combination of all inputs:
@@ -50,23 +52,24 @@ def _common_wavelength_edges(*data):
         ^     | --- |
     spectrum  |--   |
         v     |   --|
-            < wavelength >
-
+              < dim >
     """
-    min_wavelength = sc.concat(
-        [d.coords['wavelength']['wavelength', 0].min() for d in data],
-        '_aux').min('_aux')
-    max_wavelength = sc.concat(
-        [d.coords['wavelength']['wavelength', 1].max() for d in data],
-        '_aux').min('_aux')
-    return sc.concat([min_wavelength, max_wavelength], 'wavelength')
+
+    def extremum(fn, index):
+        aux_dim = uuid.uuid4().hex
+        return sc.concat([fn(d.coords[dim][dim, index]) for d in data],
+                         aux_dim).min(aux_dim)
+
+    lo = extremum(sc.min, 0)
+    hi = extremum(sc.max, 1)
+    return sc.concat([lo, hi], dim)
 
 
 def subtract_empty_instrument(data, empty_instr):
     data = data.copy(deep=False)
     empty_instr = empty_instr.copy(deep=False)
 
-    edges = _common_wavelength_edges(data, empty_instr)
+    edges = _common_edges(data, empty_instr, dim='wavelength')
     data.coords['wavelength'] = edges
     empty_instr.coords['wavelength'] = edges
 
