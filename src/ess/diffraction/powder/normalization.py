@@ -37,7 +37,7 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def _common_edges(*data, dim):
+def _common_edges(*edges, dim):
     """
     The data has separate bin edges for each spectrum:
 
@@ -57,8 +57,7 @@ def _common_edges(*data, dim):
 
     def extremum(fn, index):
         aux_dim = uuid.uuid4().hex
-        return sc.concat([fn(d.coords[dim][dim, index]) for d in data],
-                         aux_dim).min(aux_dim)
+        return fn(sc.concat([fn(edge[dim, index]) for edge in edges], aux_dim), aux_dim)
 
     lo = extremum(sc.min, 0)
     hi = extremum(sc.max, 1)
