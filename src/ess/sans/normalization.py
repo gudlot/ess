@@ -5,9 +5,13 @@ import scipp as sc
 import scippneutron as scn
 
 
-def solid_angle(data, pixel_width, pixel_height):
+def solid_angle_of_rectangular_pixels(data, pixel_width, pixel_height):
     """
     Solid angle computed from rectangular pixels with a 'width' and a 'height'.
+
+    Note that this is an approximation which is only valid for small angles
+    between the line of sight and the rectangle normal.
+    This is usually a reasonable approximation for SANS experiments.
     """
     L2 = scn.L2(data)
     return (pixel_width * pixel_height) / (L2 * L2)
