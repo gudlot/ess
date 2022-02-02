@@ -11,7 +11,7 @@ from ..wfm.tools import to_bin_centers, to_bin_edges
 from scipp.interpolate import interp1d
 
 
-def _make_coordinate_transform_graphs(gravity):
+def _make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
     """
     Create unit conversion graphs.
     The gravity parameter can be used to turn on or off the effects of gravity.
@@ -83,7 +83,9 @@ def _denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
     return denominator
 
 
-def _convert_to_q_and_merge_spectra(data, graph, wavelength_bands, gravity):
+def _convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
+                                    wavelength_bands: sc.Variable, q_bins: sc.Variable,
+                                    gravity: bool) -> sc.DataArray:
     """
     Convert the data to momentum vector Q. This accepts both dense and event data.
     The final step merges all spectra:
@@ -109,7 +111,9 @@ def _convert_to_q_and_merge_spectra(data, graph, wavelength_bands, gravity):
     return out
 
 
-def _convert_events_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands):
+def _convert_events_to_q_and_merge_spectra(
+        data: sc.DataArray, graph: dict, q_bins: sc.Variable,
+        wavelength_bands: sc.Variable) -> sc.DataArray:
     """
     Convert event data to momentum vector Q.
     """
@@ -123,7 +127,9 @@ def _convert_events_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands
     return q_binned.bins.concat('spectrum')
 
 
-def _convert_dense_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands):
+def _convert_dense_to_q_and_merge_spectra(
+        data: sc.DataArray, graph: dict, q_bins: sc.Variable,
+        wavelength_bands: sc.Variable) -> sc.DataArray:
     """
     Convert dense data to momentum vector Q.
     """
@@ -139,7 +145,9 @@ def _convert_dense_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands)
     return q_summed
 
 
-def _normalize(numerator, denominator, dim='Q'):
+def _normalize(numerator: sc.DataArray,
+               denominator: sc.DataArray,
+               dim='Q') -> sc.DataArray:
     """
     Perform normalization. If the numerator contains events, we use the sc.lookup
     function to perform the division.
@@ -151,17 +159,17 @@ def _normalize(numerator, denominator, dim='Q'):
         return numerator / denominator
 
 
-def q1d(data,
-        data_incident_monitor,
-        data_transmission_monitor,
-        direct_incident_monitor,
-        direct_transmission_monitor,
-        direct_beam,
-        wavelength_bins,
-        q_bins,
-        gravity=False,
-        monitor_non_background_range=None,
-        wavelength_bands=None):
+def q1d(data: sc.DataArray,
+        data_incident_monitor: sc.DataArray,
+        data_transmission_monitor: sc.DataArray,
+        direct_incident_monitor: sc.DataArray,
+        direct_transmission_monitor: sc.DataArray,
+        direct_beam: sc.DataArray,
+        wavelength_bins: sc.Variable,
+        q_bins: sc.Variable,
+        gravity: bool = False,
+        monitor_non_background_range: sc.Variable = None,
+        wavelength_bands: sc.Variable = None) -> sc.DataArray:
 
     monitors = {
         'data_incident_monitor': data_incident_monitor,
@@ -209,11 +217,13 @@ def q1d(data,
     data_q = _convert_to_q_and_merge_spectra(data=data,
                                              graph=data_graph,
                                              wavelength_bands=wavelength_bands,
+                                             q_bins=q_bins,
                                              gravity=gravity)
 
     denominator_q = _convert_to_q_and_merge_spectra(data=denominator,
                                                     graph=data_graph,
                                                     wavelength_bands=wavelength_bands,
+                                                    q_bins=q_bins,
                                                     gravity=gravity)
 
     normalized = _normalize(numerator=data_q, denominator=denominator_q, dim='Q')
