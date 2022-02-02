@@ -7,7 +7,8 @@ from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_unit
 
 
-def two_theta(gravity, wavelength, incident_beam, scattered_beam):
+def two_theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
+              scattered_beam: sc.Variable) -> sc.Variable:
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
     y = sc.dot(scattered_beam, gravity) / grav
@@ -40,12 +41,17 @@ def two_theta(gravity, wavelength, incident_beam, scattered_beam):
     return out
 
 
-def sans_elastic() -> dict:
+def sans_elastic(gravity: bool = False) -> dict:
     """
     Generate a coordinate transformation graph for SANS elastic scattering.
+    By default, the effects of gravity on the neutron flight paths are not included.
+
+    :param gravity: Take into account the bending of the neutron flight paths from the
+        Earth's gravitational field if ``True``.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic_Q("tof")}
-    graph["two_theta"] = two_theta
+    if gravity:
+        graph["two_theta"] = two_theta
     return graph
 
 
@@ -53,4 +59,7 @@ def sans_monitor() -> dict:
     """
     Generate a coordinate transformation graph for SANS monitor (no scattering).
     """
-    return {**conversions.beamline(scatter=False), **conversions.elastic_Q("tof")}
+    return {
+        **conversions.beamline(scatter=False),
+        **conversions.elastic_wavelength("tof")
+    }
