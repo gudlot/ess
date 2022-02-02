@@ -134,13 +134,12 @@ def _convert_dense_to_q_and_merge_spectra(
     Convert dense data to momentum vector Q.
     """
     bands = []
+    data_q = data.transform_coords("Q", graph=graph)
+    data_q.coords['wavelength'] = data_q.attrs.pop('wavelength')
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
-        band = data['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
-        q_band = band.transform_coords("Q", graph=graph)
-        bands.append(sc.histogram(q_band, bins=q_bins))
-        # bands.append(sc.histogram(q_band, bins=q_bins).sum('spectrum'))
-    q_summed = sc.concat(bands, 'wavelength').sum('spectrum')
-    # q_summed = sc.concat(denominator_bands, 'wavelength')
+        band = data_q['wavelength', wavelength_bands[i]:wavelength_bands[i + 1]]
+        bands.append(sc.histogram(band, bins=q_bins).sum('spectrum'))
+    q_summed = sc.concat(bands, 'wavelength')
     return q_summed
 
 
