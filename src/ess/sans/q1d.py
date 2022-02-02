@@ -3,11 +3,9 @@
 
 from typing import Tuple
 import scipp as sc
-from scipp.constants import g
 from .common import gravity_vector
 from . import conversions
 from . import normalization
-from ..wfm.tools import to_bin_centers, to_bin_edges
 from scipp.interpolate import interp1d
 
 
