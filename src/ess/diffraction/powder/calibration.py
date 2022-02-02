@@ -85,31 +85,6 @@ def load_calibration(filename: Union[str, Path],
     return ds
 
 
-def find_spectra(*, calibration, detector_info):
-    # Merge cal with detector-info, which contains information on how
-    # `dataset` groups its detectors. At the same time, the coord
-    # comparison in `merge` ensures that detector IDs of `dataset` match
-    # those of `calibration`.
-    cal = sc.merge(detector_info, calibration)
-
-    # Masking and grouping information in the calibration table interferes
-    # with `groupby.mean`, dropping.
-    # TODO still true? Seems to work
-    # for name in ("mask", "group"):
-    #     if name in cal:
-    #         del cal[name]
-
-    # Translate detector-based calibration information into coordinates
-    # of data. We are hard-coding some information here: the existence of
-    # "spectra", since we require labels named "spectrum" and a
-    # corresponding dimension. Given that this is in a branch that is
-    # access only if "detector_info" is present this should probably be ok.
-    cal = sc.groupby(cal, group='spectrum').mean('detector')
-    # `mean` turns the mask into floats, convert back.
-    cal['mask'] = _as_boolean_mask(cal['mask'].data)
-    return cal
-
-
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
     dim = calibration.dim
     if not sc.identical(into.coords[dim], calibration.coords[dim]):
