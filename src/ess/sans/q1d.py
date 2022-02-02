@@ -13,7 +13,8 @@ from scipp.interpolate import interp1d
 
 def _make_coordinate_transform_graphs(gravity):
     """
-    Create unit conversion graphs
+    Create unit conversion graphs.
+    The gravity parameter can be used to turn on or off the effects of gravity.
     """
     data_graph = conversions.sans_elastic(gravity=gravity)
     monitor_graph = conversions.sans_monitor()
@@ -23,26 +24,14 @@ def _make_coordinate_transform_graphs(gravity):
 def _convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
                            monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
     """
-    Convert the data array and all the items inside the dict of monitors to wavelength.
-    The gravity parameter can be used to turn on or off the effects of gravity.
+    Convert the data array and all the items inside the dict of monitors to wavelength
+    using a pre-defined conversion graph.
     """
-
-    # if gravity:
-    #     # Make shallow copy of data so as to not add coords in-place
-    #     data = data.copy(deep=False)
-    #     data.coords["gravity"] = gravity_vector()
-
-    # # Create unit conversion graphs
-    # graph = conversions.sans_elastic(gravity=gravity)
-    # graph_monitor = conversions.sans_monitor()
-
-    # Convert to wavelength
     data = data.transform_coords("wavelength", graph=data_graph)
     monitors = {
         key: monitors[key].transform_coords("wavelength", graph=monitor_graph)
         for key in monitors
     }
-
     return data, monitors
 
 
@@ -121,6 +110,9 @@ def _convert_to_q_and_merge_spectra(data, graph, wavelength_bands, gravity):
 
 
 def _convert_events_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands):
+    """
+    Convert event data to momentum vector Q.
+    """
     data = data.transform_coords("Q", graph=graph)
     q_boundaries = sc.concat([q_bins.min(), q_bins.max()], dim='Q')
 
@@ -128,11 +120,13 @@ def _convert_events_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands
     data.bins.coords['wavelength'] = data.bins.attrs.pop('wavelength')
 
     q_binned = sc.bin(data, edges=[wavelength_bands, q_boundaries])
-    q_summed = q_binned.bins.concat('spectrum')
-    return q_summed
+    return q_binned.bins.concat('spectrum')
 
 
 def _convert_dense_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands):
+    """
+    Convert dense data to momentum vector Q.
+    """
     bands = []
     print(wavelength_bands.sizes['wavelength'])
     for i in range(wavelength_bands.sizes['wavelength'] - 1):
@@ -146,6 +140,11 @@ def _convert_dense_to_q_and_merge_spectra(data, graph, q_bins, wavelength_bands)
 
 
 def _normalize(numerator, denominator, dim='Q'):
+    """
+    Perform normalization. If the numerator contains events, we use the sc.lookup
+    function to perform the division.
+    The denominator cannot contain event data.
+    """
     if numerator.bins is not None:
         return numerator.bins / sc.lookup(func=denominator, dim=dim)
     else:
@@ -200,8 +199,6 @@ def q1d(data,
     for coord in ['position', 'sample_position', 'source_position']:
         denominator.coords[coord] = data.meta[coord]
 
-    # 3. Convert from wavelength to Q ==================================================
-
     # In the case where no wavelength bands are requested, we create a single wavelength
     # band to make sure we select the correct wavelength range that corresponds to
     # wavelength_bins
@@ -219,30 +216,6 @@ def q1d(data,
                                                     wavelength_bands=wavelength_bands,
                                                     gravity=gravity)
 
-    # data = data.transform_coords("Q", graph=graph)
-    # q_boundaries = sc.concat([q_bins.min(), q_bins.max()], dim='Q')
-
-    # # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
-    # data.bins.coords['wavelength'] = data.bins.attrs.pop('wavelength')
-
-    # q_binned = sc.bin(data, edges=[wavelength_bands, q_boundaries])
-    # q_summed = q_binned.bins.concat('spectrum')
-
-    # denominator_bands = []
-    # for i in range(number_of_wavelength_bands):
-    #     band = denominator['wavelength',
-    #                        wavelength_bands['wavelength',
-    #                                         i]:wavelength_bands['wavelength', i + 1]]
-    #     q_band = band.transform_coords("Q", graph=graph)
-    #     denominator_bands.append(sc.histogram(q_band, bins=q_bins))
-    # denominator_q_summed = sc.concat(denominator_bands, 'wavelength').sum('spectrum')
-
-    # 4. Normalize =====================================================================
-
-    # normalized = q_summed.bins / sc.lookup(func=denominator_q_summed, dim='Q')
     normalized = _normalize(numerator=data_q, denominator=denominator_q, dim='Q')
-    # if histogram_output:
-    #     normalized = sc.histogram(normalized, bins=q_bins)
-    # if number_of_wavelength_bands == 1:
-    #     normalized = normalized['wavelength', 0]
+
     return normalized
