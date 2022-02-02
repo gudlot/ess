@@ -52,22 +52,16 @@ def load_calibration(filename: Union[str, Path],
         # workspaces have been created by the same algorithm, which should
         # guarantee ordering.
         mask_ws = ws.OutputMaskWorkspace
-        group_ws = ws.OutputGroupingWorkspace
         rows = mask_ws.getNumberHistograms()
         mask = sc.array(dims=['row'],
                         values=np.fromiter((mask_ws.readY(i)[0] for i in range(rows)),
                                            count=rows,
                                            dtype=np.bool_))
-        group = sc.array(dims=['row'],
-                         values=np.fromiter((group_ws.readY(i)[0] for i in range(rows)),
-                                            count=rows,
-                                            dtype=np.int32))
     # This is deliberately not stored as a mask since that would make
     # subsequent handling, e.g., with groupby, more complicated. The mask
     # is conceptually not masking rows in this table, i.e., it is not
     # marking invalid rows, but rather describes masking for other data.
     ds["mask"] = _as_boolean_mask(mask)
-    ds["group"] = group
 
     # The file does not define units
     # TODO why those units? Can we verify?
@@ -91,16 +85,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
         raise ValueError(
             f'Coordinate {dim} of calibration and target dataset do not agree.')
     out = into.copy(deep=False)
-    for name in ('difa', 'difc', 'tzero', 'group'):
+    for name in ('difa', 'difc', 'tzero'):
         out.attrs[name] = calibration[name].data
     out.masks['cal'] = calibration['mask'].data
     return out
-
-
-def calibrate_and_focus(*, sample, calibration):
-    # Import here to avoid cycle from importing at module level.
-    from .conversions import to_dspacing_with_calibration
-
-    sample = merge_calibration(into=sample, calibration=calibration)
-    dspacing = to_dspacing_with_calibration(sample)
-    return sc.groupby(dspacing, group='group').bins.concat('spectrum')
