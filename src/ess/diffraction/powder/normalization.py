@@ -68,8 +68,17 @@ def subtract_empty_instrument(data, empty_instr):
     data = data.copy(deep=False)
     empty_instr = empty_instr.copy(deep=False)
 
-    edges = _common_edges(data, empty_instr, dim='wavelength')
-    data.coords['wavelength'] = edges
-    empty_instr.coords['wavelength'] = edges
+    wavelength_edges = _common_edges(data.coords['wavelength'],
+                                     empty_instr.coords['wavelength'],
+                                     dim='wavelength')
+    data.coords['wavelength'] = wavelength_edges
+    empty_instr.coords['wavelength'] = wavelength_edges
+
+    if 'tof' in data.attrs:
+        tof_edges = _common_edges(data.attrs['tof'],
+                                  empty_instr.attrs['tof'],
+                                  dim='wavelength')
+        data.attrs['tof'] = tof_edges
+        empty_instr.attrs['tof'] = tof_edges
 
     return data.bins.concat(-empty_instr)
