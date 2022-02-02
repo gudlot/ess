@@ -62,7 +62,7 @@ def _direct_beam(direct_beam: sc.DataArray,
     direct_beam = func(wavelength_bins, midpoints=True)
     logger = sc.get_logger()
     logger.warning('An interpolation was performed on the direct_beam function. '
-                   'The variances in the direct_beam function have been ignored.')
+                   'The variances in the direct_beam function have been dropped.')
     return direct_beam
 
 
