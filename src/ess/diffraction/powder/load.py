@@ -23,6 +23,7 @@ def _load_aux_file_as_wavelength(filename):
 
 
 def load_vanadium(vanadium_file, empty_instrument_file):
+    # TODO normalize by proton charge?
     vanadium = _load_aux_file_as_wavelength(vanadium_file)
     empty_instrument = _load_aux_file_as_wavelength(empty_instrument_file)
     return subtract_empty_instrument(vanadium, empty_instrument)
