@@ -38,13 +38,11 @@ def subtract_background_and_rebin(
         background counts.
     """
     if non_background_range is not None:
-        data_original = data.copy(deep=False)
-        wav_midpoints = 0.5 * (data_original.coords['wavelength'][1:] +
-                               data_original.coords['wavelength'][:-1])
-        data_original.masks['non_background'] = (
-            wav_midpoints > non_background_range[0]) & (wav_midpoints <
-                                                        non_background_range[1])
-        background = sc.mean(data_original)
+        dim = non_background_range.dim
+        below = data[dim, :non_background_range[0]].data
+        above = data[dim, non_background_range[1]:].data
+        background = (below.sum() + above.sum()) / sc.scalar(below.sizes[dim] +
+                                                             above.sizes[dim])
         data = data - background
     return sc.rebin(data, "wavelength", wavelength_bins)
 
@@ -74,3 +72,27 @@ def transmission_fraction(data_incident_monitor: sc.DataArray,
 
     return (data_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / data_incident_monitor)
+
+
+def normalize(numerator: sc.DataArray,
+              denominator: sc.DataArray,
+              dim: str = None) -> sc.DataArray:
+    """
+    Perform normalization. If the numerator contains events, we use the sc.lookup
+    function to perform the division.
+    The denominator cannot contain event data, it must be histogrammed data.
+
+    :param numerator: The data whose counts will be divided by the denominator. This
+        can either be event or dense (histogrammed) data.
+    :param denominator: The divisor for the normalization operation. This cannot be
+        event data, it must contain histogrammed data.
+    :param dim: In the case of a numerator containing event data, this is the dimension
+        along which the lookup operation should be performed. This can be omitted in
+        case the denominator has only one dimension.
+    """
+    if numerator.bins is not None:
+        if dim is None:
+            dim = denominator.dim
+        return numerator.bins / sc.lookup(func=denominator, dim=dim)
+    else:
+        return numerator / denominator

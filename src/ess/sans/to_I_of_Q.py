@@ -140,20 +140,6 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-def _normalize(numerator: sc.DataArray,
-               denominator: sc.DataArray,
-               dim='Q') -> sc.DataArray:
-    """
-    Perform normalization. If the numerator contains events, we use the sc.lookup
-    function to perform the division.
-    The denominator cannot contain event data.
-    """
-    if numerator.bins is not None:
-        return numerator.bins / sc.lookup(func=denominator, dim=dim)
-    else:
-        return numerator / denominator
-
-
 def to_I_of_Q(data: sc.DataArray,
               data_incident_monitor: sc.DataArray,
               data_transmission_monitor: sc.DataArray,
@@ -269,6 +255,8 @@ def to_I_of_Q(data: sc.DataArray,
                                                     q_bins=q_bins,
                                                     gravity=gravity)
 
-    normalized = _normalize(numerator=data_q, denominator=denominator_q, dim='Q')
+    normalized = normalization.normalize(numerator=data_q,
+                                         denominator=denominator_q,
+                                         dim='Q')
 
     return normalized
