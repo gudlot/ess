@@ -4,4 +4,4 @@
 from . import common
 from . import conversions
 from . import normalization
-from .to_I_of_Q import to_I_of_Q
+from .i_of_q import to_I_of_Q

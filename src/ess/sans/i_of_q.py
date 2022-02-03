@@ -9,7 +9,7 @@ from . import normalization
 from scipp.interpolate import interp1d
 
 
-def _make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
+def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
     """
     Create unit conversion graphs.
     The gravity parameter can be used to turn on or off the effects of gravity.
@@ -19,8 +19,8 @@ def _make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
     return data_graph, monitor_graph
 
 
-def _convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
-                           monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
+def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
+                          monitor_graph: dict) -> Tuple[sc.DataArray, dict]:
     """
     Convert the data array and all the items inside the dict of monitors to wavelength
     using a pre-defined conversion graph.
@@ -33,8 +33,8 @@ def _convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
     return data, monitors
 
 
-def _denoise_and_rebin_monitors(monitors: dict, wavelength_bins: sc.Variable,
-                                non_background_range: sc.Variable) -> dict:
+def denoise_and_rebin_monitors(monitors: dict, wavelength_bins: sc.Variable,
+                               non_background_range: sc.Variable) -> dict:
     """
     Subtract a background baseline from monitor counts, taken as the mean of the counts
     outside the specified ``non_background_range``.
@@ -48,8 +48,8 @@ def _denoise_and_rebin_monitors(monitors: dict, wavelength_bins: sc.Variable,
     }
 
 
-def _direct_beam(direct_beam: sc.DataArray,
-                 wavelength_bins: sc.Variable) -> sc.DataArray:
+def resample_direct_beam(direct_beam: sc.DataArray,
+                         wavelength_bins: sc.Variable) -> sc.DataArray:
     """
     If the wavelength binning of the direct beam function does not match the requested
     ``wavelength_bins``, perform a 1d interpolation of the function onto the bins.
@@ -64,9 +64,9 @@ def _direct_beam(direct_beam: sc.DataArray,
     return direct_beam
 
 
-def _denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
-                 transmission_fraction: sc.DataArray,
-                 solid_angle: sc.Variable) -> sc.DataArray:
+def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
+                        transmission_fraction: sc.DataArray,
+                        solid_angle: sc.Variable) -> sc.DataArray:
     """
     Compute the denominator term.
     Because we are histogramming the Q values of the denominator further down in the
@@ -81,9 +81,9 @@ def _denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
     return denominator
 
 
-def _convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
-                                    wavelength_bands: sc.Variable, q_bins: sc.Variable,
-                                    gravity: bool) -> sc.DataArray:
+def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
+                                   wavelength_bands: sc.Variable, q_bins: sc.Variable,
+                                   gravity: bool) -> sc.DataArray:
     """
     Convert the data to momentum vector Q. This accepts both dense and event data.
     The final step merges all spectra:
@@ -206,31 +206,33 @@ def to_I_of_Q(data: sc.DataArray,
         'direct_transmission_monitor': direct_transmission_monitor
     }
 
-    data_graph, monitor_graph = _make_coordinate_transform_graphs(gravity=gravity)
+    data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
 
-    data, monitors = _convert_to_wavelength(data=data,
-                                            monitors=monitors,
-                                            data_graph=data_graph,
-                                            monitor_graph=monitor_graph)
+    data, monitors = convert_to_wavelength(data=data,
+                                           monitors=monitors,
+                                           data_graph=data_graph,
+                                           monitor_graph=monitor_graph)
 
-    monitors = _denoise_and_rebin_monitors(
+    monitors = denoise_and_rebin_monitors(
         monitors=monitors,
         wavelength_bins=wavelength_bins,
         non_background_range=monitor_non_background_range)
 
     transmission_fraction = normalization.transmission_fraction(**monitors)
 
+    direct_beam = resample_direct_beam(direct_beam=direct_beam,
+                                       wavelength_bins=wavelength_bins)
+
     solid_angle = normalization.solid_angle_of_rectangular_pixels(
         data,
         pixel_width=data.coords['pixel_width'],
         pixel_height=data.coords['pixel_height'])
 
-    direct_beam = _direct_beam(direct_beam=direct_beam, wavelength_bins=wavelength_bins)
-
-    denominator = _denominator(direct_beam=direct_beam,
-                               data_incident_monitor=monitors['data_incident_monitor'],
-                               transmission_fraction=transmission_fraction,
-                               solid_angle=solid_angle)
+    denominator = compute_denominator(
+        direct_beam=direct_beam,
+        data_incident_monitor=monitors['data_incident_monitor'],
+        transmission_fraction=transmission_fraction,
+        solid_angle=solid_angle)
     # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
@@ -243,17 +245,17 @@ def to_I_of_Q(data: sc.DataArray,
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
 
-    data_q = _convert_to_q_and_merge_spectra(data=data,
-                                             graph=data_graph,
-                                             wavelength_bands=wavelength_bands,
-                                             q_bins=q_bins,
-                                             gravity=gravity)
+    data_q = convert_to_q_and_merge_spectra(data=data,
+                                            graph=data_graph,
+                                            wavelength_bands=wavelength_bands,
+                                            q_bins=q_bins,
+                                            gravity=gravity)
 
-    denominator_q = _convert_to_q_and_merge_spectra(data=denominator,
-                                                    graph=data_graph,
-                                                    wavelength_bands=wavelength_bands,
-                                                    q_bins=q_bins,
-                                                    gravity=gravity)
+    denominator_q = convert_to_q_and_merge_spectra(data=denominator,
+                                                   graph=data_graph,
+                                                   wavelength_bands=wavelength_bands,
+                                                   q_bins=q_bins,
+                                                   gravity=gravity)
 
     normalized = normalization.normalize(numerator=data_q,
                                          denominator=denominator_q,
