@@ -165,6 +165,53 @@ def to_I_of_Q(data: sc.DataArray,
               gravity: bool = False,
               monitor_non_background_range: sc.Variable = None,
               wavelength_bands: sc.Variable = None) -> sc.DataArray:
+    """
+    Compute the scattering cross-section I(Q) for a SANS experimental run, performing
+    binning in Q and a normalization based on monitor data and a direct beam function.
+
+    The main steps of the workflow are:
+
+       * Generate a coordinate transformation graph from ``tof`` to ``Q``, that also
+         includes ``wavelength``.
+       * Convert the detector data and monitors to wavelength.
+       * Remove the background noise from the monitors and align them to a common
+         binning axis.
+       * Compute the transmission fraction from the monitor data.
+       * Compute the solid angles of the detector pixels.
+       * Resample the direct beam function to the same wavelength binning as the
+         monitors.
+       * Combine solid angle, direct beam, transmission fraction and incident monitor
+         counts to compute the denominator for the normalization.
+       * Convert the detector data to momentum vector Q.
+       * Convert the denominator to momentum vector Q.
+       * Normalize the detector data.
+
+    :param data: The DataArray containing the detector data. This can be both events
+        or dense (histogrammed) data.
+    :param data_incident_monitor: The histogrammed counts of the incident monitor
+        during the measurement (sample or background) run, as a function of wavelength.
+    :param data_transmission_monitor:  The histogrammed counts of the transmission
+        monitor during the measurement (sample or background) run, as a function of
+        wavelength.
+    :param direct_incident_monitor: The histogrammed counts of the incident monitor
+        during the direct (empty sample holder) run, as a function of wavelength.
+    :param direct_transmission_monitor: The histogrammed counts of the transmission
+        monitor during the direct (empty sample holder) run, as a function of
+        wavelength.
+    :param direct_beam: The direct beam function of the instrument (histogrammed,
+        depends on wavelength).
+    :param wavelength_bins: The binning in the wavelength dimension to be used.
+    :param q_bins: The binning in the Q dimension to be used.
+    :param gravity: Include the effects of gravity when computing the scattering angle
+        if True.
+    :param monitor_non_background_range: The range of wavelengths for the monitors that
+        are considered to not be part of the background. This is used to compute the
+        background level on each monitor, which then gets subtracted from each monitor's
+        counts.
+    :param wavelength_bands: If defined, return the data as a set of bands in the
+        wavelength dimension. This is useful for separating different wavelength ranges
+        that contribute to different regions in Q space.
+    """
 
     monitors = {
         'data_incident_monitor': data_incident_monitor,
