@@ -154,17 +154,17 @@ def _normalize(numerator: sc.DataArray,
         return numerator / denominator
 
 
-def q1d(data: sc.DataArray,
-        data_incident_monitor: sc.DataArray,
-        data_transmission_monitor: sc.DataArray,
-        direct_incident_monitor: sc.DataArray,
-        direct_transmission_monitor: sc.DataArray,
-        direct_beam: sc.DataArray,
-        wavelength_bins: sc.Variable,
-        q_bins: sc.Variable,
-        gravity: bool = False,
-        monitor_non_background_range: sc.Variable = None,
-        wavelength_bands: sc.Variable = None) -> sc.DataArray:
+def to_I_of_Q(data: sc.DataArray,
+              data_incident_monitor: sc.DataArray,
+              data_transmission_monitor: sc.DataArray,
+              direct_incident_monitor: sc.DataArray,
+              direct_transmission_monitor: sc.DataArray,
+              direct_beam: sc.DataArray,
+              wavelength_bins: sc.Variable,
+              q_bins: sc.Variable,
+              gravity: bool = False,
+              monitor_non_background_range: sc.Variable = None,
+              wavelength_bands: sc.Variable = None) -> sc.DataArray:
 
     monitors = {
         'data_incident_monitor': data_incident_monitor,
