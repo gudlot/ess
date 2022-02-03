@@ -115,14 +115,13 @@ def _convert_events_to_q_and_merge_spectra(
     """
     Convert event data to momentum vector Q.
     """
-    data = data.transform_coords("Q", graph=graph)
-    q_boundaries = sc.concat([q_bins.min(), q_bins.max()], dim='Q')
+    data_q = data.transform_coords("Q", graph=graph)
 
     # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
-    data.bins.coords['wavelength'] = data.bins.attrs.pop('wavelength')
+    data_q.bins.coords['wavelength'] = data_q.bins.attrs.pop('wavelength')
 
-    q_binned = sc.bin(data, edges=[wavelength_bands, q_boundaries])
-    return q_binned.bins.concat('spectrum')
+    q_summed = data_q.bins.concat('spectrum')
+    return sc.bin(q_summed, edges=[wavelength_bands, q_bins])
 
 
 def _convert_dense_to_q_and_merge_spectra(
@@ -199,7 +198,7 @@ def q1d(data: sc.DataArray,
                                data_incident_monitor=monitors['data_incident_monitor'],
                                transmission_fraction=transmission_fraction,
                                solid_angle=solid_angle)
-    # Insert copy coords needed for conversion to Q.
+    # Insert a copy of coords needed for conversion to Q.
     # TODO: can this be avoided by copying the Q coords from the converted numerator?
     for coord in ['position', 'sample_position', 'source_position']:
         denominator.coords[coord] = data.meta[coord]
