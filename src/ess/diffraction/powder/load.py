@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 import numpy as np
 import scipp as sc
 import scippneutron as scn
 
+from ...logging import get_logger
 from .corrections import subtract_empty_instrument
 
 
@@ -23,6 +24,10 @@ def _load_aux_file_as_wavelength(filename):
 
 
 def load_vanadium(vanadium_file, empty_instrument_file):
+    get_logger('diffraction').info(
+        'Loading vanadium from file %s\n'
+        'and correcting by empty instrument from file %s', vanadium_file,
+        empty_instrument_file)
     # TODO normalize by proton charge?
     vanadium = _load_aux_file_as_wavelength(vanadium_file)
     empty_instrument = _load_aux_file_as_wavelength(empty_instrument_file)
@@ -37,8 +42,34 @@ def _as_boolean_mask(var):
     return var.to(dtype=bool)
 
 
+def _parse_calibration_instrument_args(
+    filename: Union[str, Path],
+    *,
+    instrument_filename: Optional[str] = None,
+    instrument_name: Optional[str] = None,
+) -> Dict[str, str]:
+    if instrument_filename is not None:
+        if instrument_name is not None:
+            raise ValueError('Only one argument of `instrument_name` and '
+                             '`instrument_filename` is allowed, got both.')
+        instrument_arg = {'InstrumentFilename': instrument_filename}
+        instrument_message = f'with instrument file {instrument_filename}'
+    else:
+        if instrument_name is None:
+            raise ValueError('Need one argument of `instrument_name` and '
+                             '`instrument_filename` is allowed, got neither.')
+        instrument_arg = {'InstrumentName': instrument_name}
+        instrument_message = f'with instrument {instrument_name}'
+
+    get_logger('diffraction').info('Loading calibration from file %s %s', filename,
+                                   instrument_message)
+    return instrument_arg
+
+
 def load_calibration(filename: Union[str, Path],
                      *,
+                     instrument_filename: Optional[str] = None,
+                     instrument_name: Optional[str] = None,
                      mantid_args: Optional[dict] = None) -> sc.Dataset:
     """
     Function that loads calibration files using the Mantid algorithm
@@ -63,6 +94,10 @@ def load_calibration(filename: Union[str, Path],
     """
 
     mantid_args = {} if mantid_args is None else mantid_args
+    mantid_args.update(
+        _parse_calibration_instrument_args(filename,
+                                           instrument_filename=instrument_filename,
+                                           instrument_name=instrument_name))
 
     with scn.mantid.run_mantid_alg('LoadDiffCal', Filename=str(filename),
                                    **mantid_args) as ws:
