@@ -5,7 +5,7 @@ from scipp.signal import butter
 import scipp as sc
 
 
-def smooth_data(variable, *, dim, NPoints=3):
+def smooth_data(variable: sc.Variable, *, dim: str, NPoints: int = 3) -> sc.Variable:
     """
     Function that smooths data by assigning the value of each point to the
     mean of the values from surrounding points and itself. The number of points
@@ -47,20 +47,16 @@ def smooth_data(variable, *, dim, NPoints=3):
     return out
 
 
-# TODO remove when scipp finally supports this
-def _to_bin_centers(coord):
-    return coord[:-1] + (coord[1:] - coord[:-1]) / 2
-
-
-def fft_smooth(data, *, dim, order, Wn):
-    if data.variances is not None:
+def fft_smooth(var: sc.Variable, *, dim: str, order: int,
+               Wn: sc.Variable) -> sc.Variable:
+    if var.variances is not None:
         # TODO log properly
         print('WARNING ignoring variances')
-        data = sc.values(data)
+        var = sc.values(var)
 
-    if data.coords[dim].sizes[dim] == data.sizes[dim] + 1:
+    if var.coords[dim].sizes[dim] == var.sizes[dim] + 1:
         # TODO allow dim in attrs
-        data = data.copy(deep=False)
-        data.coords[dim] = _to_bin_centers(data.coords[dim])
+        var = var.copy(deep=False)
+        var.coords[dim] = sc.midpoints(var.coords[dim], dim)
 
-    return butter(data.coords[dim], N=order, Wn=Wn).filtfilt(data, dim)
+    return butter(var.coords[dim], N=order, Wn=Wn).filtfilt(var, dim)

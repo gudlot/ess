@@ -11,7 +11,7 @@ from ...logging import get_logger
 from .corrections import subtract_empty_instrument
 
 
-def _load_aux_file_as_wavelength(filename):
+def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
     da = scn.load(filename,
                   advanced_geometry=True,
                   load_pulse_times=False,
@@ -23,7 +23,8 @@ def _load_aux_file_as_wavelength(filename):
                                })
 
 
-def load_vanadium(vanadium_file, empty_instrument_file):
+def load_vanadium(vanadium_file: Union[str, Path],
+                  empty_instrument_file: Union[str, Path]) -> sc.DataArray:
     get_logger('diffraction').info(
         'Loading vanadium from file %s\n'
         'and correcting by empty instrument from file %s', vanadium_file,
@@ -34,7 +35,7 @@ def load_vanadium(vanadium_file, empty_instrument_file):
     return subtract_empty_instrument(vanadium, empty_instrument)
 
 
-def _as_boolean_mask(var):
+def _as_boolean_mask(var: sc.Variable) -> sc.Variable:
     if var.dtype in ('float32', 'float64'):
         if sc.any(var != var.to(dtype='int64')).value:
             raise ValueError(

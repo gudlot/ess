@@ -21,7 +21,7 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     return out
 
 
-def _common_edges(*edges, dim):
+def _common_edges(*edges, dim: str) -> sc.Variable:
     """
     The data has separate bin edges for each spectrum:
 
@@ -48,7 +48,8 @@ def _common_edges(*edges, dim):
     return sc.concat([lo, hi], dim)
 
 
-def subtract_empty_instrument(data, empty_instr):
+def subtract_empty_instrument(data: sc.DataArray,
+                              empty_instr: sc.DataArray) -> sc.DataArray:
     data = data.copy(deep=False)
     empty_instr = empty_instr.copy(deep=False)
 
@@ -95,7 +96,11 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def normalize_by_vanadium(data, *, vanadium, edges, in_place=False):
+def normalize_by_vanadium(data: sc.DataArray,
+                          *,
+                          vanadium: sc.DataArray,
+                          edges: sc.Variable,
+                          in_place: bool = False) -> sc.DataArray:
     norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
     if in_place:
         data.bins /= norm

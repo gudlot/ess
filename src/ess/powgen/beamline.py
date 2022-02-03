@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-
 import scipp as sc
 
 
-def map_detector_to_spectrum(data, *, detector_info):
+def map_detector_to_spectrum(data: sc.DataArray, *,
+                             detector_info: sc.DataArray) -> sc.DataArray:
     if not sc.identical(data.coords['detector'], detector_info.coords['detector']):
         raise sc.CoordError(
             "The 'detector' coords of `data` and `detector_info` do not match.")

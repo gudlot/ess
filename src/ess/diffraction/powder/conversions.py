@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+from typing import Optional
 
 import scipp as sc
 
 from .corrections import merge_calibration
 
 
-def dspacing_from_diff_calibration(tof, tzero, difa, difc):
+def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
+                                   difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
     # TODO Is this a good check?
     #      Do we need to check both bins and events beforehand?
     #      Or check for each element?
@@ -18,7 +20,7 @@ def dspacing_from_diff_calibration(tof, tzero, difa, difc):
     return (sc.sqrt(difc**2 + 4 * difa * (tof - tzero)) - difc) / (2.0 * difa)
 
 
-def _restore_tof_if_in_wavelength(data):
+def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     if 'wavelength' not in data.dims:
         return data
 
@@ -31,7 +33,10 @@ def _restore_tof_if_in_wavelength(data):
     return tof_data.rename_dims({'wavelength': 'tof'})
 
 
-def to_dspacing_with_calibration(data, *, calibration=None):
+def to_dspacing_with_calibration(
+        data: sc.DataArray,
+        *,
+        calibration: Optional[sc.Dataset] = None) -> sc.DataArray:
     if calibration is not None:
         out = merge_calibration(into=data, calibration=calibration)
     else:
