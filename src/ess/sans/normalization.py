@@ -12,7 +12,6 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
 
     Note that this is an approximation which is only valid for small angles
     between the line of sight and the rectangle normal.
-    This is usually a reasonable approximation for SANS experiments.
 
     :param data: The DataArray that contains the positions for the detector pixels and
         the sample.
