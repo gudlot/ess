@@ -3,6 +3,10 @@
 import uuid
 
 import scipp as sc
+from scippneutron.tof.conversions import beamline, elastic
+
+from .smoothing import fft_smooth
+from .tools import unwrap_attr
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -62,3 +66,30 @@ def subtract_empty_instrument(data, empty_instr):
         empty_instr.attrs['tof'] = tof_edges
 
     return data.bins.concat(-empty_instr)
+
+
+def normalize_by_monitor(data: sc.DataArray,
+                         *,
+                         monitor: str,
+                         wavelength_edges: sc.Variable,
+                         smooth_args=None) -> sc.DataArray:
+    """
+
+    """
+
+    mon = unwrap_attr(data.meta[monitor])
+    if 'wavelength' not in mon.coords:
+        mon = mon.transform_coords('wavelength',
+                                   graph={
+                                       **beamline(scatter=False),
+                                       **elastic("tof")
+                                   },
+                                   keep_inputs=False,
+                                   keep_intermediate=False,
+                                   keep_aliases=False)
+
+    mon = sc.rebin(mon, 'wavelength', wavelength_edges)
+    if smooth_args is not None:
+        print(f"Smoothing monitor '{monitor}' for normalisation with {smooth_args}.")
+        mon = fft_smooth(mon, dim='wavelength', **smooth_args)
+    return data.bins / sc.lookup(func=mon, dim='wavelength')
