@@ -1,3 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-from .load import load_calibration
+from .conversions import to_dspacing_with_calibration
+from .corrections import merge_calibration, subtract_empty_instrument
+from .load import load_calibration, load_vanadium

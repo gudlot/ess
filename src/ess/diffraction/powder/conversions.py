@@ -3,7 +3,7 @@
 
 import scipp as sc
 
-from .calibration import merge_calibration
+from .corrections import merge_calibration
 
 
 def dspacing_from_diff_calibration(tof, tzero, difa, difc):
