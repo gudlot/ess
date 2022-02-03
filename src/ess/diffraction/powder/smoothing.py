@@ -1,11 +1,27 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-
 from scipp.signal import butter
 import scipp as sc
 
+from ...logging import get_logger
 
-def smooth_data(variable: sc.Variable, *, dim: str, NPoints: int = 3) -> sc.Variable:
+
+def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
+    if var.variances is not None:
+        get_logger('diffraction').warning(
+            'Tried to smoothen data with uncertainties. '
+            'This is not supported because the results would be highly correlated.\n'
+            'Instead, the variances are ignored and the output '
+            'will be returned without any!'
+            '\n--------------------------------------------------\n'
+            'If you know a good solution for handling uncertainties in such a case, '
+            'please contact the scipp developers! (e.g. via https://github.com/scipp)'
+            '\n--------------------------------------------------\n')
+        return sc.values(var)
+    return var
+
+
+def smooth_data(var: sc.Variable, *, dim: str, NPoints: int = 3) -> sc.Variable:
     """
     Function that smooths data by assigning the value of each point to the
     mean of the values from surrounding points and itself. The number of points
@@ -16,7 +32,7 @@ def smooth_data(variable: sc.Variable, *, dim: str, NPoints: int = 3) -> sc.Vari
 
     Parameters
     ----------
-        variable: scipp variable
+        var: scipp variable
             The variable which should have its values smoothed
 
         dim: scipp Dim
@@ -29,30 +45,24 @@ def smooth_data(variable: sc.Variable, *, dim: str, NPoints: int = 3) -> sc.Vari
     if NPoints < 3:
         raise ValueError("smooth_data needs NPoints of 3 or higher.")
 
-    if variable.variances is not None:
-        # TODO log properly
-        print('WARNING ignoring variances')
-        variable = sc.values(variable)
+    var = _ensure_no_variances(var)
 
-    data_length = variable.sizes[dim]
-    out = variable.copy()  # preallocate output variable
+    data_length = var.sizes[dim]
+    out = var.copy()  # preallocate output variable
 
     hr = NPoints // 2  # half range rounded down
 
     for index in range(data_length):
         begin = max(0, index - hr)
         end = min(data_length, index + hr + 1)
-        out[dim, index] = sc.mean(variable[dim, begin:end], dim)
+        out[dim, index] = sc.mean(var[dim, begin:end], dim)
 
     return out
 
 
 def fft_smooth(var: sc.Variable, *, dim: str, order: int,
                Wn: sc.Variable) -> sc.Variable:
-    if var.variances is not None:
-        # TODO log properly
-        print('WARNING ignoring variances')
-        var = sc.values(var)
+    var = _ensure_no_variances(var)
 
     if var.coords[dim].sizes[dim] == var.sizes[dim] + 1:
         # TODO allow dim in attrs
