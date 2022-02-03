@@ -42,6 +42,7 @@ Documentation
    :caption: Techniques
 
    techniques/reflectometry/reflectometry
+   techniques/sans/sans
    techniques/wfm/wfm
 
 .. toctree::
