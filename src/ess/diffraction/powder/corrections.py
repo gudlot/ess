@@ -93,3 +93,13 @@ def normalize_by_monitor(data: sc.DataArray,
         print(f"Smoothing monitor '{monitor}' for normalisation with {smooth_args}.")
         mon = fft_smooth(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')
+
+
+def normalize_by_vanadium(data, *, vanadium, edges, in_place=False):
+    norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
+    if in_place:
+        data.bins /= norm
+        out = data
+    else:
+        out = data.copy(deep=False).bins / norm
+    return sc.histogram(out, bins=edges)
