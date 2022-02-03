@@ -7,6 +7,26 @@ import numpy as np
 import scipp as sc
 import scippneutron as scn
 
+from .corrections import subtract_empty_instrument
+
+
+def _load_aux_file_as_wavelength(filename):
+    da = scn.load(filename,
+                  advanced_geometry=True,
+                  load_pulse_times=False,
+                  mantid_args={'LoadMonitors': True})
+    return da.transform_coords('wavelength',
+                               graph={
+                                   **scn.tof.conversions.beamline(scatter=True),
+                                   **scn.tof.conversions.elastic("tof")
+                               })
+
+
+def load_vanadium(vanadium_file, empty_instrument_file):
+    vanadium = _load_aux_file_as_wavelength(vanadium_file)
+    empty_instrument = _load_aux_file_as_wavelength(empty_instrument_file)
+    return subtract_empty_instrument(vanadium, empty_instrument)
+
 
 def _as_boolean_mask(var):
     if var.dtype in ('float32', 'float64'):
