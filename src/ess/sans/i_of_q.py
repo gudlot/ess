@@ -110,7 +110,7 @@ def resample_direct_beam(direct_beam: sc.DataArray,
     return direct_beam
 
 
-def convert_to_q_and_merge_spectra(data: Union[sc.DataArray, dict], graph: dict,
+def convert_to_q_and_merge_spectra(data: sc.DataArray, graph: dict,
                                    wavelength_bands: sc.Variable, q_bins: sc.Variable,
                                    gravity: bool) -> sc.DataArray:
     """
@@ -119,8 +119,7 @@ def convert_to_q_and_merge_spectra(data: Union[sc.DataArray, dict], graph: dict,
       - In the case of event data, events in all bins are concatenated
       - In the case of dense data, counts in all spectra are summed
 
-    :param data: A DataArray or a dict of DataArrays, containing the data that is to be
-        converted to Q.
+    :param data: A DataArray containing the data that is to be converted to Q.
     :param graph: The coordinate conversion graph used to perform the conversion to Q.
     :param wavelength_bands: Defines bands in wavelength that can be used to separate
         different wavelength ranges that contribute to different regions in Q space.
@@ -131,35 +130,23 @@ def convert_to_q_and_merge_spectra(data: Union[sc.DataArray, dict], graph: dict,
     :param gravity: If True, include the effects of gravity when computing the
         scattering angle.
     """
-    if isinstance(data, dict):
-        return {
-            key: convert_to_q_and_merge_spectra(data=data[key],
-                                                graph=graph,
-                                                wavelength_bands=wavelength_bands,
-                                                q_bins=q_bins,
-                                                gravity=gravity)
-            for key in data
-        }
-    else:
-        if gravity:
-            data = data.copy(deep=False)
-            data.coords["gravity"] = gravity_vector()
+    if gravity:
+        data = data.copy(deep=False)
+        data.coords["gravity"] = gravity_vector()
 
-        if data.bins is not None:
-            out = _convert_events_to_q_and_merge_spectra(
-                data=data,
-                graph=graph,
-                q_bins=q_bins,
-                wavelength_bands=wavelength_bands)
-        else:
-            out = _convert_dense_to_q_and_merge_spectra(
-                data=data,
-                graph=graph,
-                q_bins=q_bins,
-                wavelength_bands=wavelength_bands)
-        if wavelength_bands.sizes['wavelength'] == 2:
-            out = out['wavelength', 0]
-        return out
+    if data.bins is not None:
+        out = _convert_events_to_q_and_merge_spectra(data=data,
+                                                     graph=graph,
+                                                     q_bins=q_bins,
+                                                     wavelength_bands=wavelength_bands)
+    else:
+        out = _convert_dense_to_q_and_merge_spectra(data=data,
+                                                    graph=graph,
+                                                    q_bins=q_bins,
+                                                    wavelength_bands=wavelength_bands)
+    if wavelength_bands.sizes['wavelength'] == 2:
+        out = out['wavelength', 0]
+    return out
 
 
 def _convert_events_to_q_and_merge_spectra(
@@ -301,14 +288,18 @@ def to_I_of_Q(data: sc.DataArray,
         wavelength_bands = sc.concat(
             [wavelength_bins.min(), wavelength_bins.max()], dim='wavelength')
 
-    to_q_conversion = {'numerator': data, 'denominator': denominator}
-    reduced = convert_to_q_and_merge_spectra(data=to_q_conversion,
-                                             graph=data_graph,
-                                             wavelength_bands=wavelength_bands,
-                                             q_bins=q_bins,
-                                             gravity=gravity)
+    data_q = convert_to_q_and_merge_spectra(data=data,
+                                            graph=data_graph,
+                                            wavelength_bands=wavelength_bands,
+                                            q_bins=q_bins,
+                                            gravity=gravity)
 
-    normalized = normalization.normalize(numerator=reduced['numerator'],
-                                         denominator=reduced['denominator'])
+    denominator_q = convert_to_q_and_merge_spectra(data=denominator,
+                                                   graph=data_graph,
+                                                   wavelength_bands=wavelength_bands,
+                                                   q_bins=q_bins,
+                                                   gravity=gravity)
+
+    normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
 
     return normalized
