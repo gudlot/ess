@@ -11,7 +11,7 @@ import numpy as np
 import scipp as sc
 import scippneutron as scn
 
-from ...logging import get_logger
+from ..logging import get_logger
 from .corrections import subtract_empty_instrument
 
 

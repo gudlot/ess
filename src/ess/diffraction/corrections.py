@@ -5,7 +5,7 @@ import uuid
 import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
 
-from ..smoothing import fft_smooth
+from .smoothing import fft_smooth
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
