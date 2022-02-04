@@ -6,10 +6,10 @@ Reference
 Reduction workflows
 -------------------
 
-.. autosummary::
-   :toctree: ../../generated
+.. toctree::
+   :maxdepth: 1
 
-   to_I_of_Q.to_I_of_Q
+   i_of_q
 
 
 Conversions
@@ -28,8 +28,9 @@ Normalization
    :toctree: ../../generated
 
    normalization.solid_angle_of_rectangular_pixels
-   normalization.subtract_background_and_rebin
    normalization.transmission_fraction
+   normalization.compute_denominator
+   normalization.normalize
 
 Common
 ------
