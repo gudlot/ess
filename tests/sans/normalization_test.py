@@ -37,35 +37,34 @@ def test_transmission_fraction():
                              stop=16.0,
                              num=N + 1,
                              unit='angstrom')
-    data_monitor_incident = sc.DataArray(data=sc.array(dims=['wavelength'],
-                                                       values=100.0 *
-                                                       np.random.random(N),
-                                                       unit='counts'),
-                                         coords={'wavelength': wavelength})
+    data_monitors = {
+        'incident':
+        sc.DataArray(data=sc.array(dims=['wavelength'],
+                                   values=100.0 * np.random.random(N),
+                                   unit='counts'),
+                     coords={'wavelength': wavelength}),
+        'transmission':
+        sc.DataArray(data=sc.array(dims=['wavelength'],
+                                   values=50.0 * np.random.random(N),
+                                   unit='counts'),
+                     coords={'wavelength': wavelength})
+    }
 
-    data_monitor_transmission = sc.DataArray(data=sc.array(dims=['wavelength'],
-                                                           values=50.0 *
-                                                           np.random.random(N),
-                                                           unit='counts'),
-                                             coords={'wavelength': wavelength})
+    direct_monitors = {
+        'incident':
+        sc.DataArray(data=sc.array(dims=['wavelength'],
+                                   values=100.0 * np.random.random(N),
+                                   unit='counts'),
+                     coords={'wavelength': wavelength}),
+        'transmission':
+        sc.DataArray(data=sc.array(dims=['wavelength'],
+                                   values=80.0 * np.random.random(N),
+                                   unit='counts'),
+                     coords={'wavelength': wavelength})
+    }
 
-    direct_monitor_incident = sc.DataArray(data=sc.array(dims=['wavelength'],
-                                                         values=100.0 *
-                                                         np.random.random(N),
-                                                         unit='counts'),
-                                           coords={'wavelength': wavelength})
-
-    direct_monitor_transmission = sc.DataArray(data=sc.array(dims=['wavelength'],
-                                                             values=80.0 *
-                                                             np.random.random(N),
-                                                             unit='counts'),
-                                               coords={'wavelength': wavelength})
-
-    trans_frac = normalization.transmission_fraction(
-        data_monitor_incident=data_monitor_incident,
-        data_monitor_transmission=data_monitor_transmission,
-        direct_monitor_incident=direct_monitor_incident,
-        direct_monitor_transmission=direct_monitor_transmission)
+    trans_frac = normalization.transmission_fraction(data_monitors=data_monitors,
+                                                     direct_monitors=direct_monitors)
 
     # If counts on data transmission monitor have increased, it means less neutrons
     # have been absorbed and transmission fraction should increase.
@@ -73,11 +72,13 @@ def test_transmission_fraction():
     # - direct run: incident: 100 -> transmission: 80
     assert sc.allclose(
         (trans_frac * sc.scalar(1.5)).data,
-        normalization.transmission_fraction(
-            data_monitor_incident=data_monitor_incident,
-            data_monitor_transmission=data_monitor_transmission * sc.scalar(1.5),
-            direct_monitor_incident=direct_monitor_incident,
-            direct_monitor_transmission=direct_monitor_transmission).data)
+        normalization.transmission_fraction(data_monitors={
+            'incident':
+            data_monitors['incident'],
+            'transmission':
+            data_monitors['transmission'] * sc.scalar(1.5)
+        },
+                                            direct_monitors=direct_monitors).data)
 
     # If counts on direct transmission monitor are higher, it means that many more
     # neutrons are absorbed when the sample is in the path of the beam, and therefore
@@ -86,11 +87,13 @@ def test_transmission_fraction():
     # - direct run: incident: 100 -> transmission: 90
     assert sc.allclose((trans_frac / sc.scalar(9 / 8)).data,
                        normalization.transmission_fraction(
-                           data_monitor_incident=data_monitor_incident,
-                           data_monitor_transmission=data_monitor_transmission,
-                           direct_monitor_incident=direct_monitor_incident,
-                           direct_monitor_transmission=direct_monitor_transmission *
-                           sc.scalar(9 / 8)).data)
+                           data_monitors=data_monitors,
+                           direct_monitors={
+                               'incident':
+                               direct_monitors['incident'],
+                               'transmission':
+                               direct_monitors['transmission'] * sc.scalar(9 / 8)
+                           }).data)
 
     # If counts on direct incident monitor are higher, but counts on direct transmission
     # monitor are the same, it means that the relative difference between incident and
@@ -100,13 +103,13 @@ def test_transmission_fraction():
     # run.
     # - data run: incident: 100 -> transmission: 50
     # - direct run: incident: 110 -> transmission: 80
-    assert sc.allclose(
-        (trans_frac * sc.scalar(1.1)).data,
-        normalization.transmission_fraction(
-            data_monitor_incident=data_monitor_incident,
-            data_monitor_transmission=data_monitor_transmission * sc.scalar(1.1),
-            direct_monitor_incident=direct_monitor_incident,
-            direct_monitor_transmission=direct_monitor_transmission).data)
+    assert sc.allclose((trans_frac * sc.scalar(1.1)).data,
+                       normalization.transmission_fraction(
+                           data_monitors=data_monitors,
+                           direct_monitors={
+                               'incident': direct_monitors['incident'] * sc.scalar(1.1),
+                               'transmission': direct_monitors['transmission']
+                           }).data)
 
     # If counts on data incident monitor are higher, but counts on data transmission
     # monitor are the same, it means that more neutrons were absorbed in this run,
@@ -115,8 +118,10 @@ def test_transmission_fraction():
     # - direct run: incident: 100 -> transmission: 80
     assert sc.allclose(
         (trans_frac / sc.scalar(1.1)).data,
-        normalization.transmission_fraction(
-            data_monitor_incident=data_monitor_incident * sc.scalar(1.1),
-            data_monitor_transmission=data_monitor_transmission,
-            direct_monitor_incident=direct_monitor_incident,
-            direct_monitor_transmission=direct_monitor_transmission).data)
+        normalization.transmission_fraction(data_monitors={
+            'incident':
+            data_monitors['incident'] * sc.scalar(1.1),
+            'transmission':
+            data_monitors['transmission']
+        },
+                                            direct_monitors=direct_monitors).data)
