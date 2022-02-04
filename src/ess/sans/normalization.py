@@ -22,31 +22,26 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     return (pixel_width * pixel_height) / (L2 * L2)
 
 
-def transmission_fraction(data_incident_monitor: sc.DataArray,
-                          data_transmission_monitor: sc.DataArray,
-                          direct_incident_monitor: sc.DataArray,
-                          direct_transmission_monitor: sc.DataArray) -> sc.DataArray:
+def transmission_fraction(data_monitors: dict, direct_monitors: dict) -> sc.DataArray:
     """
     Approximation based on equations in CalculateTransmission documentation
     p = \frac{S_T}{D_T}\frac{D_I}{S_I}
     This is equivalent to mantid.CalculateTransmission without fitting.
 
-    TODO: It seems we are always multiplying this by data_incident_monitor to compute
-    the normalization term. We could consider just returning
-    data_transmission_monitor * direct_incident_monitor / direct_transmission_monitor
+    TODO: It seems we are always multiplying this by data_monitors['incident'] to
+    compute the normalization term. We could consider just returning
+    data_monitors['transmission'] * direct_monitors['incident'] /
+        direct_monitors['transmission']
 
-    :param data_incident_monitor: The DataArray containing the incident monitor counts
-        as a function of wavelength for the data/sample run.
-    :param data_transmission_monitor: The DataArray containing the transmission monitor
-        counts as a function of wavelength for the data/sample run.
-    :param direct_incident_monitor: The DataArray containing the incident monitor counts
-        as a function of wavelength for the direct run.
-    :param direct_transmission_monitor: The DataArray containing the transmission
-        monitor counts as a function of wavelength for the direct run.
+    :param data_monitors: A dict containing the DataArrays for the incident and
+        transmission monitors for the measurement run (monitor data should depend on
+        wavelength).
+    :param direct_monitors: A dict containing the DataArrays for the incident and
+        transmission monitors for the direct run (monitor data should depend on
+        wavelength).
     """
-
-    return (data_transmission_monitor / direct_transmission_monitor) * (
-        direct_incident_monitor / data_incident_monitor)
+    return (data_monitors['transmission'] / direct_monitors['transmission']) * (
+        direct_monitors['incident'] / data_monitors['incident'])
 
 
 def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
@@ -57,6 +52,15 @@ def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.Dat
     Because we are histogramming the Q values of the denominator further down in the
     workflow, we convert the wavelength coordinate of the denominator from bin edges to
     bin centers.
+
+    :param direct_beam: The DataArray containing the direct beam function (depends on
+        wavelength).
+    :param data_incident_monitor: The DataArray containing the incident monitor counts
+        from the measurement run (depends on wavelength).
+    :param transmission_fraction: The DataArray containing the transmission fraction
+        (depends on wavelength).
+    :param solid_angle: The solid angle of the detector pixels (depends on detector
+        position).
     """
     denominator = (solid_angle * direct_beam * data_incident_monitor *
                    transmission_fraction)

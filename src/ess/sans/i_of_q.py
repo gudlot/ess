@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 
-from typing import Tuple
+from typing import Tuple, Union
 import scipp as sc
 from .common import gravity_vector
 from . import conversions
@@ -37,11 +37,23 @@ def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
         monitors.
     """
     data = data.transform_coords("wavelength", graph=data_graph)
-    monitors = {
-        key: monitors[key].transform_coords("wavelength", graph=monitor_graph)
-        for key in monitors
-    }
+    monitors = _monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
+    # for key, value in monitors.items():
+    #     if isinstance(
+    #     key: monitors[key].transform_coords("wavelength", graph=monitor_graph)
+    #     for key in monitors
+    # }
     return data, monitors
+
+
+def _monitors_to_wavelength(monitors, graph):
+    if isinstance(monitors, dict):
+        return {
+            key: _monitors_to_wavelength(monitors[key], graph=graph)
+            for key in monitors
+        }
+    else:
+        return monitors.transform_coords("wavelength", graph=graph)
 
 
 def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
@@ -61,43 +73,49 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
     """
     if isinstance(monitors, dict):
         return {
-            key:
-            _subtract_background_and_rebin(monitors[key],
-                                           wavelength_bins=wavelength_bins,
-                                           non_background_range=non_background_range)
+            key: denoise_and_rebin_monitors(monitors[key],
+                                            wavelength_bins=wavelength_bins,
+                                            non_background_range=non_background_range)
             for key in monitors
         }
     else:
-        return _subtract_background_and_rebin(monitors,
-                                              wavelength_bins=wavelength_bins,
-                                              non_background_range=non_background_range)
+        if non_background_range is not None:
+            dim = non_background_range.dim
+            below = monitors[dim, :non_background_range[0]]
+            above = monitors[dim, non_background_range[1]:]
+            # TODO: if we implement `ones_like` for data arrays, we could use that here
+            # instead of dividing the below and above pieces by themselves
+            divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
+            background = (below.sum().data + above.sum().data) / divisor
+            monitors = monitors - background
+        return sc.rebin(monitors, "wavelength", wavelength_bins)
 
 
-def _subtract_background_and_rebin(
-        data: sc.DataArray,
-        wavelength_bins: sc.Variable,
-        non_background_range: sc.Variable = None) -> sc.DataArray:
-    """
-    Subtracts background value from data counts and performs a wavelength rebin.
-    The background is computed as the mean value of all the counts outside of the given
-    ``non_background_range``.
+# def _subtract_background_and_rebin(
+#         data: sc.DataArray,
+#         wavelength_bins: sc.Variable,
+#         non_background_range: sc.Variable = None) -> sc.DataArray:
+#     """
+#     Subtracts background value from data counts and performs a wavelength rebin.
+#     The background is computed as the mean value of all the counts outside of the given
+#     ``non_background_range``.
 
-    :param data: The DataArray containing the monitor data to be de-noised and rebinned.
-    :param wavelength_bins: The wavelength binning to apply when rebinning the data.
-    :param non_background_range: The range of wavelengths that defines the data which
-        does not constitute background. Everything outside this range is treated as
-        background counts.
-    """
-    if non_background_range is not None:
-        dim = non_background_range.dim
-        below = data[dim, :non_background_range[0]]
-        above = data[dim, non_background_range[1]:]
-        # TODO: if we implement `ones_like` for data arrays, we could use that here
-        # instead of dividing the below and above pieces by themselves
-        divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
-        background = (below.sum().data + above.sum().data) / divisor
-        data = data - background
-    return sc.rebin(data, "wavelength", wavelength_bins)
+#     :param data: The DataArray containing the monitor data to be de-noised and rebinned.
+#     :param wavelength_bins: The wavelength binning to apply when rebinning the data.
+#     :param non_background_range: The range of wavelengths that defines the data which
+#         does not constitute background. Everything outside this range is treated as
+#         background counts.
+#     """
+#     # if non_background_range is not None:
+#     #     dim = non_background_range.dim
+#     #     below = data[dim, :non_background_range[0]]
+#     #     above = data[dim, non_background_range[1]:]
+#     #     # TODO: if we implement `ones_like` for data arrays, we could use that here
+#     #     # instead of dividing the below and above pieces by themselves
+#     #     divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
+#     #     background = (below.sum().data + above.sum().data) / divisor
+#     #     data = data - background
+#     # return sc.rebin(data, "wavelength", wavelength_bins)
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,
@@ -191,11 +209,26 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
+# def _make_dict_of_monitors(data_monitors, direct_monitors):
+#     """
+#     Place data and direct monitors into a single dict for convenience.
+#     Also verify that no entries are missing.
+#     """
+#     monitors = {}
+#     for group, monitor_dict in zip(('data', 'direct'),
+#                                    (data_monitors, direct_monitors)):
+#         for key in ('incident', 'transmission'):
+#             if key not in monitor_dict:
+#                 raise KeyError(
+#                     f'The dict of monitors for the {data} run is missing entry {key}.')
+#             name = f'{group}_monitor_{key}'
+#             monitors[name] = monitor_dict[key]
+#     return monitors
+
+
 def to_I_of_Q(data: sc.DataArray,
-              data_incident_monitor: sc.DataArray,
-              data_transmission_monitor: sc.DataArray,
-              direct_incident_monitor: sc.DataArray,
-              direct_transmission_monitor: sc.DataArray,
+              data_monitors: dict,
+              direct_monitors: dict,
               direct_beam: sc.DataArray,
               wavelength_bins: sc.Variable,
               q_bins: sc.Variable,
@@ -225,16 +258,10 @@ def to_I_of_Q(data: sc.DataArray,
 
     :param data: The DataArray containing the detector data. This can be both events
         or dense (histogrammed) data.
-    :param data_incident_monitor: The histogrammed counts of the incident monitor
-        during the measurement (sample or background) run, as a function of wavelength.
-    :param data_transmission_monitor:  The histogrammed counts of the transmission
-        monitor during the measurement (sample or background) run, as a function of
-        wavelength.
-    :param direct_incident_monitor: The histogrammed counts of the incident monitor
-        during the direct (empty sample holder) run, as a function of wavelength.
-    :param direct_transmission_monitor: The histogrammed counts of the transmission
-        monitor during the direct (empty sample holder) run, as a function of
-        wavelength.
+    :param data_monitors: A dict containing the data array for the incident and
+        transmission monitors for the measurement run
+    :param direct_monitors: A dict containing the data array for the incident and
+        transmission monitors for the direct (empty sample holder) run.
     :param direct_beam: The direct beam function of the instrument (histogrammed,
         depends on wavelength).
     :param wavelength_bins: The binning in the wavelength dimension to be used.
@@ -250,12 +277,9 @@ def to_I_of_Q(data: sc.DataArray,
         that contribute to different regions in Q space.
     """
 
-    monitors = {
-        'data_incident_monitor': data_incident_monitor,
-        'data_transmission_monitor': data_transmission_monitor,
-        'direct_incident_monitor': direct_incident_monitor,
-        'direct_transmission_monitor': direct_transmission_monitor
-    }
+    # monitors = _make_dict_of_monitors(data_monitors=data_monitors,
+    #                                   direct_monitors=direct_monitors)
+    monitors = {'data': data_monitors, 'direct': direct_monitors}
 
     data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
 
@@ -269,7 +293,8 @@ def to_I_of_Q(data: sc.DataArray,
         wavelength_bins=wavelength_bins,
         non_background_range=monitor_non_background_range)
 
-    transmission_fraction = normalization.transmission_fraction(**monitors)
+    transmission_fraction = normalization.transmission_fraction(
+        data_monitors=monitors['data'], direct_monitors=monitors['direct'])
 
     direct_beam = resample_direct_beam(direct_beam=direct_beam,
                                        wavelength_bins=wavelength_bins)
@@ -281,7 +306,7 @@ def to_I_of_Q(data: sc.DataArray,
 
     denominator = normalization.compute_denominator(
         direct_beam=direct_beam,
-        data_incident_monitor=monitors['data_incident_monitor'],
+        data_incident_monitor=monitors['data']['incident'],
         transmission_fraction=transmission_fraction,
         solid_angle=solid_angle)
     # Insert a copy of coords needed for conversion to Q.
@@ -308,8 +333,8 @@ def to_I_of_Q(data: sc.DataArray,
                                                    q_bins=q_bins,
                                                    gravity=gravity)
 
-    normalized = normalization.normalize(numerator=data_q,
-                                         denominator=denominator_q,
-                                         dim='Q')
+    # return data_q, denominator_q
+
+    normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
 
     return normalized
