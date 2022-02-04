@@ -39,10 +39,12 @@ def subtract_background_and_rebin(
     """
     if non_background_range is not None:
         dim = non_background_range.dim
-        below = data[dim, :non_background_range[0]].data
-        above = data[dim, non_background_range[1]:].data
-        background = (below.sum() + above.sum()) / sc.scalar(below.sizes[dim] +
-                                                             above.sizes[dim])
+        below = data[dim, :non_background_range[0]]
+        above = data[dim, non_background_range[1]:]
+        # TODO: if we implement `ones_like` for data arrays, we could use that here
+        # instead of dividing the below and above pieces by themselves
+        divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
+        background = (below.sum().data + above.sum().data) / divisor
         data = data - background
     return sc.rebin(data, "wavelength", wavelength_bins)
 
