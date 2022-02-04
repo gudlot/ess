@@ -5,7 +5,7 @@ from typing import Optional
 from scipp.signal import butter
 import scipp as sc
 
-from ...logging import get_logger
+from ..logging import get_logger
 
 
 def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
