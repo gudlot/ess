@@ -22,33 +22,6 @@ def solid_angle_of_rectangular_pixels(data: sc.DataArray, pixel_width: sc.Variab
     return (pixel_width * pixel_height) / (L2 * L2)
 
 
-def subtract_background_and_rebin(
-        data: sc.DataArray,
-        wavelength_bins: sc.Variable,
-        non_background_range: sc.Variable = None) -> sc.DataArray:
-    """
-    Subtracts background value from data counts and performs a wavelength rebin.
-    The background is computed as the mean value of all the counts outside of the given
-    ``non_background_range``.
-
-    :param data: The DataArray containing the monitor data to be de-noised and rebinned.
-    :param wavelength_bins: The wavelength binning to apply when rebinning the data.
-    :param non_background_range: The range of wavelengths that defines the data which
-        does not constitute background. Everything outside this range is treated as
-        background counts.
-    """
-    if non_background_range is not None:
-        dim = non_background_range.dim
-        below = data[dim, :non_background_range[0]]
-        above = data[dim, non_background_range[1]:]
-        # TODO: if we implement `ones_like` for data arrays, we could use that here
-        # instead of dividing the below and above pieces by themselves
-        divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
-        background = (below.sum().data + above.sum().data) / divisor
-        data = data - background
-    return sc.rebin(data, "wavelength", wavelength_bins)
-
-
 def transmission_fraction(data_incident_monitor: sc.DataArray,
                           data_transmission_monitor: sc.DataArray,
                           direct_incident_monitor: sc.DataArray,
@@ -74,6 +47,23 @@ def transmission_fraction(data_incident_monitor: sc.DataArray,
 
     return (data_transmission_monitor / direct_transmission_monitor) * (
         direct_incident_monitor / data_incident_monitor)
+
+
+def compute_denominator(direct_beam: sc.DataArray, data_incident_monitor: sc.DataArray,
+                        transmission_fraction: sc.DataArray,
+                        solid_angle: sc.Variable) -> sc.DataArray:
+    """
+    Compute the denominator term.
+    Because we are histogramming the Q values of the denominator further down in the
+    workflow, we convert the wavelength coordinate of the denominator from bin edges to
+    bin centers.
+    """
+    denominator = (solid_angle * direct_beam * data_incident_monitor *
+                   transmission_fraction)
+    # TODO: once scipp-0.12 is released, use sc.midpoints()
+    denominator.coords['wavelength'] = 0.5 * (denominator.coords['wavelength'][1:] +
+                                              denominator.coords['wavelength'][:-1])
+    return denominator
 
 
 def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:
