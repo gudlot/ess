@@ -29,6 +29,16 @@ def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
 
 def load_vanadium(vanadium_file: Union[str, Path],
                   empty_instrument_file: Union[str, Path]) -> sc.DataArray:
+    """
+    Load and return data from a vanadium measurement.
+
+    Subtracts events recorded for the instrument without sample.
+
+    :param vanadium_file: File that contains the vanadium data.
+    :param empty_instrument_file: File that contains data for the empty instrument.
+                                  Must correspond to the same setup as `vanadium_file`.
+    :return: Vanadium - empty instrument with a wavelength coordinate.
+    """
     get_logger('diffraction').info(
         'Loading vanadium from file %s\n'
         'and correcting by empty instrument from file %s', vanadium_file,
@@ -77,25 +87,21 @@ def load_calibration(filename: Union[str, Path],
                      instrument_name: Optional[str] = None,
                      mantid_args: Optional[dict] = None) -> sc.Dataset:
     """
-    Function that loads calibration files using the Mantid algorithm
-    LoadDiffCal. This algorithm produces up to three workspaces, a
-    TableWorkspace containing conversion factors between TOF and d, a
-    GroupingWorkspace with detector groups and a MaskWorkspace for masking.
-    The information from the TableWorkspace and GroupingWorkspace is converted
-    to a Scipp dataset and returned, while the MaskWorkspace is ignored for
-    now. Only the keyword parameters Filename and InstrumentName are mandatory.
+    Load and return calibration data.
+
+    Uses the Mantid algorithm `LoadDiffCal
+    <https://docs.mantidproject.org/nightly/algorithms/LoadDiffCal-v1.html>`_
+    and stores the data in a :class:`scipp.Dataset`
 
     Note that this function requires mantid to be installed and available in
     the same Python environment as ess.
 
-    :param filename: The name of the calibration file to be loaded.
-    :param mantid_args : Dictionary with arguments for the
-                         LoadDiffCal Mantid algorithm.
-                         Currently, InstrumentName or InstrumentFilename
-                         is required.
-    :raises: If the InstrumentName given in mantid_args is not
-             valid.
-    :return: A Dataset containing the calibration data and grouping.
+    :param filename: The name of the calibration file to load.
+    :param instrument_filename: Instrument definition file.
+    :param instrument_name: Name of the instrument.
+    :param mantid_args: Dictionary with additional arguments for the
+                        `LoadDiffCal` Mantid algorithm.
+    :return: A Dataset containing the calibration data and masking.
     """
 
     mantid_args = {} if mantid_args is None else mantid_args
@@ -107,17 +113,13 @@ def load_calibration(filename: Union[str, Path],
     with scn.mantid.run_mantid_alg('LoadDiffCal', Filename=str(filename),
                                    **mantid_args) as ws:
         ds = scn.from_mantid(ws.OutputCalWorkspace)
-
-        # Note that despite masking and grouping stored in separate workspaces,
-        # there is no need to handle potentially mismatching ordering: All
-        # workspaces have been created by the same algorithm, which should
-        # guarantee ordering.
         mask_ws = ws.OutputMaskWorkspace
         rows = mask_ws.getNumberHistograms()
         mask = sc.array(dims=['row'],
                         values=np.fromiter((mask_ws.readY(i)[0] for i in range(rows)),
                                            count=rows,
-                                           dtype=np.bool_))
+                                           dtype=np.bool_),
+                        unit=None)
     # This is deliberately not stored as a mask since that would make
     # subsequent handling, e.g., with groupby, more complicated. The mask
     # is conceptually not masking rows in this table, i.e., it is not
@@ -131,10 +133,7 @@ def load_calibration(filename: Union[str, Path],
     ds["tzero"].unit = 'us'
 
     ds = ds.rename_dims({'row': 'detector'})
-    # TODO conversion to int32 required to match type in detector_info
-    #      loaded by Mantid. Do we ultimately need that compatibility?
-    #      If int32 large enough for everything we do as ESS?
-    ds.coords['detector'] = ds['detid'].data.astype('int32')
+    ds.coords['detector'] = ds['detid'].data
     del ds['detid']
 
     return ds
