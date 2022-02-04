@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+"""
+Smoothing arrays data.
+"""
+
 from typing import Optional
 
 from scipp.signal import butter
