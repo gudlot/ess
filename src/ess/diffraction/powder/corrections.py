@@ -6,7 +6,6 @@ import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
 
 from .smoothing import fft_smooth
-from .tools import unwrap_attr
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
@@ -78,7 +77,7 @@ def normalize_by_monitor(data: sc.DataArray,
 
     """
 
-    mon = unwrap_attr(data.meta[monitor])
+    mon = data.meta[monitor].value
     if 'wavelength' not in mon.coords:
         mon = mon.transform_coords('wavelength',
                                    graph={
