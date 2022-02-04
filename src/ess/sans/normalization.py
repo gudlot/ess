@@ -74,25 +74,18 @@ def transmission_fraction(data_incident_monitor: sc.DataArray,
         direct_incident_monitor / data_incident_monitor)
 
 
-def normalize(numerator: sc.DataArray,
-              denominator: sc.DataArray,
-              dim: str = None) -> sc.DataArray:
+def normalize(numerator: sc.DataArray, denominator: sc.DataArray) -> sc.DataArray:
     """
-    Perform normalization. If the numerator contains events, we use the sc.lookup
-    function to perform the division.
-    The denominator cannot contain event data, it must be histogrammed data.
+    Perform normalization of counts as a fucntion of Q.
+    If the numerator contains events, we use the sc.lookup function to perform the
+    division.
 
     :param numerator: The data whose counts will be divided by the denominator. This
         can either be event or dense (histogrammed) data.
     :param denominator: The divisor for the normalization operation. This cannot be
         event data, it must contain histogrammed data.
-    :param dim: In the case of a numerator containing event data, this is the dimension
-        along which the lookup operation should be performed. This can be omitted in
-        case the denominator has only one dimension.
     """
     if numerator.bins is not None:
-        if dim is None:
-            dim = denominator.dim
-        return numerator.bins / sc.lookup(func=denominator, dim=dim)
+        return numerator.bins / sc.lookup(func=denominator, dim='Q')
     else:
         return numerator / denominator
