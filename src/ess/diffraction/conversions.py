@@ -9,15 +9,12 @@ from .corrections import merge_calibration
 
 def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
                                    difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
-    # TODO Is this a good check?
-    #      Do we need to check both bins and events beforehand?
-    #      Or check for each element?
-    if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
-        return sc.reciprocal(difc) * (tof - tzero)
-
-    # DIFa non zero: tof = DIFA * d**2 + DIFC * d + TZERO.
+    # TODO Use of where is inefficient, move to C++
+    # DIFA non zero: tof = DIFA * d**2 + DIFC * d + TZERO.
     # d-spacing is the positive solution of this polynomial
-    return (sc.sqrt(difc**2 + 4 * difa * (tof - tzero)) - difc) / (2.0 * difa)
+    return sc.where(difa == sc.scalar(0.0, unit=difa.unit),
+                    sc.reciprocal(difc) * (tof - tzero),
+                    (sc.sqrt(difc**2 + 4 * difa * (tof - tzero)) - difc) / (2.0 * difa))
 
 
 def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
