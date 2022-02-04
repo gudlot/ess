@@ -10,7 +10,18 @@ Conversions
    :toctree: ../../generated
 
    conversions.dspacing_from_diff_calibration
-   conversions.to_dspacing_with_calibration
+   to_dspacing_with_calibration
+
+Corrections
+-----------
+
+.. autosummary::
+   :toctree: ../../generated
+
+   merge_calibration
+   normalize_by_monitor
+   normalize_by_vanadium
+   subtract_empty_instrument
 
 Loading
 -------
@@ -18,7 +29,7 @@ Loading
 .. autosummary::
    :toctree: ../../generated
 
-   load.load_calibration
+   load_calibration
 
 Smoothing
 -----------
@@ -26,4 +37,4 @@ Smoothing
 .. autosummary::
    :toctree: ../../generated
 
-   smoothing.fft_smooth
+   fft_smooth

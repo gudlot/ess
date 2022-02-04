@@ -1,14 +1,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+from typing import Any, Optional, Dict
 import uuid
 
 import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
 
 from .smoothing import fft_smooth
+from ..logging import get_logger
 
 
 def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.DataArray:
+    """
+    Return a :class:`scipp.DataArray` containing calibration metadata.
+
+    :param into: Base data and metadata for the returned object.
+    :param calibration: Calibration data.
+    :return: (Shallow) Copy of `into` with additional coordinates and masks
+             from `calibration`.
+    :seealso: :func:`ess.diffraction.load_calibration`
+    """
     dim = calibration.dim
     if not sc.identical(into.coords[dim], calibration.coords[dim]):
         raise ValueError(
@@ -49,6 +60,14 @@ def _common_edges(*edges, dim: str) -> sc.Variable:
 
 def subtract_empty_instrument(data: sc.DataArray,
                               empty_instr: sc.DataArray) -> sc.DataArray:
+    """
+    Combine event list of data with that of an empty instrument measurement.
+
+    :param data: Binned data in wavelength.
+    :param empty_instr: Binned data for an empty instrument in wavelength.
+    :return: Binned data containing events from `data` with positive weights and
+             events from `empty_string` with negative weights.
+    """
     data = data.copy(deep=False)
     empty_instr = empty_instr.copy(deep=False)
 
@@ -72,11 +91,19 @@ def normalize_by_monitor(data: sc.DataArray,
                          *,
                          monitor: str,
                          wavelength_edges: sc.Variable,
-                         smooth_args=None) -> sc.DataArray:
+                         smooth_args: Optional[Dict[str, Any]] = None) -> sc.DataArray:
     """
+    Normalize event data by a histogrammed monitor.
 
+    :param data: Input data.
+    :param monitor: Name of a monitor. Must be stored as metadata in `data`.
+    :param wavelength_edges: Histogram the monitor with these edges.
+    :param smooth_args: If given, the monitor histogram is smoothed with
+                        :func:ess.diffraction.fft_smooth` before dividing into `data`.
+                        `smooth_args` is passed as arguments to `fft_smooth`.
+                        If ``None``, the monitor is not smoothed.
+    :return: `data` normalized by a monitor.
     """
-
     mon = data.meta[monitor].value
     if 'wavelength' not in mon.coords:
         mon = mon.transform_coords('wavelength',
@@ -102,10 +129,21 @@ def normalize_by_vanadium(data: sc.DataArray,
                           vanadium: sc.DataArray,
                           edges: sc.Variable,
                           in_place: bool = False) -> sc.DataArray:
+    """
+    Normalize sample data by a vanadium measurement.
+
+    :param data: Sample data.
+    :param vanadium: Vanadium data.
+    :param edges: Histogram `vanadium` with these bin edges.
+    :param in_place: If ``True``, `data` is modified in order to safe memory.
+                     Otherwise, the input data is unchanged.
+    :return: `data` normalized by `vanadium`. This is the same object as `data`
+             when ``in_place == True``.
+    """
     norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
     if in_place:
         data.bins /= norm
         out = data
     else:
-        out = data.copy(deep=False).bins / norm
+        out = data.bins / norm
     return sc.histogram(out, bins=edges)
