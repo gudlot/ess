@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+from typing import Optional
+
 from scipp.signal import butter
 import scipp as sc
 
@@ -21,13 +23,41 @@ def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
     return var
 
 
-def fft_smooth(var: sc.Variable, *, dim: str, order: int,
-               Wn: sc.Variable) -> sc.Variable:
-    var = _ensure_no_variances(var)
+def fft_smooth(da: sc.DataArray,
+               *,
+               dim: str,
+               order: int,
+               Wn: sc.Variable,
+               coord: Optional[str] = None) -> sc.DataArray:
+    """
+    Smooth data using a lowpass frequency filter.
 
-    if var.coords[dim].sizes[dim] == var.sizes[dim] + 1:
-        # TODO allow dim in attrs
-        var = var.copy(deep=False)
-        var.coords[dim] = sc.midpoints(var.coords[dim], dim)
+    Applies a lowpass Butterworth filter to `da.data` based on the sampling rate
+    defined by `coord`.
+    See :py:func:`scipp.signal.butter` for information on filter design.
 
-    return butter(var.coords[dim], N=order, Wn=Wn).filtfilt(var, dim)
+    :param da: Data to smoothen.
+    :param dim: Dimension along which to smooth.
+    :param coord: Name of the coordinate that defines the sampling frequency.
+                  Defaults to `dim`.
+    :param order: Order of the lowpass filter.
+    :param Wn: Critical frequency of the filter.
+    :seealso: :py:func:`scipp.signal.butter`
+              :py:func:`scipp.signal.sosfiltfilt`
+
+    Examples:
+
+       >>> x = sc.linspace(dim='x', start=1.1, stop=4.0, num=1000, unit='m')
+       >>> y = sc.sin(x * sc.scalar(1.0, unit='rad/m'))
+       >>> y += sc.sin(x * sc.scalar(400.0, unit='rad/m'))
+       >>> noisy = sc.DataArray(data=y, coords={'x': x})
+       >>> smooth = fft_smooth(noisy, dim='x', order=4, Wn=20 / x.unit)
+    """
+    da = _ensure_no_variances(da)
+    coord = dim if coord is None else coord
+
+    if da.coords[coord].sizes[dim] == da.sizes[dim] + 1:
+        da = da.copy(deep=False)
+        da.coords[coord] = sc.midpoints(da.coords[coord], dim)
+
+    return butter(da.coords[coord], N=order, Wn=Wn).filtfilt(da, dim)
