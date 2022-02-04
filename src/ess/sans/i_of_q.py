@@ -203,7 +203,7 @@ def _make_dict_of_monitors(data_monitors, direct_monitors):
         for key in ('incident', 'transmission'):
             if key not in monitor_dict:
                 raise KeyError(
-                    f'The dict of monitors for the {data} run is missing entry {key}.')
+                    f'The dict of monitors for the {group} run is missing entry {key}.')
     return {'data': data_monitors, 'direct': direct_monitors}
 
 
