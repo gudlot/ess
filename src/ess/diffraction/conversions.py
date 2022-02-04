@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+"""
+Coordinate transformations for diffraction.
+"""
+
 from typing import Optional
 
 import scipp as sc
@@ -9,9 +13,18 @@ from .corrections import merge_calibration
 
 def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
                                    difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
+    r"""
+    Compute d-spacing from calibration parameters.
+
+    d-spacing is the positive solution of
+
+    .. math:: \mathsf{tof} = \mathsf{DIFA} * d^2 + \mathsf{DIFC} * d + t_0
+
+    This function can be used with :func:`scipp.transform_coords`.
+
+    :seealso: :func:`ess.diffraction.conversions.to_dspacing_with_calibration`
+    """
     # TODO Use of where is inefficient, move to C++
-    # DIFA non zero: tof = DIFA * d**2 + DIFC * d + TZERO.
-    # d-spacing is the positive solution of this polynomial
     return sc.where(difa == sc.scalar(0.0, unit=difa.unit),
                     sc.reciprocal(difc) * (tof - tzero),
                     (sc.sqrt(difc**2 + 4 * difa * (tof - tzero)) - difc) / (2.0 * difa))
@@ -34,6 +47,20 @@ def to_dspacing_with_calibration(
         data: sc.DataArray,
         *,
         calibration: Optional[sc.Dataset] = None) -> sc.DataArray:
+    r"""
+    Transform coordinates to d-spacing from calibration parameters.
+
+    Computes d-spacing from time-of-flight stored in `data`.
+    `data` may have a wavelength coordinate and dimension,
+    but those are replaced by tof before conversion to d-spacing.
+    An exception is raised if `data` does not contain time-of-flight information.
+
+    :param data: Input data in tof or wavelength dimension.
+                 Must have a tof coordinate or attribute.
+    :param calibration: Calibration data. If given, use it for the conversion.
+                        Otherwise, the calibration data must be stored in `data`.
+    :seealso: :func:`ess.diffraction.conversions.dspacing_from_diff_calibration`
+    """
     if calibration is not None:
         out = merge_calibration(into=data, calibration=calibration)
     else:
