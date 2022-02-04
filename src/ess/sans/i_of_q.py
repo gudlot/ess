@@ -38,15 +38,13 @@ def convert_to_wavelength(data: sc.DataArray, monitors: dict, data_graph: dict,
     """
     data = data.transform_coords("wavelength", graph=data_graph)
     monitors = _monitors_to_wavelength(monitors=monitors, graph=monitor_graph)
-    # for key, value in monitors.items():
-    #     if isinstance(
-    #     key: monitors[key].transform_coords("wavelength", graph=monitor_graph)
-    #     for key in monitors
-    # }
     return data, monitors
 
 
 def _monitors_to_wavelength(monitors, graph):
+    """
+    Recursively convert all monitors in dict.
+    """
     if isinstance(monitors, dict):
         return {
             key: _monitors_to_wavelength(monitors[key], graph=graph)
@@ -89,33 +87,6 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             background = (below.sum().data + above.sum().data) / divisor
             monitors = monitors - background
         return sc.rebin(monitors, "wavelength", wavelength_bins)
-
-
-# def _subtract_background_and_rebin(
-#         data: sc.DataArray,
-#         wavelength_bins: sc.Variable,
-#         non_background_range: sc.Variable = None) -> sc.DataArray:
-#     """
-#     Subtracts background value from data counts and performs a wavelength rebin.
-#     The background is computed as the mean value of all the counts outside of the given
-#     ``non_background_range``.
-
-#     :param data: The DataArray containing the monitor data to be de-noised and rebinned.
-#     :param wavelength_bins: The wavelength binning to apply when rebinning the data.
-#     :param non_background_range: The range of wavelengths that defines the data which
-#         does not constitute background. Everything outside this range is treated as
-#         background counts.
-#     """
-#     # if non_background_range is not None:
-#     #     dim = non_background_range.dim
-#     #     below = data[dim, :non_background_range[0]]
-#     #     above = data[dim, non_background_range[1]:]
-#     #     # TODO: if we implement `ones_like` for data arrays, we could use that here
-#     #     # instead of dividing the below and above pieces by themselves
-#     #     divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
-#     #     background = (below.sum().data + above.sum().data) / divisor
-#     #     data = data - background
-#     # return sc.rebin(data, "wavelength", wavelength_bins)
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,
@@ -209,21 +180,18 @@ def _convert_dense_to_q_and_merge_spectra(
     return q_summed
 
 
-# def _make_dict_of_monitors(data_monitors, direct_monitors):
-#     """
-#     Place data and direct monitors into a single dict for convenience.
-#     Also verify that no entries are missing.
-#     """
-#     monitors = {}
-#     for group, monitor_dict in zip(('data', 'direct'),
-#                                    (data_monitors, direct_monitors)):
-#         for key in ('incident', 'transmission'):
-#             if key not in monitor_dict:
-#                 raise KeyError(
-#                     f'The dict of monitors for the {data} run is missing entry {key}.')
-#             name = f'{group}_monitor_{key}'
-#             monitors[name] = monitor_dict[key]
-#     return monitors
+def _make_dict_of_monitors(data_monitors, direct_monitors):
+    """
+    Also verify that no entries are missing in the monitors and place them into a
+    single dict for convenience.
+    """
+    for group, monitor_dict in zip(('data', 'direct'),
+                                   (data_monitors, direct_monitors)):
+        for key in ('incident', 'transmission'):
+            if key not in monitor_dict:
+                raise KeyError(
+                    f'The dict of monitors for the {data} run is missing entry {key}.')
+    return {'data': data_monitors, 'direct': direct_monitors}
 
 
 def to_I_of_Q(data: sc.DataArray,
@@ -277,9 +245,8 @@ def to_I_of_Q(data: sc.DataArray,
         that contribute to different regions in Q space.
     """
 
-    # monitors = _make_dict_of_monitors(data_monitors=data_monitors,
-    #                                   direct_monitors=direct_monitors)
-    monitors = {'data': data_monitors, 'direct': direct_monitors}
+    monitors = _make_dict_of_monitors(data_monitors=data_monitors,
+                                      direct_monitors=direct_monitors)
 
     data_graph, monitor_graph = make_coordinate_transform_graphs(gravity=gravity)
 
