@@ -7,9 +7,8 @@ from ess.powgen import data
 
 
 def test_load_calibration_loads_required_data():
-    loaded = load_calibration(
-        data.calibration_file(),
-        instrument_filename='POWGEN_Definition_2011-02-25.xml')
+    loaded = load_calibration(data.calibration_file(),
+                              instrument_filename='POWGEN_Definition_2011-02-25.xml')
 
     assert 'difa' in loaded
     assert 'difc' in loaded
