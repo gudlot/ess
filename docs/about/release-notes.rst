@@ -9,6 +9,8 @@ v0.3.0 (unreleased)
 Features
 ~~~~~~~~
 
+* Added the ``sans.to_I_of_Q`` workflow to reduce SANS2D data, as well as notebooks that describe the workflow and illustrate its usage `#60 <https://github.com/scipp/ess/pull/60>`_.
+
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
@@ -25,6 +27,7 @@ Contributors
 ~~~~~~~~~~~~
 
 Simon Heybrock :sup:`a`\ ,
+Wojciech Potrzebowski :sup:`a`\ ,
 Neil Vaytet :sup:`a`\ ,
 and Jan-Lukas Wynen :sup:`a`
 
