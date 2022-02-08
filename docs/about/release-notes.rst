@@ -12,6 +12,8 @@ Features
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
+* When doing ``import ess``, all the submodules (``amor``, ``reflectometry``, and ``wfm``) are no longer directly available as ``ess.amor``. Instead, we now rely on simply doing ``from ess import amor`` or ``import ess.sans as sans`` `#102 <https://github.com/scipp/ess/pull/102>`_.
+
 Bugfixes
 ~~~~~~~~
 
