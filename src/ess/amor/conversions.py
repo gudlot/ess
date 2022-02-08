@@ -23,10 +23,11 @@ def specular_reflection() -> dict:
     return graph
 
 
-def supermirror_calibration(q_bins: sc.Variable, 
-                              m_value: sc.Variable = 5 * sc.Unit('dimensionless'), 
-                              critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'), 
-                              alpha: sc.Variable = 0.25 / 0.088 * sc.units.angstrom) -> sc.Variable:
+def supermirror_calibration(
+        q_bins: sc.Variable,
+        m_value: sc.Variable = 5 * sc.Unit('dimensionless'),
+        critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
+        alpha: sc.Variable = 0.25 / 0.088 * sc.units.angstrom) -> sc.Variable:
     """
     Determine calibration factor for the supermirror.
 

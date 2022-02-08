@@ -65,4 +65,3 @@ def load(filename,
 
     # Perform tof correction and fold two pulses
     return _tof_correction(data)
-
