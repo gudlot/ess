@@ -6,9 +6,9 @@ from ..choppers import make_chopper
 
 
 def make_beamline(
-    sample_rotation: sc.Variable = None,
-    beam_size: sc.Variable = 0.001 * sc.units.m,
-    sample_size: sc.Variable = 0.01 * sc.units.m,
+    sample_rotation: sc.Variable = 45.0 * sc.units.deg,
+    beam_size: sc.Variable = 2.0 * sc.units.mm,
+    sample_size: sc.Variable = 10.0 * sc.units.mm,
     detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
     gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * g,
     chopper_frequency: sc.Variable = sc.scalar(20 / 3, unit='Hz'),
@@ -39,12 +39,16 @@ def make_beamline(
     :returns: A dict.
     :rtype: dict
     """
+    beam_on_sample = beam_size / sc.sin(sample_rotation)
+    fwhm_to_std = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
+    footprint_scale = sc.erf(sample_size / beam_on_sample * fwhm_to_std)
     beamline = {
         'sample_rotation': sample_rotation,
         'beam_size': beam_size,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
-        'gravity': gravity
+        'gravity': gravity,
+        'footprint_scale': footprint_scale
     }
     # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
     # of a DataArray, and the data value is a string containing the name of the
