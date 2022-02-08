@@ -29,13 +29,13 @@ def supermirror_calibration(q_bins: sc.Variable,
                               alpha: sc.Variable = 0.25 / 0.088 * sc.units.angstrom) -> sc.Variable:
     """
     Determine calibration factor for the supermirror.
-    
+
     :param q_bins: Q-bins over which calibration is performed.
     :param m_value: m-value for the supermirror.
     :param critical_edge: Supermirror critical edge.
     :param alpha: Supermirror alpha value.
 
-    :return: Calibration factor at the midpoint of each Q-bin. 
+    :return: Calibration factor at the midpoint of each Q-bin.
     """
     q_midpoints = _midpoints(q_bins, 'Q')
     max_q = m_value * critical_edge
