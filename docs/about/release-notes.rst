@@ -3,11 +3,41 @@
 Release Notes
 =============
 
-v0.3.0 (unreleased)
+v0.4.0 (unreleased)
 -------------------
 
 Features
 ~~~~~~~~
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* When doing ``import ess``, all the submodules (``amor``, ``reflectometry``, and ``wfm``) are no longer directly available as ``ess.amor``. Instead, we now rely on simply doing ``from ess import amor`` or ``import ess.sans as sans`` `#102 <https://github.com/scipp/ess/pull/102>`_.
+
+Bugfixes
+~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+Stability, Maintainability, and Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
+v0.3.0 (February 2022)
+----------------------
+
+Features
+~~~~~~~~
+
+* Implemented a logging framework for reflectometry and Amor `#93 <https://github.com/scipp/ess/pull/93>`_.
+* Added the ``sans.to_I_of_Q`` workflow to reduce SANS2D data, as well as notebooks that describe the workflow and illustrate its usage `#60 <https://github.com/scipp/ess/pull/60>`_.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
@@ -25,6 +55,7 @@ Contributors
 ~~~~~~~~~~~~
 
 Simon Heybrock :sup:`a`\ ,
+Wojciech Potrzebowski :sup:`a`\ ,
 Neil Vaytet :sup:`a`\ ,
 and Jan-Lukas Wynen :sup:`a`
 

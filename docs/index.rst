@@ -35,13 +35,21 @@ Documentation
    :caption: Instruments
 
    instruments/amor/amor
+   instruments/loki/loki
 
 .. toctree::
    :maxdepth: 3
    :caption: Techniques
 
    techniques/reflectometry/reflectometry
+   techniques/sans/sans
    techniques/wfm/wfm
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
+
+   utilities/utilities
 
 .. toctree::
    :caption: About
