@@ -25,6 +25,7 @@ test:
     - ess.reflectometry
   requires:
     - ipympl
+    - mantid-framework
     - pytest
     - pandoc
     - pythreejs

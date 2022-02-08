@@ -49,6 +49,15 @@ extensions = [
 
 autodoc_typehints = 'description'
 
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipp': ('https://scipp.github.io/', None),
+    'scippneutron': ('https://scipp.github.io/scippneutron', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/', None),
+    'xarray': ('https://xarray.pydata.org/en/stable/', None)
+}
+
 # autodocs includes everything, even irrelevant API internals. autosummary
 # looks more suitable in the long run when the API grows.
 # For a nice example see how xarray handles its API documentation.

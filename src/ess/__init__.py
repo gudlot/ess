@@ -5,8 +5,7 @@ try:
     from . import _version
     __version__ = _version.__version__
 except ImportError:
-    pass
+    __version__ = "0.0.0-unknown"
 
-from . import amor
-from . import reflectometry
-from . import wfm
+from .logging import get_logger
+from . import logging
