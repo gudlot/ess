@@ -131,9 +131,13 @@ Documentation
 -------------
 
 Apart from workflows in Jupyter notebooks, please provide and update documentation.
-This involves putting python docstrings on your user facing functions,
-providing code comments, and considering  adding other explanations you need to include
-to describe how your functions work.
+This involves
+
+- including python docstrings on your user facing functions
+- providing code comments
+- adding type-hints to your function arguments and return types (see `here <https://docs.python.org/3/library/typing.html>`_)
+- adding your functions to the API reference for your technique or instrument
+- any additional document (Jupyter notebook or .rst file) that helps explain or describe how your functions or module work
 
 We will build and publish sphinx documentation located
 `here <https://github.com/scipp/ess/tree/main/docs>`_.
