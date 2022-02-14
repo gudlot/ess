@@ -54,9 +54,9 @@ If you have functions in your workflow that represent important steps
 (or costly operations) in your data processing, it is recommended to register the calls
 to those functions via Scipp's logging framework.
 
-Please see the
-`Scipp documentation on logging  <https://scipp.github.io/reference/logging.html>`_
-for more details.
+More details can be found `here <https://scipp.github.io/reference/logging.html>`_,
+as well as in the
+`Scipp documentation on logging <https://scipp.github.io/reference/logging.html>`_.
 
 Testing
 ~~~~~~~
@@ -88,9 +88,8 @@ Jupyter notebooks style
 
 The recommended way to add a data reduction workflow to ``ess`` is to create a Jupyter
 notebook that outlines all the steps in the workflow.
-These notebooks should be added in the ``src/ess/{technique}`` or
-``src/ess/{instrument}`` folder, as they will then be built (and thus checked for
-errors) for every PR.
+These notebooks should be added in the ``docs/{technique}`` or ``docs/{instrument}``
+folder, as they will then be built (and thus checked for errors) for every PR.
 
 It is possible to have a notebook outlining the different steps in a workflow,
 and having the entire workflow available inside a python wrapper function for convenience.
