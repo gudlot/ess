@@ -135,7 +135,8 @@ An example:
    *Self-assembly of ionic and non-ionic surfactants in type IV cerium nitrate and urea based deep eutectic solvent*,
    [J. Chem. Phys. 155, 084902](https://doi.org/10.1063/5.0059238)
 
-To cite the article in the text body, use e.g.
+To cite the article in the text body,
+use the Harvard (author-year) style in combination with a link, e.g.
 
 .. code-block:: md
 
