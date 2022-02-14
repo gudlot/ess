@@ -67,6 +67,22 @@ If we are aware of failing tests, we can provide future fixes and migrations for
 Please avoid large data files, or any code requiring network access.
 Test suites should be fast to execute.
 
+Formatting
+~~~~~~~~~~
+
+Your Python code will be checked for errors and formatting when opening a PR.
+We use the `flake8 <https://flake8.pycqa.org/en/latest/>`_ linter to check code quality,
+and `yapf <https://github.com/google/yapf>`_ to enforce code formatting.
+Make sure that running your code though these tools does not generate any output before
+you push your changes.
+
+From the top level directory, you can use
+
+.. code-block:: sh
+
+   >$ flake8 .
+   >$ yapf --diff --recursive .
+
 Jupyter notebooks style
 -----------------------
 
@@ -137,7 +153,7 @@ This involves
 - providing code comments
 - adding type-hints to your function arguments and return types (see `here <https://docs.python.org/3/library/typing.html>`_)
 - adding your functions to the API reference for your technique or instrument
-- any additional document (Jupyter notebook or .rst file) that helps explain or describe how your functions or module work
+- including any additional document (Jupyter notebook or .rst file) that helps explain or describe how your functions or module work
 
 We will build and publish sphinx documentation located
 `here <https://github.com/scipp/ess/tree/main/docs>`_.
