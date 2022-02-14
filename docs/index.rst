@@ -52,6 +52,12 @@ Documentation
    utilities/utilities
 
 .. toctree::
+   :caption: Developer documentation
+   :maxdepth: 3
+
+   developer/style-guide
+
+.. toctree::
    :caption: About
    :maxdepth: 3
 
