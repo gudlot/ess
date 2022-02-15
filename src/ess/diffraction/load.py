@@ -27,8 +27,9 @@ def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
                                })
 
 
-def load_vanadium(vanadium_file: Union[str, Path],
-                  empty_instrument_file: Union[str, Path]) -> sc.DataArray:
+def load_and_preprocess_vanadium(
+        vanadium_file: Union[str, Path],
+        empty_instrument_file: Union[str, Path]) -> sc.DataArray:
     """
     Load and return data from a vanadium measurement.
 
