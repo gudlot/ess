@@ -124,6 +124,17 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
+def normalize_by_proton_charge(data: sc.DataArray,
+                               *,
+                               proton_charge: str = 'gd_prtn_chrg',
+                               in_place: bool = False) -> sc.DataArray:
+    proton_charge = data.attrs[proton_charge].values
+    if in_place:
+        data /= proton_charge
+        return data
+    return data / proton_charge
+
+
 def normalize_by_vanadium(data: sc.DataArray,
                           *,
                           vanadium: sc.DataArray,

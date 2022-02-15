@@ -12,7 +12,7 @@ import scipp as sc
 import scippneutron as scn
 
 from ..logging import get_logger
-from .corrections import subtract_empty_instrument
+from .corrections import normalize_by_proton_charge, subtract_empty_instrument
 
 
 def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
@@ -44,9 +44,10 @@ def load_and_preprocess_vanadium(
         'Loading vanadium from file %s\n'
         'and correcting by empty instrument from file %s', vanadium_file,
         empty_instrument_file)
-    # TODO normalize by proton charge?
     vanadium = _load_aux_file_as_wavelength(vanadium_file)
     empty_instrument = _load_aux_file_as_wavelength(empty_instrument_file)
+    normalize_by_proton_charge(vanadium, in_place=True)
+    normalize_by_proton_charge(empty_instrument, in_place=True)
     return subtract_empty_instrument(vanadium, empty_instrument)
 
 
