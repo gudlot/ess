@@ -7,7 +7,7 @@ import scipp as sc
 from ess.diffraction import to_dspacing_with_calibration
 
 
-@pytest.fixture(params=['random', 'zero', 'one_zero'])
+@pytest.fixture(params=['random', 'zero'])
 def calibration(request):
     rng = np.random.default_rng(789236)
     n = 30
@@ -28,8 +28,6 @@ def calibration(request):
                     coords={'spectrum': sc.arange('spectrum', n, unit=None)})
     if request.param == 'zero':
         ds['difa'].data = sc.zeros_like(ds['difa'].data)
-    elif request.param == 'one_zero':
-        ds['difa'].data['spectrum', 1] = sc.scalar(0.0, unit='us / angstrom**2')
     return ds
 
 
