@@ -54,8 +54,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
         return data
 
     # TODO better error message
-    # TODO remove empty graph
-    tof_data = data.transform_coords('tof', graph={'_': '_'})
+    tof_data = data.transform_coords('tof', graph={}, quiet=True)
     del tof_data.coords['wavelength']
     if tof_data.bins:
         del tof_data.bins.coords['wavelength']
