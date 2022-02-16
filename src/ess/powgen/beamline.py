@@ -19,8 +19,7 @@ def map_detector_to_spectrum(data: sc.DataArray, *,
     del out.coords['detector']
     # Add 1 because spectrum numbers in the data start at 1 but
     # detector_info contains spectrum indices which start at 0.
-    out.coords['spectrum'] = (
-        detector_info.coords['spectrum'] +
-        sc.scalar(1, dtype=detector_info.coords['spectrum'].dtype))
+    out.coords['spectrum'] = (detector_info.coords['spectrum'] +
+                              sc.index(1, dtype=detector_info.coords['spectrum'].dtype))
 
     return out.rename_dims({'detector': 'spectrum'})

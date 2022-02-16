@@ -136,6 +136,7 @@ def load_calibration(filename: Union[str, Path],
 
     ds = ds.rename_dims({'row': 'detector'})
     ds.coords['detector'] = ds['detid'].data
+    ds.coords['detector'].unit = None
     del ds['detid']
 
     return ds
