@@ -128,7 +128,8 @@ def normalize_by_proton_charge(data: sc.DataArray,
                                *,
                                proton_charge: str = 'gd_prtn_chrg',
                                in_place: bool = False) -> sc.DataArray:
-    proton_charge = data.attrs[proton_charge].values
+    # TODO unit of proton charge?
+    proton_charge = data.attrs[proton_charge]
     if in_place:
         data /= proton_charge
         return data
