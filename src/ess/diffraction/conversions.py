@@ -11,6 +11,26 @@ import scipp as sc
 from .corrections import merge_calibration
 
 
+def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
+    """
+    This function implements the solution to
+      t = a * d^2 + c * d + t0
+    for a != 0.
+    It uses the following way of expressing the solution with an order of operations
+    that is optimized for low memory usage.
+      d = (sqrt([x-t0+t] / x) - 1) * c / (2a)
+      x = c^2 / (4a)
+    """
+    x = c**2 / (4 * a)
+    out = (x - t0) + t
+    out /= x
+    del x
+    sc.sqrt(out, out=out)
+    out -= 1
+    out *= c / (2 * a)
+    return out
+
+
 def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
                                    difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
     r"""
@@ -24,10 +44,9 @@ def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
 
     :seealso: :func:`ess.diffraction.conversions.to_dspacing_with_calibration`
     """
-    # TODO Use of where is inefficient, move to C++
-    return sc.where(difa == sc.scalar(0.0, unit=difa.unit),
-                    sc.reciprocal(difc) * (tof - tzero),
-                    (sc.sqrt(difc**2 + 4 * difa * (tof - tzero)) - difc) / (2.0 * difa))
+    if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
+        return (tof - tzero) / difc
+    return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
 
 
 def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
