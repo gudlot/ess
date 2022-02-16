@@ -49,6 +49,28 @@ def test_dspacing_with_calibration_roundtrip(calibration):
     assert sc.allclose(recomputed_tof, initial_tof.coords['tof'])
 
 
+def test_dspacing_with_calibration_roundtrip_with_wavelength(calibration):
+    initial_wavelength = sc.DataArray(
+        sc.ones(dims=['spectrum', 'wavelength'],
+                shape=[calibration.sizes['spectrum'], 27]),
+        coords={
+            'spectrum': calibration.coords['spectrum'],
+            'wavelength': sc.linspace('wavelength', 10.0, 100.0, 27, unit='angstrom')
+        },
+        attrs={'tof': sc.linspace('wavelength', 1.0, 1000.0, 27, unit='us')})
+    dspacing = to_dspacing_with_calibration(initial_wavelength, calibration=calibration)
+
+    d = dspacing.coords['dspacing']
+    difa = calibration['difa'].data
+    difc = calibration['difc'].data
+    tzero = calibration['tzero'].data
+    recomputed_tof = difa * d**2 + difc * d + tzero
+    recomputed_tof = recomputed_tof.rename_dims({'dspacing': 'tof'})
+    assert sc.allclose(
+        recomputed_tof,
+        initial_wavelength.attrs['tof'].rename_dims({'wavelength': 'tof'}))
+
+
 def test_dspacing_with_calibration_does_not_use_positions(calibration):
     rng = np.random.default_rng(91032)
     n_spectra = calibration.sizes['spectrum']
