@@ -42,16 +42,12 @@ def make_beamline(
     :returns: A dict.
     :rtype: dict
     """
-    beam_on_sample = beam_size / sc.sin(sample_rotation)
-    fwhm_to_std = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
-    footprint_scale = sc.erf(sample_size / beam_on_sample * fwhm_to_std)
     beamline = {
         'sample_rotation': sample_rotation,
         'beam_size': beam_size,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
         'gravity': gravity,
-        'footprint_scale': footprint_scale
     }
     # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
     # of a DataArray, and the data value is a string containing the name of the
