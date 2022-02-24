@@ -48,10 +48,18 @@ def load_and_preprocess_vanadium(
 
     Subtracts events recorded for the instrument without sample.
 
-    :param vanadium_file: File that contains the vanadium data.
-    :param empty_instrument_file: File that contains data for the empty instrument.
-                                  Must correspond to the same setup as `vanadium_file`.
-    :return: (Vanadium - empty instrument) with a wavelength coordinate.
+    Parameters
+    ----------
+    vanadium_file:
+        File that contains the vanadium data.
+    empty_instrument_file:
+        File that contains data for the empty instrument.
+        Must correspond to the same setup as `vanadium_file`.
+
+    Returns
+    -------
+    :
+        (Vanadium - empty instrument) with a wavelength coordinate.
     """
     get_logger('diffraction').info('Loading vanadium from file %s.', vanadium_file)
     vanadium = _load_aux_file_as_wavelength(vanadium_file)
@@ -116,12 +124,22 @@ def load_calibration(filename: Union[str, Path],
     Note that this function requires mantid to be installed and available in
     the same Python environment as ess.
 
-    :param filename: The name of the calibration file to load.
-    :param instrument_filename: Instrument definition file.
-    :param instrument_name: Name of the instrument.
-    :param mantid_args: Dictionary with additional arguments for the
-                        `LoadDiffCal` Mantid algorithm.
-    :return: A Dataset containing the calibration data and masking.
+    Parameters
+    ----------
+    filename:
+        The name of the calibration file to load.
+    instrument_filename:
+        Instrument definition file.
+    instrument_name:
+        Name of the instrument.
+    mantid_args:
+        Dictionary with additional arguments for the
+        `LoadDiffCal` Mantid algorithm.
+
+    Returns
+    -------
+    :
+        A Dataset containing the calibration data and masking.
     """
 
     mantid_args = {} if mantid_args is None else mantid_args

@@ -40,16 +40,31 @@ def fft_smooth(da: sc.DataArray,
     defined by `coord`.
     See :py:func:`scipp.signal.butter` for information on filter design.
 
-    :param da: Data to smoothen.
-    :param dim: Dimension along which to smooth.
-    :param coord: Name of the coordinate that defines the sampling frequency.
+    Parameters
+    ----------
+    da:
+        Data to smoothen.
+    dim:
+        Dimension along which to smooth.
+    coord:
+        Name of the coordinate that defines the sampling frequency.
                   Defaults to `dim`.
-    :param order: Order of the lowpass filter.
-    :param Wn: Critical frequency of the filter.
-    :seealso: :py:func:`scipp.signal.butter`
-              :py:func:`scipp.signal.sosfiltfilt`
+    order:
+        Order of the lowpass filter.
+    Wn:
+        Critical frequency of the filter.
 
-    Examples:
+    Returns
+    -------
+    :
+        Smoothed `da`.
+
+    See Also
+    --------
+    scipp.signal.butter scipp.signal.sosfiltfilt
+
+    Examples
+    --------
 
        >>> x = sc.linspace(dim='x', start=1.1, stop=4.0, num=1000, unit='m')
        >>> y = sc.sin(x * sc.scalar(1.0, unit='rad/m'))

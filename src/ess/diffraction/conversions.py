@@ -42,7 +42,9 @@ def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
 
     This function can be used with :func:`scipp.transform_coords`.
 
-    :seealso: :func:`ess.diffraction.conversions.to_dspacing_with_calibration`
+    See Also
+    --------
+    ess.diffraction.conversions.to_dspacing_with_calibration
     """
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
         return (tof - tzero) / difc
@@ -65,7 +67,7 @@ def to_dspacing_with_calibration(
         data: sc.DataArray,
         *,
         calibration: Optional[sc.Dataset] = None) -> sc.DataArray:
-    r"""
+    """
     Transform coordinates to d-spacing from calibration parameters.
 
     Computes d-spacing from time-of-flight stored in `data`.
@@ -73,11 +75,18 @@ def to_dspacing_with_calibration(
     but those are replaced by tof before conversion to d-spacing.
     An exception is raised if `data` does not contain time-of-flight information.
 
-    :param data: Input data in tof or wavelength dimension.
-                 Must have a tof coordinate or attribute.
-    :param calibration: Calibration data. If given, use it for the conversion.
-                        Otherwise, the calibration data must be stored in `data`.
-    :seealso: :func:`ess.diffraction.conversions.dspacing_from_diff_calibration`
+    Parameters
+    ----------
+    data:
+        Input data in tof or wavelength dimension.
+        Must have a tof coordinate or attribute.
+    calibration:
+        Calibration data. If given, use it for the conversion.
+        Otherwise, the calibration data must be stored in `data`.
+
+    See Also
+    --------
+    ess.diffraction.conversions.dspacing_from_diff_calibration
     """
     if calibration is not None:
         out = merge_calibration(into=data, calibration=calibration)
