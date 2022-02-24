@@ -9,6 +9,21 @@ import scipp as sc
 
 def map_detector_to_spectrum(data: sc.DataArray, *,
                              detector_info: sc.DataArray) -> sc.DataArray:
+    """
+    Transform 'detector' coords to 'spectrum'.
+
+    Parameters
+    ----------
+    data:
+        Input data whose 'detector' coord is transformed.
+    detector_info:
+        Defines mapping from detector numbers to spectra.
+
+    Returns
+    -------
+    :
+        `data` with 'detector' coord and dim replaced by 'spectrum'.
+    """
     if not sc.identical(
             data.coords['detector'].to(dtype=detector_info.coords['detector'].dtype,
                                        copy=False), detector_info.coords['detector']):
