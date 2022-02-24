@@ -50,7 +50,7 @@ def make_beamline(sample_rotation: sc.Variable,
         chopper_frequency = sc.scalar(20 / 3, unit='Hz')
     if chopper_phase is None:
         chopper_phase = sc.scalar(-8.0, unit='deg')
-    if chopper_position:
+    if chopper_position is None:
         chopper_position = sc.vector(value=[0, 0, -15.0], unit='m')
     beamline = {
         'sample_rotation': sample_rotation,
