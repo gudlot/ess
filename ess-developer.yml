@@ -26,8 +26,6 @@ dependencies:
 
   # Formatting & static analysis
   - flake8
-  - pip:
-    - nb-clean
   - yapf
 
   # Docs
@@ -37,3 +35,10 @@ dependencies:
   - sphinx-book-theme
   - sphinx-copybutton
   - nbsphinx
+
+  - pip
+  - pip:
+    # Formatting & static analysis
+    - nb-clean
+    # Docs
+    - sphinx-autodoc-typehints>=1.17.0
