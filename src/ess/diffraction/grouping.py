@@ -11,4 +11,7 @@ def focus_by_two_theta(data: sc.DataArray,
     data = data.copy(deep=False)
     if 'two_theta' not in data.meta and 'two_theta' not in data.bins.meta:
         data.coords['two_theta'] = scn.two_theta(data)
-    return sc.groupby(data, 'two_theta', bins=edges).bins.concat(replace_dim)
+    return sc.groupby(data,
+                      'two_theta',
+                      bins=edges.to(unit=data.coords['two_theta'].unit,
+                                    copy=False)).bins.concat(replace_dim)
