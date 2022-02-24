@@ -8,16 +8,14 @@ from ..logging import log_call
 
 @log_call(instrument='amor',
           message='Constructing AMOR beamline from default parameters')
-def make_beamline(
-    sample_rotation: sc.Variable,
-    beam_size: sc.Variable = None,
-    sample_size: sc.Variable = None,
-    detector_spatial_resolution: sc.Variable = None,
-    gravity: sc.Variable = None,
-    chopper_frequency: sc.Variable = None,
-    chopper_phase: sc.Variable = None,
-    chopper_position: sc.Variable = None
-) -> dict:
+def make_beamline(sample_rotation: sc.Variable,
+                  beam_size: sc.Variable = None,
+                  sample_size: sc.Variable = None,
+                  detector_spatial_resolution: sc.Variable = None,
+                  gravity: sc.Variable = None,
+                  chopper_frequency: sc.Variable = None,
+                  chopper_phase: sc.Variable = None,
+                  chopper_position: sc.Variable = None) -> dict:
     """
     Amor beamline components.
 

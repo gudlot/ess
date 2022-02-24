@@ -20,4 +20,3 @@ def specular_reflection() -> dict:
     graph = spec_relf_graph()
     graph['incident_beam'] = incident_beam
     return graph
-
