@@ -35,8 +35,6 @@ test:
     - sphinx-copybutton
     - nbsphinx
     - pip
-    - pip:
-      - sphinx-autodoc-typehints>=1.17.0
   source_files:
     - tests/
     - docs/
