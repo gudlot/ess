@@ -34,7 +34,7 @@ def _remove_based_on_proton_charge(da: sc.DataArray) -> bool:
         get_logger('diffraction').info(
             'Discarding data for the empty instrument because its proton charge '
             'is too low. Vanadium will not be corrected for background. '
-            'Maximum charge: %f%s vs gd_prtn_chrg: %f%s',
+            'Maximum charge: %e%s vs gd_prtn_chrg: %e%s',
             charge.max().value, charge.unit, limit.value, limit.unit)
         return True
     return False
