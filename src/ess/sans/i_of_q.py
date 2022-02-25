@@ -86,7 +86,10 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
             background = (below.sum().data + above.sum().data) / divisor
             monitors = monitors - background
-        return sc.rebin(monitors, "wavelength", wavelength_bins)
+        #TODO: Fix this properly with if when bins for monitors are None
+        #result = sc.rebin(monitors, "wavelength", wavelength_bins)
+        result = sc.histogram(monitors, wavelength_bins)
+        return result
 
 
 def resample_direct_beam(direct_beam: sc.DataArray,

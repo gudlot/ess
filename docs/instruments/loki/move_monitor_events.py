@@ -19,6 +19,7 @@ def main():
 
     copyfile(infile, outfile)
     with h5.File(outfile, 'r+') as f:
+        f['entry/instrument/name'] = 'LARMOR'
         group = f['entry/instrument']
         for monitor_name in filter(lambda k: k.startswith('monitor'), group):
             monitor_group = group[monitor_name]
