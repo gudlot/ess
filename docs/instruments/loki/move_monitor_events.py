@@ -20,6 +20,10 @@ def main():
     copyfile(infile, outfile)
     with h5.File(outfile, 'r+') as f:
         f['entry/instrument/name'] = 'LARMOR'
+        #For tweaking Mantid
+        group_entry = f['entry']
+        nx_class = group_entry.create_group('sample')
+        nx_class.attrs["NX_class"] = 'NXsample'
         group = f['entry/instrument']
         for monitor_name in filter(lambda k: k.startswith('monitor'), group):
             monitor_group = group[monitor_name]
