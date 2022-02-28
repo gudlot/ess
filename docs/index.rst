@@ -36,7 +36,7 @@ Documentation
 
    instruments/amor/amor
    instruments/loki/loki
-   instruments/powgen/powgen
+   instruments/external/external
 
 .. toctree::
    :maxdepth: 3

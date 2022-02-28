@@ -1,4 +1,4 @@
-.. currentmodule:: ess.powgen
+.. currentmodule:: ess.external.powgen
 
 Reference
 =========
