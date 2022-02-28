@@ -59,7 +59,6 @@ def _common_edges(*edges, dim: str) -> sc.Variable:
         v     |   --|
               < dim >
     """
-
     def extremum(fn, index):
         aux_dim = uuid.uuid4().hex
         return fn(sc.concat([fn(edge[dim, index]) for edge in edges], aux_dim), aux_dim)
@@ -109,7 +108,7 @@ def subtract_empty_instrument(data: sc.DataArray,
 def normalize_by_monitor(data: sc.DataArray,
                          *,
                          monitor: str,
-                         wavelength_edges: Optional[sc.Variable]=None,
+                         wavelength_edges: Optional[sc.Variable] = None,
                          smooth_args: Optional[Dict[str, Any]] = None) -> sc.DataArray:
     """
     Normalize event data by a monitor.
