@@ -54,7 +54,8 @@ If you have functions in your workflow that represent important steps
 (or costly operations) in your data processing, it is recommended to register the calls
 to those functions via Scipp's logging framework.
 
-More details can be found `here <https://scipp.github.io/reference/logging.html>`_,
+More details can be found in the
+`logging documentation <https://scipp.github.io/reference/logging.html>`_,
 as well as in the
 `Scipp documentation on logging <https://scipp.github.io/reference/logging.html>`_.
 
@@ -102,7 +103,7 @@ Using data files
 
 If your notebooks require data files, you should use the ``pooch`` utility to handle
 file paths.
-See `here <https://github.com/scipp/ess/blob/main/src/ess/amor/data.py>`_ for an
+See `amor.data <https://github.com/scipp/ess/blob/main/src/ess/amor/data.py>`_ for an
 example showing how it is used in practice.
 
 References
@@ -151,7 +152,7 @@ This involves
 
 - including python docstrings on your user facing functions
 - providing code comments
-- adding type-hints to your function arguments and return types (see `here <https://docs.python.org/3/library/typing.html>`_)
+- adding type-hints to your function arguments and return types (see `typing <https://docs.python.org/3/library/typing.html>`_)
 - adding your functions to the API reference for your technique or instrument
 - including any additional document (Jupyter notebook or .rst file) that helps explain or describe how your functions or module work
 

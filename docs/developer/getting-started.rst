@@ -25,7 +25,7 @@ We use the ``tools/metatoenv.py`` script to merge the dependencies in the
 .. code-block:: bash
 
   python tools/metatoenv.py --dir=conda --env-file=ess-developer.yml \
-    --channels=conda-forge,scipp --merge-with=developer-extra.yml
+    --channels=conda-forge,scipp,mantid --merge-with=developer-extra.yml
   conda env create -f ess-developer.yml
   conda activate ess-developer
 

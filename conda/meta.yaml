@@ -13,7 +13,7 @@ requirements:
     - ipywidgets
     - matplotlib
     - pooch
-    - scippneutron>=0.4.2
+    - scippneutron>=0.5
     - scipy
     - tifffile
 
@@ -25,7 +25,7 @@ test:
     - ess.reflectometry
   requires:
     - ipympl
-    - mantid-framework
+    - mantid
     - pytest
     - pandoc
     - pythreejs
