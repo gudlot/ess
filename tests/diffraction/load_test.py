@@ -3,7 +3,7 @@
 import pytest
 
 from ess.diffraction import load_calibration
-from ess.powgen import data
+from ess.external.powgen import data
 
 
 def test_load_calibration_loads_required_data():
