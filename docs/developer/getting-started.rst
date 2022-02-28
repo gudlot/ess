@@ -29,12 +29,11 @@ We use the ``tools/metatoenv.py`` script to merge the dependencies in the
   conda env create -f ess-developer.yml
   conda activate ess-developer
 
-Once you have activated the environment, if you want to import the ``ess`` module from
-the source, you will have to update your ``PYTHONPATH``
+Once you have activated the environment, you want to ``pip`` install it locally using
 
 .. code-block:: bash
 
-  export PYTHONPATH=$PYTHONPATH:src/.
+  python -m pip install -e .
 
 
 Running the unit tests
