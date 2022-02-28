@@ -56,6 +56,7 @@ Documentation
    :maxdepth: 3
 
    developer/style-guide
+   developer/getting-started
 
 .. toctree::
    :caption: About
