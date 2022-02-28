@@ -30,6 +30,6 @@ def supermirror_calibration(
     nq = 1.0 / (1.0 - alpha * (q - critical_edge))
     calibration_factor = lim + (1 - lim) * nq
     mask = (q < max_q).astype(float)
-    mask.unit = 'one' 
+    mask.unit = 'one'
     calibration_factor *= mask
     return calibration_factor
