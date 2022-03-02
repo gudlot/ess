@@ -31,6 +31,17 @@ def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
     return out
 
 
+def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
+    """
+    This function implements the solution to
+      t = a * d^2 + c * d + t0
+    for a == 0.
+    """
+    out = t - t0
+    out /= c
+    return out
+
+
 def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
                                    difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
     r"""
@@ -47,7 +58,7 @@ def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
     ess.diffraction.conversions.to_dspacing_with_calibration
     """
     if sc.all(difa == sc.scalar(0.0, unit=difa.unit)).value:
-        return (tof - tzero) / difc
+        return _dspacing_from_diff_calibration_a0_impl(tof, tzero, difc)
     return _dspacing_from_diff_calibration_generic_impl(tof, tzero, difa, difc)
 
 
