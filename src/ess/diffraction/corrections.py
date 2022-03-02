@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from typing import Any, Optional, Dict
-import uuid
 
 import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
@@ -59,12 +58,8 @@ def _common_edges(*edges, dim: str) -> sc.Variable:
         v     |   --|
               < dim >
     """
-    def extremum(fn, index):
-        aux_dim = uuid.uuid4().hex
-        return fn(sc.concat([fn(edge[dim, index]) for edge in edges], aux_dim), aux_dim)
-
-    lo = extremum(sc.min, 0)
-    hi = extremum(sc.max, 1)
+    lo = sc.reduce([e[dim, 0] for e in edges]).min().min()
+    hi = sc.reduce([e[dim, -1] for e in edges]).max().max()
     return sc.concat([lo, hi], dim)
 
 
