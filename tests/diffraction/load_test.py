@@ -2,7 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import pytest
 
-from ess.diffraction import load_calibration
+from ess.diffraction.external import load_calibration
 from ess.external.powgen import data
 
 
