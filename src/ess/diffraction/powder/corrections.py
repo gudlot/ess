@@ -30,6 +30,12 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
             f'Coordinate {dim} of calibration and target dataset do not agree.')
     out = into.copy(deep=False)
     for name in ('difa', 'difc', 'tzero'):
+        if name in out.meta:
+            raise ValueError(f"Cannot add calibration parameter '{name}' to data, "
+                             "there already is metadata with the same name.")
         out.attrs[name] = calibration[name].data
+    if 'calibration' in out.masks:
+        raise ValueError("Cannot add calibration mask 'calibration' tp data, "
+                         "there already is a mask with the same name.")
     out.masks['calibration'] = calibration['mask'].data
     return out
