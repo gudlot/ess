@@ -11,7 +11,7 @@ import scipp as sc
 import scippneutron as scn
 
 from ..logging import get_logger
-from .corrections import normalize_by_proton_charge, subtract_empty_instrument
+from .corrections import subtract_empty_instrument
 
 
 def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
@@ -62,7 +62,8 @@ def load_and_preprocess_vanadium(
     """
     get_logger('diffraction').info('Loading vanadium from file %s.', vanadium_file)
     vanadium = _load_aux_file_as_wavelength(vanadium_file)
-    normalize_by_proton_charge(vanadium, in_place=True)
+    # TODO need proper way to extract proton charge, that is abstract away the name
+    vanadium /= vanadium.meta['gd_prtn_chrg']
     empty_instrument = _load_aux_file_as_wavelength(empty_instrument_file)
     if _remove_based_on_proton_charge(empty_instrument):
         # TODO This is a hack because in the POWGEN test data, all events are
@@ -72,5 +73,5 @@ def load_and_preprocess_vanadium(
     get_logger('diffraction').info(
         'Subtracting empty instrument loaded from file %s from vanadium.',
         empty_instrument_file)
-    normalize_by_proton_charge(empty_instrument, in_place=True)
+    empty_instrument /= empty_instrument.meta['gd_prtn_chrg']
     return subtract_empty_instrument(vanadium, empty_instrument)

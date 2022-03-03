@@ -4,8 +4,8 @@
 Components for diffraction experiments (powder and single crystal).
 """
 
-from .corrections import normalize_by_monitor, normalize_by_proton_charge,\
-    normalize_by_vanadium, subtract_empty_instrument
+from .corrections import normalize_by_monitor, normalize_by_vanadium,\
+    subtract_empty_instrument
 from .grouping import focus_by_two_theta
 from .load import load_and_preprocess_vanadium
 from .smoothing import fft_smooth
@@ -15,7 +15,6 @@ __all__ = [
     'focus_by_two_theta',
     'load_and_preprocess_vanadium',
     'normalize_by_monitor',
-    'normalize_by_proton_charge',
     'normalize_by_vanadium',
     'subtract_empty_instrument',
 ]

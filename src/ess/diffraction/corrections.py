@@ -116,36 +116,6 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def normalize_by_proton_charge(data: sc.DataArray,
-                               *,
-                               proton_charge: str = 'gd_prtn_chrg',
-                               in_place: bool = False) -> sc.DataArray:
-    """
-    Normalize data by the proton charge.
-
-    Assumes that the total proton charge has already been computed and stored in `data`.
-
-    Parameters
-    ----------
-    data:
-        Input data.
-    proton_charge:
-        Name of the proton charge metadata in `data`.
-    in_place:
-        If ``True``, the `data` is modified to save RAM.
-
-    Returns
-    -------
-    :
-        `data` divided by proton charge.
-    """
-    proton_charge = data.meta[proton_charge]
-    if in_place:
-        data /= proton_charge
-        return data
-    return data / proton_charge
-
-
 def normalize_by_vanadium(data: sc.DataArray,
                           *,
                           vanadium: sc.DataArray,
