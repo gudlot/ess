@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 """
-Coordinate transformations for diffraction.
+Coordinate transformations for powder diffraction.
 """
 
 from typing import Optional
 
 import scipp as sc
 
-from .corrections import merge_calibration
+from ..corrections import merge_calibration
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):

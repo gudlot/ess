@@ -3,3 +3,6 @@
 """
 Components for powder diffraction experiments.
 """
+from .conversions import to_dspacing_with_calibration
+
+__all__ = ['to_dspacing_with_calibration']

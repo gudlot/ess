@@ -4,7 +4,6 @@
 Components for diffraction experiments (powder and single crystal).
 """
 
-from .conversions import to_dspacing_with_calibration
 from .corrections import merge_calibration, normalize_by_monitor,\
     normalize_by_proton_charge, normalize_by_vanadium, subtract_empty_instrument
 from .grouping import focus_by_two_theta
