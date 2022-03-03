@@ -71,6 +71,36 @@ def test_dspacing_with_calibration_roundtrip_with_wavelength(calibration):
         initial_wavelength.attrs['tof'].rename_dims({'wavelength': 'tof'}))
 
 
+def test_dspacing_with_calibration_consumes_positions(calibration):
+    rng = np.random.default_rng(9274)
+    n_spectra = calibration.sizes['spectrum']
+    tof = sc.DataArray(sc.ones(dims=['spectrum', 'tof'],
+                               shape=[calibration.sizes['spectrum'], 27]),
+                       coords={
+                           'spectrum':
+                           calibration.coords['spectrum'],
+                           'tof':
+                           sc.linspace('tof', 1.0, 1000.0, 27, unit='us'),
+                           'position':
+                           sc.vectors(dims=['spectrum'],
+                                      values=rng.uniform(-2., 2., (n_spectra, 3)),
+                                      unit='m'),
+                           'sample_position':
+                           sc.vector(value=[0.1, 0.02, 0.0], unit='m'),
+                           'source_position':
+                           sc.vector(value=[-10.0, -1.0, 0.0], unit='m')
+                       })
+    dspacing = to_dspacing_with_calibration(tof, calibration=calibration)
+    assert 'position' not in dspacing.coords
+    assert sc.identical(dspacing.attrs['position'], tof.coords['position'])
+    assert 'sample_position' not in dspacing.coords
+    assert sc.identical(dspacing.attrs['sample_position'],
+                        tof.coords['sample_position'])
+    assert 'source_position' not in dspacing.coords
+    assert sc.identical(dspacing.attrs['source_position'],
+                        tof.coords['source_position'])
+
+
 def test_dspacing_with_calibration_does_not_use_positions(calibration):
     rng = np.random.default_rng(91032)
     n_spectra = calibration.sizes['spectrum']
