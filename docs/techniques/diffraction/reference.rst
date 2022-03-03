@@ -3,14 +3,17 @@
 Reference
 =========
 
+Powder
+------
+
 Conversions
------------
+~~~~~~~~~~~
 
 .. autosummary::
    :toctree: ../../generated
 
-   conversions.dspacing_from_diff_calibration
-   to_dspacing_with_calibration
+   powder.conversions.dspacing_from_diff_calibration
+   powder.to_dspacing_with_calibration
 
 Corrections
 -----------
@@ -30,7 +33,6 @@ Loading
    :toctree: ../../generated
 
    load_and_preprocess_vanadium
-   load_calibration
 
 Smoothing
 -----------
