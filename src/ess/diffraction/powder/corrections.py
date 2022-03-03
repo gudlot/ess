@@ -31,5 +31,5 @@ def merge_calibration(*, into: sc.DataArray, calibration: sc.Dataset) -> sc.Data
     out = into.copy(deep=False)
     for name in ('difa', 'difc', 'tzero'):
         out.attrs[name] = calibration[name].data
-    out.masks['cal'] = calibration['mask'].data
+    out.masks['calibration'] = calibration['mask'].data
     return out
