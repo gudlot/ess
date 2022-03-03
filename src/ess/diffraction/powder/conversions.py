@@ -66,8 +66,7 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     if 'wavelength' not in data.dims:
         return data
 
-    # TODO better error message
-    tof_data = data.transform_coords('tof', graph={}, quiet=True)
+    tof_data = data.copy(deep=False)
     del tof_data.coords['wavelength']
     if tof_data.bins:
         del tof_data.bins.coords['wavelength']
