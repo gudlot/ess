@@ -94,7 +94,8 @@ def load_calibration(filename: Union[str, Path],
                                            instrument_filename=instrument_filename,
                                            instrument_name=instrument_name))
 
-    with scn.mantid.run_mantid_alg('LoadDiffCal', Filename=str(filename),
+    with scn.mantid.run_mantid_alg('LoadDiffCal',
+                                   Filename=str(filename),
                                    MakeGroupingWorkspace=False,
                                    **mantid_args) as ws:
         ds = scn.from_mantid(ws.OutputCalWorkspace)
