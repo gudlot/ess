@@ -131,7 +131,7 @@ def normalize_by_vanadium(data: sc.DataArray,
     vanadium:
         Vanadium data.
     edges:
-        Histogram `data` and `vanadium` with these bin edges.
+        `vanadium` is histogrammed into these bins before dividing the data by it.
     in_place:
         If ``True``, `data` is modified in order to safe memory.
         Otherwise, the input data is unchanged.
@@ -139,12 +139,10 @@ def normalize_by_vanadium(data: sc.DataArray,
     Returns
     -------
     :
-        `data` normalized by `vanadium` and histogrammed according to `edges`.
+        `data` normalized by `vanadium`.
     """
     norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
     if in_place:
         data.bins /= norm
-        out = data
-    else:
-        out = data.bins / norm
-    return sc.histogram(out, bins=edges)
+        return data
+    return data.bins / norm
