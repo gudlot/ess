@@ -16,7 +16,7 @@ from .corrections import subtract_empty_instrument
 
 def _load_aux_file_as_wavelength(filename: Union[str, Path]) -> sc.DataArray:
     da = scn.load(filename,
-                  advanced_geometry=True,
+                  advanced_geometry=False,
                   load_pulse_times=False,
                   mantid_args={'LoadMonitors': True})
     return da.transform_coords('wavelength',
