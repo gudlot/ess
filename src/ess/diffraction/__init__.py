@@ -8,10 +8,10 @@ from .corrections import normalize_by_monitor, normalize_by_vanadium,\
     subtract_empty_instrument
 from .grouping import focus_by_two_theta
 from .load import load_and_preprocess_vanadium
-from .smoothing import fft_smooth
+from .smoothing import lowpass
 
 __all__ = [
-    'fft_smooth',
+    'lowpass',
     'focus_by_two_theta',
     'load_and_preprocess_vanadium',
     'normalize_by_monitor',

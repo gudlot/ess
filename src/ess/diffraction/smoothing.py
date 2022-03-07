@@ -27,12 +27,12 @@ def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
     return var
 
 
-def fft_smooth(da: sc.DataArray,
-               *,
-               dim: str,
-               N: int,
-               Wn: sc.Variable,
-               coord: Optional[str] = None) -> sc.DataArray:
+def lowpass(da: sc.DataArray,
+            *,
+            dim: str,
+            N: int,
+            Wn: sc.Variable,
+            coord: Optional[str] = None) -> sc.DataArray:
     """
     Smooth data using a lowpass frequency filter.
 
@@ -76,7 +76,7 @@ def fft_smooth(da: sc.DataArray,
        >>> y = sc.sin(x * sc.scalar(1.0, unit='rad/m'))
        >>> y += sc.sin(x * sc.scalar(400.0, unit='rad/m'))
        >>> noisy = sc.DataArray(data=y, coords={'x': x})
-       >>> smooth = fft_smooth(noisy, dim='x', N=4, Wn=20 / x.unit)
+       >>> smooth = lowpass(noisy, dim='x', N=4, Wn=20 / x.unit)
     """
     da = _ensure_no_variances(da)
     coord = dim if coord is None else coord

@@ -5,7 +5,7 @@ from typing import Any, Optional, Dict
 import scipp as sc
 from scippneutron.tof.conversions import beamline, elastic
 
-from .smoothing import fft_smooth
+from .smoothing import lowpass
 from ..logging import get_logger
 
 
@@ -112,7 +112,7 @@ def normalize_by_monitor(data: sc.DataArray,
         get_logger('diffraction').info(
             "Smoothing monitor '%s' for normalisation using fft_smooth with %s.",
             monitor, smooth_args)
-        mon = fft_smooth(mon, dim='wavelength', **smooth_args)
+        mon = lowpass(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
