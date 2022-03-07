@@ -30,7 +30,7 @@ def _ensure_no_variances(var: sc.Variable) -> sc.Variable:
 def fft_smooth(da: sc.DataArray,
                *,
                dim: str,
-               order: int,
+               N: int,
                Wn: sc.Variable,
                coord: Optional[str] = None) -> sc.DataArray:
     """
@@ -49,7 +49,7 @@ def fft_smooth(da: sc.DataArray,
     coord:
         Name of the coordinate that defines the sampling frequency.
                   Defaults to `dim`.
-    order:
+    N:
         Order of the lowpass filter.
     Wn:
         Critical frequency of the filter.
@@ -70,7 +70,7 @@ def fft_smooth(da: sc.DataArray,
        >>> y = sc.sin(x * sc.scalar(1.0, unit='rad/m'))
        >>> y += sc.sin(x * sc.scalar(400.0, unit='rad/m'))
        >>> noisy = sc.DataArray(data=y, coords={'x': x})
-       >>> smooth = fft_smooth(noisy, dim='x', order=4, Wn=20 / x.unit)
+       >>> smooth = fft_smooth(noisy, dim='x', N=4, Wn=20 / x.unit)
     """
     da = _ensure_no_variances(da)
     coord = dim if coord is None else coord
@@ -79,4 +79,4 @@ def fft_smooth(da: sc.DataArray,
         da = da.copy(deep=False)
         da.coords[coord] = sc.midpoints(da.coords[coord], dim)
 
-    return butter(da.coords[coord], N=order, Wn=Wn).filtfilt(da, dim)
+    return butter(da.coords[coord], N=N, Wn=Wn).filtfilt(da, dim)
