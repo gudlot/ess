@@ -40,6 +40,12 @@ def fft_smooth(da: sc.DataArray,
     defined by `coord`.
     See :py:func:`scipp.signal.butter` for information on filter design.
 
+    Important
+    ---------
+    If `coord` is bin-edges, it is first converted to bin-centers using
+    :func:`scipp.midpoints`.
+    This is only valid for linearly-spaced edges.
+
     Parameters
     ----------
     da:
@@ -48,7 +54,7 @@ def fft_smooth(da: sc.DataArray,
         Dimension along which to smooth.
     coord:
         Name of the coordinate that defines the sampling frequency.
-                  Defaults to `dim`.
+        Defaults to `dim`.
     N:
         Order of the lowpass filter.
     Wn:
