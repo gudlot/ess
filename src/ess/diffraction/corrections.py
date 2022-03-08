@@ -86,9 +86,9 @@ def normalize_by_monitor(data: sc.DataArray,
         If given, rebin the monitor with these edges.
     smooth_args:
         If given, the monitor histogram is smoothed with
-        :func:`ess.diffraction.fft_smooth` before dividing into `data`.
+        :func:`ess.diffraction.lowpass` before dividing into `data`.
         `smooth_args` is passed as keyword arguments to
-        :func:`ess.diffraction.fft_smooth`. If ``None``, the monitor is not smoothed.
+        :func:`ess.diffraction.lowpass`. If ``None``, the monitor is not smoothed.
 
     Returns
     -------
@@ -110,8 +110,8 @@ def normalize_by_monitor(data: sc.DataArray,
         mon = sc.rebin(mon, 'wavelength', wavelength_edges)
     if smooth_args is not None:
         get_logger('diffraction').info(
-            "Smoothing monitor '%s' for normalisation using fft_smooth with %s.",
-            monitor, smooth_args)
+            "Smoothing monitor '%s' for normalisation using "
+            "ess.diffraction.smoothing.lowpass with %s.", monitor, smooth_args)
         mon = lowpass(mon, dim='wavelength', **smooth_args)
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 

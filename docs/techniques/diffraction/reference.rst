@@ -27,7 +27,7 @@ Smoothing
 .. autosummary::
    :toctree: ../../generated
 
-   fft_smooth
+   lowpass
 
 Powder
 ------
