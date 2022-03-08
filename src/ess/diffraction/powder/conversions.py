@@ -10,6 +10,7 @@ import uuid
 import scipp as sc
 
 from .corrections import merge_calibration
+from ...logging import get_logger
 
 
 def _dspacing_from_diff_calibration_generic_impl(t, t0, a, c):
@@ -67,13 +68,17 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     if 'wavelength' not in data.dims:
         return data
 
+    get_logger('diffraction').info(
+        "Discarding coordinate 'wavelength' in favor of 'tof'.")
     temp_name = uuid.uuid4().hex
     aux = data.transform_coords(temp_name, {
         temp_name: lambda wavelength, tof: tof
     },
                                 keep_inputs=False,
                                 quiet=True)
-    return aux.rename({temp_name: 'tof'})
+    return aux.transform_coords('tof', {'tof': temp_name},
+                                keep_inputs=False,
+                                quiet=True)
 
 
 def _consume_positions(temp_dspacing_, position, sample_position, source_position):
