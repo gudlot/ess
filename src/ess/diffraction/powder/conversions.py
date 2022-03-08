@@ -95,9 +95,18 @@ def to_dspacing_with_calibration(
     Transform coordinates to d-spacing from calibration parameters.
 
     Computes d-spacing from time-of-flight stored in `data`.
+
+    Attention
+    ---------
     `data` may have a wavelength coordinate and dimension,
-    but those are replaced by tof before conversion to d-spacing.
-    An exception is raised if `data` does not contain time-of-flight information.
+    but those are discarded.
+    Only the stored time-of-flight is used, that is, any modifications to
+    the wavelength coordinate after it was computed from time-of-flight are lost.
+
+    Raises
+    ------
+    KeyError
+        If `data` does not contain a 'tof' metadata.
 
     Parameters
     ----------
@@ -107,6 +116,11 @@ def to_dspacing_with_calibration(
     calibration:
         Calibration data. If given, use it for the conversion.
         Otherwise, the calibration data must be stored in `data`.
+
+    Returns
+    -------
+    :
+        A DataArray with the same data as the input and a 'dspacing' coordinate.
 
     See Also
     --------
