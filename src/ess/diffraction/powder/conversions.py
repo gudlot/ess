@@ -76,6 +76,17 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     return aux.rename({temp_name: 'tof'})
 
 
+def _consume_positions(temp_dspacing_, position, sample_position, source_position):
+    _ = position
+    _ = sample_position
+    _ = source_position
+    return temp_dspacing_
+
+
+def _make_dummy():
+    return sc.scalar(0)
+
+
 def to_dspacing_with_calibration(
         data: sc.DataArray,
         *,
@@ -107,13 +118,11 @@ def to_dspacing_with_calibration(
         out = data
 
     out = _restore_tof_if_in_wavelength(out)
-    graph = {'dspacing': dspacing_from_diff_calibration}
-    out = out.transform_coords('dspacing', graph=graph)
-
-    for name in ('sample_position', 'source_position', 'position'):
-        if name in out.coords:
-            out.attrs[name] = out.coords.pop(name)
-        if out.bins is not None and name in out.bins.coords:
-            out.bins.attrs[name] = out.bins.coords.pop(name)
-
-    return out
+    graph = {
+        'temp_dspacing_': dspacing_from_diff_calibration,
+        'dspacing': _consume_positions,
+        'position': _make_dummy,
+        'sample_position': _make_dummy,
+        'source_position': _make_dummy
+    }
+    return out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
