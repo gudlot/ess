@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import scipp as sc
-import scippneutron as scn
+from scippneutron.tof import conversions
 
 
 def focus_by_two_theta(data: sc.DataArray,
@@ -27,9 +27,7 @@ def focus_by_two_theta(data: sc.DataArray,
     :
         `data` grouped into two_theta bins.
     """
-    data = data.copy(deep=False)
-    if 'two_theta' not in data.meta and 'two_theta' not in data.bins.meta:
-        data.coords['two_theta'] = scn.two_theta(data)
+    data = data.transform_coords('two_theta', graph=conversions.beamline(scatter=True))
     return sc.groupby(data,
                       'two_theta',
                       bins=edges.to(unit=data.coords['two_theta'].unit,
