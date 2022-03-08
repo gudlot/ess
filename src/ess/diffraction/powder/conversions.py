@@ -5,6 +5,7 @@ Coordinate transformations for powder diffraction.
 """
 
 from typing import Optional
+import uuid
 
 import scipp as sc
 
@@ -66,11 +67,13 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
     if 'wavelength' not in data.dims:
         return data
 
-    tof_data = data.copy(deep=False)
-    del tof_data.coords['wavelength']
-    if tof_data.bins:
-        del tof_data.bins.coords['wavelength']
-    return tof_data.rename_dims({'wavelength': 'tof'})
+    temp_name = uuid.uuid4().hex
+    aux = data.transform_coords(temp_name, {
+        temp_name: lambda wavelength, tof: tof
+    },
+                                keep_inputs=False,
+                                quiet=True)
+    return aux.rename({temp_name: 'tof'})
 
 
 def to_dspacing_with_calibration(
