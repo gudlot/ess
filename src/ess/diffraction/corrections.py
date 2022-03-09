@@ -9,65 +9,6 @@ from .smoothing import lowpass
 from ..logging import get_logger
 
 
-def _common_edges(*edges, dim: str) -> sc.Variable:
-    """
-    The data has separate bin edges for each spectrum:
-
-        ^      |---|
-    spectrum  |--|
-        v        |--|
-              < dim >
-
-    This function computes common edges for all spectra
-    for the combination of all inputs:
-
-        ^     | --- |
-    spectrum  |--   |
-        v     |   --|
-              < dim >
-    """
-    lo = sc.reduce([e[dim, 0] for e in edges]).min().min()
-    hi = sc.reduce([e[dim, -1] for e in edges]).max().max()
-    return sc.concat([lo, hi], dim)
-
-
-def subtract_empty_instrument(data: sc.DataArray,
-                              empty_instr: sc.DataArray) -> sc.DataArray:
-    """
-    Combine event list of data with that of an empty instrument measurement.
-
-    Parameters
-    ----------
-    data:
-        Binned data in wavelength.
-    empty_instr:
-        Binned data for an empty instrument in wavelength.
-
-    Returns
-    -------
-    :
-        Binned data containing events from `data` with positive weights and
-        events from `empty_string` with negative weights.
-    """
-    data = data.copy(deep=False)
-    empty_instr = empty_instr.copy(deep=False)
-
-    wavelength_edges = _common_edges(data.coords['wavelength'],
-                                     empty_instr.coords['wavelength'],
-                                     dim='wavelength')
-    data.coords['wavelength'] = wavelength_edges
-    empty_instr.coords['wavelength'] = wavelength_edges
-
-    if 'tof' in data.attrs:
-        tof_edges = _common_edges(data.attrs['tof'],
-                                  empty_instr.attrs['tof'],
-                                  dim='wavelength')
-        data.attrs['tof'] = tof_edges
-        empty_instr.attrs['tof'] = tof_edges
-
-    return data.bins.concat(-empty_instr)
-
-
 def normalize_by_monitor(data: sc.DataArray,
                          *,
                          monitor: str,

@@ -45,7 +45,8 @@ def _dspacing_from_diff_calibration_a0_impl(t, t0, c):
 
 
 def dspacing_from_diff_calibration(tof: sc.Variable, tzero: sc.Variable,
-                                   difa: sc.Variable, difc: sc.Variable) -> sc.Variable:
+                                   difa: sc.Variable, difc: sc.Variable,
+                                   _tag_positions_consumed: sc.Variable) -> sc.Variable:
     r"""
     Compute d-spacing from calibration parameters.
 
@@ -81,14 +82,10 @@ def _restore_tof_if_in_wavelength(data: sc.DataArray) -> sc.DataArray:
                                 quiet=True)
 
 
-def _consume_positions(temp_dspacing_, position, sample_position, source_position):
+def _consume_positions(position, sample_position, source_position):
     _ = position
     _ = sample_position
     _ = source_position
-    return temp_dspacing_
-
-
-def _make_dummy():
     return sc.scalar(0)
 
 
@@ -138,10 +135,7 @@ def to_dspacing_with_calibration(
 
     out = _restore_tof_if_in_wavelength(out)
     graph = {
-        'temp_dspacing_': dspacing_from_diff_calibration,
-        'dspacing': _consume_positions,
-        'position': _make_dummy,
-        'sample_position': _make_dummy,
-        'source_position': _make_dummy
+        'dspacing': dspacing_from_diff_calibration,
+        '_tag_positions_consumed': _consume_positions,
     }
     return out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
