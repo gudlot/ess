@@ -4,9 +4,8 @@ import numpy as np
 import scipp as sc
 from typing import Union
 
-
 # Enables the conversion from full width half
-# maximum to standard deviation 
+# maximum to standard deviation
 FWHM_TO_STD = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
 
 
