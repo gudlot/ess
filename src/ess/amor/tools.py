@@ -11,7 +11,7 @@ _FWHM_TO_STD = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
 def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
     """
     Convert from full-width half maximum to standard deviation.
-    
+
     :param fwhm: Full-width half maximum.
     :return: Standard deviation.
     """
@@ -23,7 +23,7 @@ def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
 def std_to_fwhm(std: sc.Variable) -> sc.Variable:
     """
     Convert from standard deviation to full-width half maximum.
-    
+
     :param std: Standard deviation.
     :return: Full-width half maximum.
     """
