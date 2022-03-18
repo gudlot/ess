@@ -4,7 +4,6 @@ import numpy as np
 import scipp as sc
 from typing import Union
 
-
 _FWHM_TO_STD = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
 
 
