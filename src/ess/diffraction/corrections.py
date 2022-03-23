@@ -17,6 +17,8 @@ def normalize_by_monitor(data: sc.DataArray,
     """
     Normalize event data by a monitor.
 
+    The input is converted to wavelength if it does not already contain wavelengths.
+
     Parameters
     ----------
     data:
