@@ -9,4 +9,5 @@ the ``dream`` module when that is available.
 
 from . import beamline
 from . import data
+from .instrument_view import instrument_view
 from .load import load
