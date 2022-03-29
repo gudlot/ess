@@ -8,22 +8,18 @@ from ..logging import log_call
 
 @log_call(instrument='amor',
           message='Constructing AMOR beamline from default parameters')
-def make_beamline(
-    sample_rotation: sc.Variable = None,
-    beam_size: sc.Variable = 0.001 * sc.units.m,
-    sample_size: sc.Variable = 0.01 * sc.units.m,
-    detector_spatial_resolution: sc.Variable = 0.0025 * sc.units.m,
-    gravity: sc.Variable = sc.vector(value=[0, -1, 0]) * g,
-    chopper_frequency: sc.Variable = sc.scalar(20 / 3, unit='Hz'),
-    chopper_phase: sc.Variable = sc.scalar(-8.0, unit='deg'),
-    chopper_position: sc.Variable = sc.vector(value=[0, 0, -15.0], unit='m')
-) -> dict:
+def make_beamline(sample_rotation: sc.Variable,
+                  beam_size: sc.Variable = None,
+                  sample_size: sc.Variable = None,
+                  detector_spatial_resolution: sc.Variable = None,
+                  gravity: sc.Variable = None,
+                  chopper_frequency: sc.Variable = None,
+                  chopper_phase: sc.Variable = None,
+                  chopper_position: sc.Variable = None) -> dict:
     """
     Amor beamline components.
 
     :param sample_rotation: Sample rotation (omega) angle.
-        Default is `None`.
-    :type sample_rotation: Variable.
     :param beam_size: Size of the beam perpendicular to the scattering surface.
         Default is `0.001 m`.
     :param sample_size: Size of the sample in direction of the beam.
@@ -42,6 +38,20 @@ def make_beamline(
     :returns: A dict.
     :rtype: dict
     """
+    if beam_size is None:
+        beam_size = 2.0 * sc.units.mm
+    if sample_size is None:
+        sample_size = 10.0 * sc.units.mm
+    if detector_spatial_resolution is None:
+        detector_spatial_resolution = 0.0025 * sc.units.m
+    if gravity is None:
+        gravity = sc.vector(value=[0, -1, 0]) * g
+    if chopper_frequency is None:
+        chopper_frequency = sc.scalar(20 / 3, unit='Hz')
+    if chopper_phase is None:
+        chopper_phase = sc.scalar(-8.0, unit='deg')
+    if chopper_position is None:
+        chopper_position = sc.vector(value=[0, 0, -15.0], unit='m')
     beamline = {
         'sample_rotation': sample_rotation,
         'beam_size': beam_size,

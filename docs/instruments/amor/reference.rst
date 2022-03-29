@@ -12,6 +12,7 @@ Modules
    :recursive:
 
    beamline
+   calibration
    conversions
    tools
 
