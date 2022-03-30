@@ -4,7 +4,7 @@ import scipp as sc
 from scippneutron.tof import conversions
 
 
-def focus_by_two_theta(data: sc.DataArray,
+def group_by_two_theta(data: sc.DataArray,
                        *,
                        edges: sc.Variable,
                        replace_dim: str = 'spectrum') -> sc.DataArray:
