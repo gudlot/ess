@@ -131,4 +131,4 @@ def load_and_preprocess_vanadium(vanadium_file: Union[str, Path],
         _normalize_by_proton_charge_in_place(d, gd_proton_charge_name)
         d.da = d.da.transform_coords('wavelength', graph=tof_to_wavelength)
 
-    return data[0].da.bins.concat(data[1].da)
+    return data[0].da.bins.concat(-data[1].da)
