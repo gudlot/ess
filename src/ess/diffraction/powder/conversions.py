@@ -136,6 +136,13 @@ def to_dspacing_with_calibration(
     out = _restore_tof_if_in_wavelength(out)
     graph = {
         'dspacing': dspacing_from_diff_calibration,
-        '_tag_positions_consumed': _consume_positions,
     }
-    return out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+
+    if 'position' in out.meta:
+        graph['_tag_positions_consumed'] = _consume_positions
+    else:
+        out.attrs['_tag_positions_consumed'] = sc.scalar(0)
+
+    out = out.transform_coords('dspacing', graph=graph, keep_intermediate=False)
+    out.attrs.pop('_tag_positions_consumed', None)
+    return out
