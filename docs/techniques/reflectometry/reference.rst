@@ -35,4 +35,4 @@ Save
 .. autosummary:: 
    :toctree: ../../generated
    
-   save.save0
+   save.save
