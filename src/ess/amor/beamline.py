@@ -13,6 +13,7 @@ def make_beamline(sample_rotation: sc.Variable,
                   sample_size: sc.Variable = None,
                   detector_spatial_resolution: sc.Variable = None,
                   gravity: sc.Variable = None,
+                  chopper_chopper_distance: sc.Variable = None,
                   chopper_frequency: sc.Variable = None,
                   chopper_phase: sc.Variable = None,
                   chopper_position: sc.Variable = None) -> dict:
@@ -28,6 +29,8 @@ def make_beamline(sample_rotation: sc.Variable,
         Default is `2.5 mm`.
     :param gravity: Vector representing the direction and magnitude of the Earth's
         gravitational field. Default is `[0, -g, 0]`.
+    :param chopper_chopper_distance: The distance between the two choppers of the
+        double blind system.
     :param chopper_frequency: Rotational frequency of the chopper.
         Default is `6.6666... Hz`.
     :param chopper_phase: Phase offset between chopper pulse and ToF zero.
@@ -46,6 +49,8 @@ def make_beamline(sample_rotation: sc.Variable,
         detector_spatial_resolution = 0.0025 * sc.units.m
     if gravity is None:
         gravity = sc.vector(value=[0, -1, 0]) * g
+    if chopper_chopper_distance is None:
+        chopper_chopper_distance = sc.scalar(0.49, unit='m')
     if chopper_frequency is None:
         chopper_frequency = sc.scalar(20 / 3, unit='Hz')
     if chopper_phase is None:
@@ -57,7 +62,8 @@ def make_beamline(sample_rotation: sc.Variable,
         'beam_size': beam_size,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
-        'gravity': gravity
+        'gravity': gravity,
+        'chopper_chopper_distance': chopper_chopper_distance 
     }
     # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
     # of a DataArray, and the data value is a string containing the name of the
