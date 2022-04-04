@@ -63,7 +63,7 @@ def make_beamline(sample_rotation: sc.Variable,
         'sample_size': sample_size,
         'detector_spatial_resolution': detector_spatial_resolution,
         'gravity': gravity,
-        'chopper_chopper_distance': chopper_chopper_distance 
+        'chopper_chopper_distance': chopper_chopper_distance
     }
     # TODO: in scn.load_nexus, the chopper parameters are stored as coordinates
     # of a DataArray, and the data value is a string containing the name of the
