@@ -83,18 +83,13 @@ def load(filename,
     return _tof_correction(data)
 
 
-def populate_orso(data: sc.DataArray,
-                  filename: str,
-                  owner: fileio.base.Person,
-                  sample: fileio.data_source.Sample,
-                  creator: fileio.base.Person,
+def populate_orso(data: sc.DataArray, filename: str, owner: fileio.base.Person,
+                  sample: fileio.data_source.Sample, creator: fileio.base.Person,
                   reduction_script: str) -> fileio.orso.Orso:
     orso = base_orso()
     orso.data_source.owner = owner
-    orso.data_source.experiment.title = data.attrs[
-        'experiment_title'].value
-    orso.data_source.experiment.instrument = data.attrs[
-        'instrument_name'].value
+    orso.data_source.experiment.title = data.attrs['experiment_title'].value
+    orso.data_source.experiment.instrument = data.attrs['instrument_name'].value
     orso.data_source.experiment.start_date = datetime.strftime(
         datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
         '%Y-%m-%d')
