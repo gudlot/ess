@@ -76,29 +76,41 @@ def load(filename,
     for key, value in beamline.items():
         data.coords[key] = value
 
-    data.attrs['orso'] = sc.scalar(populate_orso())
-    data.attrs['orso'].value.data_source.owner = owner
-    data.attrs['orso'].value.data_source.experiment.title = data.attrs[
-        'experiment_title'].value
-    data.attrs['orso'].value.data_source.experiment.instrument = data.attrs[
-        'instrument_name'].value
-    data.attrs['orso'].value.data_source.experiment.start_date = datetime.strftime(
-        datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
-        '%Y-%m-%d')
-    data.attrs['orso'].value.data_source.sample = sample
-    data.attrs['orso'].value.data_source.measurement.data_files = [filename]
-    data.attrs['orso'].value.reduction.creator = creator
-    data.attrs['orso'].value.reduction.script = reduction_script
+    data.attrs['orso'] = sc.scalar(
+        populate_orso(data, filename, owner, sample, creator, reduction_script))
 
     # Perform tof correction and fold two pulses
     return _tof_correction(data)
 
 
-def populate_orso() -> fileio.orso.Orso:
+def populate_orso(data: sc.DataArray,
+                  filename: str,
+                  owner: fileio.base.Person,
+                  sample: fileio.data_source.Sample,
+                  creator: fileio.base.Person,
+                  reduction_script: str) -> fileio.orso.Orso:
+    orso = base_orso()
+    orso.data_source.owner = owner
+    orso.data_source.experiment.title = data.attrs[
+        'experiment_title'].value
+    orso.data_source.experiment.instrument = data.attrs[
+        'instrument_name'].value
+    orso.data_source.experiment.start_date = datetime.strftime(
+        datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
+        '%Y-%m-%d')
+    orso.data_source.sample = sample
+    orso.data_source.measurement.data_files = [filename]
+    orso.reduction.creator = creator
+    orso.reduction.script = reduction_script
+    return orso
+
+
+def base_orso() -> fileio.orso.Orso:
     """
+    Generate the base Orso object for the Amor instrument.
     Populate the Orso object for metadata storage.
 
-    :return: Populated Orso object.
+    :return: Base Orso object.
     """
     orso = fileio.orso.Orso.empty()
     orso.data_source.experiment.probe = 'neutrons'
