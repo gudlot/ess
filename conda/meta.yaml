@@ -17,6 +17,7 @@ requirements:
     - scipy
     - tifffile
     - pip
+    - pip:
       - orsopy
 
 test:
