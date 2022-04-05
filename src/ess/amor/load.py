@@ -83,8 +83,8 @@ def load(filename,
     data.attrs['orso'].value.data_source.experiment.instrument = data.attrs[
         'instrument_name'].value
     data.attrs['orso'].value.data_source.experiment.start_date = datetime.strftime(
-        datetime.strptime(data.attrs['start_time'].value[:-3],
-                          '%Y-%m-%dT%H:%M:%S.%f'), '%Y-%m-%d')
+        datetime.strptime(data.attrs['start_time'].value[:-3], '%Y-%m-%dT%H:%M:%S.%f'),
+        '%Y-%m-%d')
     data.attrs['orso'].value.data_source.sample = sample
     data.attrs['orso'].value.data_source.measurement.data_files = [filename]
     data.attrs['orso'].value.reduction.creator = creator
@@ -104,8 +104,8 @@ def populate_orso() -> fileio.orso.Orso:
     orso.data_source.experiment.probe = 'neutrons'
     orso.data_source.experiment.facility = 'Paul Scherrer Institut'
     orso.data_source.measurement.scheme = 'angle- and energy-dispersive'
-    orso.reduction.software = fileio.reduction.Software(
-        'scipp-ess', sc.__version__, platform.platform())
+    orso.reduction.software = fileio.reduction.Software('scipp-ess', sc.__version__,
+                                                        platform.platform())
     orso.reduction.timestep = datetime.now()
     orso.reduction.corrections = []
     orso.reduction.computer = platform.node()
@@ -113,8 +113,7 @@ def populate_orso() -> fileio.orso.Orso:
         fileio.base.Column('Qz', '1/angstrom', 'wavevector transfer'),
         fileio.base.Column('R', None, 'reflectivity'),
         fileio.base.Column('sR', None, 'standard deivation of reflectivity'),
-        fileio.base.Column('sQz',
-                           '1/angstrom',
+        fileio.base.Column('sQz', '1/angstrom',
                            'standard deviation of wavevector transfer resolution'),
     ]
     return orso
