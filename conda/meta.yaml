@@ -16,6 +16,8 @@ requirements:
     - scippneutron>=0.5
     - scipy
     - tifffile
+    - pip
+      - orsopy
 
 test:
   imports:
