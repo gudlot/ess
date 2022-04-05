@@ -15,10 +15,11 @@ def save(data_array: sc.DataArray, filename: str):
     """
     if filename[:-4] == '.ort':
         raise UserWarning("The expected output file ending is .ort.")
-    q = sc.midpoints(data_array.mean('detector_id').coords['Q']).values
-    R = data_array.mean('detector_id').data.values
-    sR = sc.stddevs(data_array.mean('detector_id').data).values
-    sq = data_array.coords['sigma_Q_by_Q'].max('detector_id').values * q
+    q = sc.midpoints(data_array.mean('detector_id').coords['Q'])
+    R = data_array.mean('detector_id').data
+    sR = sc.stddevs(data_array.mean('detector_id').data)
+    sq = data_array.coords['sigma_Q_by_Q'].max('detector_id') * q
     dataset = fileio.orso.OrsoDataset(data_array.attrs['orso'].value,
-                                      np.array([q, R, sR, sq]).T)
+                                      np.array([q.values, R.values,
+                                                sR.values, sq.values]).T)
     fileio.orso.save_orso([dataset], filename)
