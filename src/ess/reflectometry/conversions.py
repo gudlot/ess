@@ -61,3 +61,29 @@ def specular_reflection() -> dict:
     graph["theta"] = theta
     graph["Q"] = reflectometry_q
     return graph
+
+
+def tof_to_wavelength(
+    data_array: sc.DataArray,
+    wavelength_edges: sc.Variable,
+    graph: dict = specular_reflection()) -> sc.DataArray:
+    """
+    Use transform coords to convert from ToF to wavelength, cutoff high and
+    low limits for wavelength, and add necessary ORSO metadata.
+
+    :param data_array: Data array to convert.
+    :param wavelength_edges: The lower and upper limits for the wavelength.
+    :return: New data array with wavelength dimension.
+    """
+    data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
+    data_array_wav = sc.bin(data_array_wav, edges=[wavelength_edges])
+    try:
+        from orsopy import fileio
+        data_array_wav.attrs[
+            'orso'].value.data_source.measurement.instrument_settings.wavelength = fileio.base.ValueRange(
+                wavelength_edges.min().value,
+                wavelength_edges.max().value, 'angstrom')
+    except ImportError:
+        raise UserWarning("For metadata to be logged in the data array, "
+                          "it is necessary to install the orsopy package.")
+    return data_array_wav
