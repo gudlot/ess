@@ -4,7 +4,7 @@ import numpy as np
 import scipp as sc
 from typing import Union
 
-_FWHM_TO_STD = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
+_STD_TO_FWHM = sc.scalar(2.) * sc.sqrt(sc.scalar(2.) * sc.log(sc.scalar(2.)))
 
 
 def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
@@ -16,7 +16,7 @@ def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
     """
     # Enables the conversion from full width half
     # maximum to standard deviation
-    return fwhm * _FWHM_TO_STD
+    return fwhm / _STD_TO_FWHM
 
 
 def std_to_fwhm(std: sc.Variable) -> sc.Variable:
@@ -28,7 +28,7 @@ def std_to_fwhm(std: sc.Variable) -> sc.Variable:
     """
     # Enables the conversion from full width half
     # maximum to standard deviation
-    return std / _FWHM_TO_STD
+    return std * _STD_TO_FWHM
 
 
 def linlogspace(dim: str,
