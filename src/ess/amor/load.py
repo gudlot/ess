@@ -18,9 +18,9 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     TODO: generalise mechanism to fold any number of pulses.
     """
     data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
-    tau = sc.to_unit(1 / (2 * data.coords['source_chopper'].value['frequency'].data),
+    tau = sc.to_unit(1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
                      data.coords[dim].unit)
-    chopper_phase = data.coords['source_chopper'].value['phase'].data
+    chopper_phase = data.coords['source_chopper_2'].value['phase'].data
     tof_offset = tau * chopper_phase / (180.0 * sc.units.deg)
     # Make 2 bins, one for each pulse
     edges = sc.concat([-tof_offset, tau - tof_offset, 2 * tau - tof_offset], dim)
