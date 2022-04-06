@@ -18,7 +18,7 @@ def save(data_array: sc.DataArray, filename: str):
     q = sc.midpoints(data_array.mean('detector_id').coords['Q'])
     R = data_array.mean('detector_id').data
     sR = sc.stddevs(data_array.mean('detector_id').data)
-    sq = data_array.coords['sigma_Q_by_Q'].max('detector_id') * q
+    sq = data_array.coords['sigma_Q']
     dataset = fileio.orso.OrsoDataset(
         data_array.attrs['orso'].value,
         np.array([q.values, R.values, sR.values, sq.values]).T)
