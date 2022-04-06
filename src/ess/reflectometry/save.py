@@ -6,7 +6,7 @@ import scipp as sc
 from orsopy import fileio
 
 
-def save(data_array: sc.DataArray, filename: str):
+def save_ort(data_array: sc.DataArray, filename: str):
     """
     Save a data array with the ORSO .ort file format.
 
