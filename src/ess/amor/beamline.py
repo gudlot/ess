@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-from turtle import pos
 import scipp as sc
 from scipp.constants import g
 from ..choppers import make_chopper
@@ -75,8 +74,8 @@ def make_beamline(sample_rotation: sc.Variable,
                      position=chopper_2_position))
     beamline["source_chopper_1"] = sc.scalar(
         make_chopper(frequency=chopper_frequency,
-                    phase=chopper_phase,
-                    position=chopper_1_position)
+                     phase=chopper_phase,
+                     position=chopper_1_position)
     )
     return beamline
 
