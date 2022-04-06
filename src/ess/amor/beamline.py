@@ -75,8 +75,7 @@ def make_beamline(sample_rotation: sc.Variable,
     beamline["source_chopper_1"] = sc.scalar(
         make_chopper(frequency=chopper_frequency,
                      phase=chopper_phase,
-                     position=chopper_1_position)
-    )
+                     position=chopper_1_position))
     return beamline
 
 
