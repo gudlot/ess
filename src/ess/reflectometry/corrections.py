@@ -2,6 +2,7 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import numpy as np
 import scipp as sc
+from ..amor.tools import fwhm_to_std
 
 
 def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
@@ -33,3 +34,42 @@ def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
     if ((sc.mean(beam_on_sample)) > sample_size).value:
         beam_on_sample = sc.broadcast(sample_size, shape=theta.shape, dims=theta.dims)
     return beam_on_sample
+
+
+def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
+    """
+    Perform the footprint correction on the data array that has a :code:`beam_size` and
+    binned :code:`theta` values.
+
+    :param data_array: Data array to perform footprint correction on.
+    :return: Footprint corrected data array.
+    """
+    beam_on_sample = data_array.coords['beam_size'] / sc.sin(
+        data_array.bins.coords['theta'])
+    footprint_scale = sc.erf(
+        fwhm_to_std(data_array.coords['sample_size'] / beam_on_sample))
+    data_array_fp_correction = data_array / footprint_scale.squeeze()
+    try:
+        data_array_fp_correction.attrs[
+            'orso'].value.reduction.corrections += ['footprint correction']
+    except KeyError:
+        raise UserWarning("To store information about corrections "
+                          "it is necessary to install the orsopy package.")
+    return data_array_fp_correction
+
+
+def normalise_by_counts(data_array: sc.DataArray) -> sc.DataArray:
+    """
+    Normalise the bin-summed data by the total number of counts.
+
+    :param data_array: Data array to be normalised.
+    :return: Normalised data array.
+    """
+    ncounts = data_array.sum()
+    norm = data_array / ncounts
+    try:
+        norm.attrs['orso'].value.reduction.corrections += ['total counts']
+    except KeyError:
+        raise UserWarning("For metadata to be logged in the data array, "
+                          "it is necessary to install the orsopy package.")
+    return norm

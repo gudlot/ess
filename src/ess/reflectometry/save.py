@@ -15,7 +15,9 @@ def save_ort(data_array: sc.DataArray, filename: str):
     """
     if filename[:-4] == '.ort':
         raise UserWarning("The expected output file ending is .ort.")
-    q = sc.midpoints(data_array.mean('detector_id').coords['Q'])
+    q = data_array.mean('detector_id').coords['Q']
+    if data_array.mean('detector_id').coords.is_edges('Q'):
+        q = sc.midpoints(q)
     R = data_array.mean('detector_id').data
     sR = sc.stddevs(data_array.mean('detector_id').data)
     sq = data_array.coords['sigma_Q']
