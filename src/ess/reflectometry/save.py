@@ -3,7 +3,6 @@
 
 import numpy as np
 import scipp as sc
-from orsopy import fileio
 
 
 def save_ort(data_array: sc.DataArray, filename: str):
@@ -13,6 +12,7 @@ def save_ort(data_array: sc.DataArray, filename: str):
     :param data_array: Scipp-data array to save.
     :param filename: Filename.
     """
+    from orsopy import fileio
     if filename[:-4] == '.ort':
         raise UserWarning("The expected output file ending is .ort.")
     q = data_array.mean('detector_id').coords['Q']
