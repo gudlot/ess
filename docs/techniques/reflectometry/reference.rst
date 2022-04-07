@@ -18,16 +18,7 @@ Corrections
    :toctree: ../../generated
 
    corrections.footprint_correction
-   corrections.normalise_by_counts
-
-Resolution
-----------
-
-.. autosummary::
-   :toctree: ../../generated
-
-   resolution.detector_resolution
-   resolution.z_offset
+   corrections.normalize_by_counts
 
 Save 
 ----
@@ -35,4 +26,4 @@ Save
 .. autosummary:: 
    :toctree: ../../generated
    
-   save.save
+   save.save_ort

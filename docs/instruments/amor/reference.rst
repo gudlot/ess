@@ -12,8 +12,10 @@ Modules
    :recursive:
 
    beamline
-   calibration
+   calibrations
    conversions
+   normalize
+   resolution
    tools
 
 

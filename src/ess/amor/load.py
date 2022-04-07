@@ -86,6 +86,17 @@ def load(filename,
 def populate_orso(data: sc.DataArray, filename: str, owner: fileio.base.Person,
                   sample: fileio.data_source.Sample, creator: fileio.base.Person,
                   reduction_script: str) -> fileio.orso.Orso:
+    """
+    Populate the Orso object, by calling the :code:`base_orso` and adding data from the file.
+    
+    :param data: Data array to source information from 
+    :param filename: Path of the file to load.
+    :param owner: the owner of the data set, i.e. the main proposer of the measurement.
+    :param sample: A description of the sample.
+    :param creator: The creator of the reduced data, the person responsible for the
+        reduction process.
+    :param reduction_script: The script or notebook used for reduction.
+    """
     orso = base_orso()
     orso.data_source.owner = owner
     orso.data_source.experiment.title = data.attrs['experiment_title'].value
