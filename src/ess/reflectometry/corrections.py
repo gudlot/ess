@@ -23,8 +23,9 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
             'footprint correction'
         ]
     except KeyError:
-        warnings.warn("To store information about corrections it is "
-                      "necessary to install the orsopy package.", UserWarning)
+        warnings.warn(
+            "To store information about corrections it is "
+            "necessary to install the orsopy package.", UserWarning)
     return data_array_fp_correction
 
 
@@ -40,6 +41,7 @@ def normalise_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     try:
         norm.attrs['orso'].value.reduction.corrections += ['total counts']
     except KeyError:
-        warnings.warn("To store information about corrections it is "
-                      "necessary to install the orsopy package.", UserWarning)
+        warnings.warn(
+            "To store information about corrections it is "
+            "necessary to install the orsopy package.", UserWarning)
     return norm
