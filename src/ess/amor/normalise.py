@@ -19,9 +19,8 @@ def normalise_by_supermirror(sample: sc.DataArray,
     try:
         normalised.attrs['orso'] = sample.attrs['orso']
         normalised.attrs['orso'].value.reduction.corrections = list(
-            set(sample.attrs[
-                'orso'].value.reduction.corrections + supermirror.attrs[
-                    'orso'].value.reduction.corrections))
+            set(sample.attrs['orso'].value.reduction.corrections +
+                supermirror.attrs['orso'].value.reduction.corrections))
         normalised.attrs[
             'orso'].value.data_source.measurement.reference = supermirror.attrs[
                 'orso'].value.data_source.measurement.data_files

@@ -3,12 +3,12 @@
 import scipp as sc
 
 
-def supermirror_calibration(data_array: sc.DataArray,
-                            m_value: sc.Variable = sc.scalar(
-                                5, unit=sc.units.dimensionless),
-                            critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
-                            alpha: sc.Variable = sc.scalar(
-                                0.25 / 0.088, unit=sc.units.angstrom)) -> sc.Variable:
+def supermirror_calibration(
+    data_array: sc.DataArray,
+    m_value: sc.Variable = sc.scalar(5, unit=sc.units.dimensionless),
+    critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
+    alpha: sc.Variable = sc.scalar(0.25 / 0.088, unit=sc.units.angstrom)
+) -> sc.Variable:
     """
     Calibrate supermirror measurements
 
@@ -22,20 +22,21 @@ def supermirror_calibration(data_array: sc.DataArray,
     calibration = calibration_factor(data_array, m_value, critical_edge, alpha)
     data_array_cal = data_array * calibration
     try:
-        data_array_cal.attrs[
-            'orso'].value.reduction.corrections += ['supermirror calibration']
+        data_array_cal.attrs['orso'].value.reduction.corrections += [
+            'supermirror calibration'
+        ]
     except KeyError:
         raise UserWarning("For metadata to be logged in the data array, "
                           "it is necessary to install the orsopy package.")
     return data_array_cal
 
 
-def calibration_factor(data_array: sc.DataArray,
-                       m_value: sc.Variable = sc.scalar(
-                           5, unit=sc.units.dimensionless),
-                       critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
-                       alpha: sc.Variable = sc.scalar(
-                                0.25 / 0.088, unit=sc.units.angstrom)) -> sc.Variable:
+def calibration_factor(
+    data_array: sc.DataArray,
+    m_value: sc.Variable = sc.scalar(5, unit=sc.units.dimensionless),
+    critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
+    alpha: sc.Variable = sc.scalar(0.25 / 0.088, unit=sc.units.angstrom)
+) -> sc.Variable:
     """
     Return the calibration factor for the supermirror.
 
