@@ -17,7 +17,8 @@ Corrections
 .. autosummary::
    :toctree: ../../generated
 
-   corrections.illumination_of_sample
+   corrections.footprint_correction
+   corrections.normalise_by_counts
 
 Resolution
 ----------

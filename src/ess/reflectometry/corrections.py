@@ -1,24 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
+import warnings
 import numpy as np
 import scipp as sc
 from ..amor.tools import fwhm_to_std
-
-
-def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
-                           theta: sc.Variable) -> sc.Variable:
-    """
-    Determine the illumination of the sample by the beam and therefore the size of its
-    illuminated length.
-
-    :param beam_size: Width of incident beam.
-    :param sample_size: Width of sample in the dimension of the beam.
-    :param theta: Incident angle.
-    """
-    beam_on_sample = beam_size / sc.sin(theta)
-    if ((sc.mean(beam_on_sample)) > sample_size).value:
-        beam_on_sample = sc.broadcast(sample_size, shape=theta.shape, dims=theta.dims)
-    return beam_on_sample
 
 
 def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
@@ -39,8 +24,8 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
             'footprint correction'
         ]
     except KeyError:
-        raise UserWarning("To store information about corrections "
-                          "it is necessary to install the orsopy package.")
+        warnings.warn("To store information about corrections it is "
+                      "necessary to install the orsopy package.", UserWarning)
     return data_array_fp_correction
 
 
@@ -56,6 +41,6 @@ def normalise_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     try:
         norm.attrs['orso'].value.reduction.corrections += ['total counts']
     except KeyError:
-        raise UserWarning("For metadata to be logged in the data array, "
-                          "it is necessary to install the orsopy package.")
+        warnings.warn("To store information about corrections it is "
+                      "necessary to install the orsopy package.", UserWarning)
     return norm
