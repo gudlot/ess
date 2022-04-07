@@ -29,12 +29,12 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
     return data_array_fp_correction
 
 
-def normalise_by_counts(data_array: sc.DataArray) -> sc.DataArray:
+def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     """
-    Normalise the bin-summed data by the total number of counts.
+    Normalize the bin-summed data by the total number of counts.
 
-    :param data_array: Data array to be normalised.
-    :return: Normalised data array.
+    :param data_array: Data array to be normalized.
+    :return: Normalized data array.
     """
     ncounts = data_array.sum()
     norm = data_array / ncounts
