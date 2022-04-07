@@ -5,21 +5,6 @@ import scipp as sc
 from ..amor.tools import fwhm_to_std
 
 
-def illumination_correction(beam_size: sc.Variable, sample_size: sc.Variable,
-                            theta: sc.Variable) -> sc.Variable:
-    """
-    Compute the factor by which the intensity should be multiplied to account for the
-    scattering geometry, where the beam is Gaussian in shape.
-
-    :param beam_size: Width of incident beam.
-    :param sample_size: Width of sample in the dimension of the beam.
-    :param theta: Incident angle.
-    """
-    beam_on_sample = beam_size / sc.sin(theta)
-    fwhm_to_std = 2 * np.sqrt(2 * np.log(2))
-    return sc.erf(sample_size / beam_on_sample * fwhm_to_std)
-
-
 def illumination_of_sample(beam_size: sc.Variable, sample_size: sc.Variable,
                            theta: sc.Variable) -> sc.Variable:
     """
