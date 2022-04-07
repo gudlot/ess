@@ -119,16 +119,19 @@ def wavelength_to_theta(data_array: sc.DataArray,
         from orsopy import fileio
         data_array_theta.attrs[
             'orso'].value.data_source.measurement.instrument_settings.incident_angle = (
-                fileio.base.ValueRange(data_array_theta.coords['theta'].min().value,
-                                       data_array_theta.coords['theta'].max().value,
-                                       data_array_theta.bins.coords['theta'].min().unit)
-                                       )
+                fileio.base.ValueRange(
+                    data_array_theta.coords['theta'].min().value,
+                    data_array_theta.coords['theta'].max().value,
+                    data_array_theta.bins.coords['theta'].min().unit))
         import inspect
         # Determine if 'gravity' is in the graph and if to add the gravity correction
-        if any(['gravity' in i.parameters.keys() for i in map(inspect.signature,
-                                                              graph.values())]):
-            data_array_theta.attrs[
-                'orso'].value.reduction.corrections += ['gravity correction']
+        if any([
+                'gravity' in i.parameters.keys()
+                for i in map(inspect.signature, graph.values())
+        ]):
+            data_array_theta.attrs['orso'].value.reduction.corrections += [
+                'gravity correction'
+            ]
     except ImportError:
         raise UserWarning("For metadata to be logged in the data array, "
                           "it is necessary to install the orsopy package.")
@@ -163,7 +166,6 @@ def sum_bins(data_array: sc.DataArray):
     """
     data_array_summed = data_array.bins.sum()
     if 'angular_resolution' in data_array.bins.coords:
-        data_array_summed.coords[
-            'angular_resolution'] = data_array.bins.coords[
-                'angular_resolution'].max('detector_id')
+        data_array_summed.coords['angular_resolution'] = data_array.bins.coords[
+            'angular_resolution'].max('detector_id')
     return data_array_summed

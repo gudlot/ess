@@ -50,8 +50,9 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
         fwhm_to_std(data_array.coords['sample_size'] / beam_on_sample))
     data_array_fp_correction = data_array / footprint_scale.squeeze()
     try:
-        data_array_fp_correction.attrs[
-            'orso'].value.reduction.corrections += ['footprint correction']
+        data_array_fp_correction.attrs['orso'].value.reduction.corrections += [
+            'footprint correction'
+        ]
     except KeyError:
         raise UserWarning("To store information about corrections "
                           "it is necessary to install the orsopy package.")
