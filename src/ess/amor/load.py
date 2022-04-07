@@ -87,9 +87,10 @@ def populate_orso(data: sc.DataArray, filename: str, owner: fileio.base.Person,
                   sample: fileio.data_source.Sample, creator: fileio.base.Person,
                   reduction_script: str) -> fileio.orso.Orso:
     """
-    Populate the Orso object, by calling the :code:`base_orso` and adding data from the file.
-    
-    :param data: Data array to source information from 
+    Populate the Orso object, by calling the :code:`base_orso` and adding data from the
+    file.
+
+    :param data: Data array to source information from.
     :param filename: Path of the file to load.
     :param owner: the owner of the data set, i.e. the main proposer of the measurement.
     :param sample: A description of the sample.
