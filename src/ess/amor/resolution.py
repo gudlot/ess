@@ -42,7 +42,7 @@ def sample_size_resolution(pixel_position: sc.Variable,
 def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
                        detector_spatial_resolution: sc.Variable) -> sc.Variable:
     """
-    Determine the angular resolution as described in Secion 4.3.3 of the Amor
+    Determine the angular resolution as described in Section 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
 
     :param pixel_position: Positions for detector pixels.
