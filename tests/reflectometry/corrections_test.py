@@ -52,3 +52,24 @@ def test_normalize_by_counts_orso():
                                            N))
     assert sc.allclose(array_normalized.data, result.data)
     assert 'total counts' in array.attrs['orso'].value.reduction.corrections
+
+
+def test_beam_on_sample():
+    """
+    Tests the corrections.beam_on_sample function.
+    """
+    beam_size = sc.scalar(1., unit=sc.units.mm)
+    theta = sc.scalar(0.1, unit=sc.units.rad)
+    expected_result = sc.scalar(10.01668613, unit=sc.units.mm)
+    assert sc.allclose(expected_result, corrections.beam_on_sample(beam_size, theta))
+
+
+def test_beam_on_sample_array():
+    """
+    Tests the corrections.beam_on_sample function with an array of theta.
+    """
+    beam_size = sc.scalar(1., unit=sc.units.mm)
+    theta = sc.array(dims=['x'], values=[0.1, 0.5], unit=sc.units.rad)
+    expected_result = sc.array(
+        dims=['x'], values=[10.01668613, 2.085829643], unit=sc.units.mm)
+    assert sc.allclose(expected_result, corrections.beam_on_sample(beam_size, theta))

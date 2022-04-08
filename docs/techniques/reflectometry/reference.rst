@@ -19,6 +19,7 @@ Corrections
 
    corrections.footprint_correction
    corrections.normalize_by_counts
+   corrections.beam_on_sample
 
 Save 
 ----
