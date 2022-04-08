@@ -70,6 +70,7 @@ def test_beam_on_sample_array():
     """
     beam_size = sc.scalar(1., unit=sc.units.mm)
     theta = sc.array(dims=['x'], values=[0.1, 0.5], unit=sc.units.rad)
-    expected_result = sc.array(
-        dims=['x'], values=[10.01668613, 2.085829643], unit=sc.units.mm)
+    expected_result = sc.array(dims=['x'],
+                               values=[10.01668613, 2.085829643],
+                               unit=sc.units.mm)
     assert sc.allclose(expected_result, corrections.beam_on_sample(beam_size, theta))
