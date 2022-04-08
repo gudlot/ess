@@ -20,8 +20,8 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
     :
        Footprint corrected data array.
     """
-    size_of_beam_on_sample = beam_on_sample(
-        data_array.coords['beam_size'], data_array.bins.coords['theta'])
+    size_of_beam_on_sample = beam_on_sample(data_array.coords['beam_size'],
+                                            data_array.bins.coords['theta'])
     footprint_scale = sc.erf(
         fwhm_to_std(data_array.coords['sample_size'] / size_of_beam_on_sample))
     data_array_fp_correction = data_array / footprint_scale.squeeze()
