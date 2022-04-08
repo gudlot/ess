@@ -9,8 +9,12 @@ def save_ort(data_array: sc.DataArray, filename: str):
     """
     Save a data array with the ORSO .ort file format.
 
-    :param data_array: Scipp-data array to save.
-    :param filename: Filename.
+    Parameters
+    ----------
+    data_array:
+        Scipp-data array to save.
+    filename:
+        Filename.
     """
     from orsopy import fileio
     if filename[:-4] == '.ort':

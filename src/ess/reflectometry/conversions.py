@@ -14,6 +14,24 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion),
     but we ignore the horizontal `x` component.
     See the schematic in Fig 5 of doi: 10.1016/j.nima.2016.03.007.
+
+    Parameters
+    ----------
+    gravity:
+        The three-dimensional vector describing gravity.
+    wavelength:
+        Wavelength values for the events.
+    incident_beam:
+        Vector for incident beam.
+    scatter_beam:
+        Vector for scattered beam.
+    sample_rotation:
+        Rotation of sample wrt to incoming beam.
+
+    Returns
+    -------
+    :
+        Theta values, accounting for gravity.
     """
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
@@ -43,6 +61,18 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     between gamma and omega.
     Note that this is identical the 'normal' Q defined in scippneutron, except that
     the `theta` angle is given as an input instead of `two_theta`.
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength values for the events.
+    theta:
+        Theta values, accounting for gravity.
+
+    Returns
+    -------
+    :
+        Q-values.
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
@@ -52,6 +82,11 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
 def specular_reflection() -> dict:
     """
     Generate a coordinate transformation graph for specular reflection reflectometry.
+
+    Returns
+    -------
+    :
+        Specular reflectometry graph.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
     del graph['two_theta']
@@ -70,11 +105,20 @@ def tof_to_wavelength(data_array: sc.DataArray,
     Use :code:`transform_coords` to convert from ToF to wavelength, cutoff high and
     low limits for wavelength, and add necessary ORSO metadata.
 
-    :param data_array: Data array to convert.
-    :param wavelength_edges: The lower and upper limits for the wavelength.
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    wavelength_edges:
+        The lower and upper limits for the wavelength.
         If :code:`None`, no binning is performed.
-    :param graph: Graph for :code:`transform_coords`.
-    :return: New data array with wavelength dimension.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with wavelength dimension.
     """
     graph = graph if graph is not None else specular_reflection()
     data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
@@ -105,11 +149,20 @@ def wavelength_to_theta(data_array: sc.DataArray,
     Use :code:`transform_coords` to find the theta values for the events and
     potentially add ORSO metadata.
 
-    :param data_array: Data array to convert.
-    :param theta_edges: The lower and upper limits for the theta.
-        If :code:`None`, no binning is performed.
-    :param graph: Graph for :code:`transform_coords`.
-    :return: New data array with theta coordinate.
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    theta_edges:
+        The lower and upper limits for the theta. If :code:`None`, no
+        binning is performed.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with theta coordinate.
     """
     graph = graph if graph is not None else specular_reflection()
     data_array_theta = data_array.transform_coords(['theta'], graph=graph)
@@ -144,11 +197,20 @@ def theta_to_q(data_array: sc.DataArray,
     """
     Convert from theta to Q and if necessary bin in Q.
 
-    :param data_array: Data array to convert.
-    :param q_edges: The lower and upper limits for the Q.
-        If :code:`None`, no binning is performed.
-    :param graph: Graph for :code:`transform_coords`.
-    :return: New data array with theta coordinate.
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    q_edges:
+        The lower and upper limits for the Q. If :code:`None`, no
+        binning is performed.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with theta coordinate.
     """
     graph = graph if graph is not None else specular_reflection()
     data_array_q = data_array.transform_coords(["Q"], graph=graph)
@@ -161,8 +223,15 @@ def sum_bins(data_array: sc.DataArray):
     """
     Sum the event bins and propogate the maximum resolution, where available.
 
-    :param data_array: Data array to be summed.
-    :return: Summed data array.
+    Parameters
+    ----------
+    data_array:
+        Data array to be summed.
+
+    Returns
+    -------
+    :
+        Summed data array.
     """
     data_array_summed = data_array.bins.sum()
     if 'angular_resolution' in data_array.bins.coords:
