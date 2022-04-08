@@ -11,8 +11,15 @@ def fwhm_to_std(fwhm: sc.Variable) -> sc.Variable:
     """
     Convert from full-width half maximum to standard deviation.
 
-    :param fwhm: Full-width half maximum.
-    :return: Standard deviation.
+    Parameters
+    ----------
+    fwhm:
+        Full-width half maximum.
+
+    Returns
+    -------
+    :
+        Standard deviation.
     """
     # Enables the conversion from full width half
     # maximum to standard deviation
@@ -23,8 +30,15 @@ def std_to_fwhm(std: sc.Variable) -> sc.Variable:
     """
     Convert from standard deviation to full-width half maximum.
 
-    :param std: Standard deviation.
-    :return: Full-width half maximum.
+    Parameters
+    ----------
+    std:
+        Standard deviation.
+
+    Returns
+    -------
+    :
+        Full-width half maximum.
     """
     # Enables the conversion from full width half
     # maximum to standard deviation
@@ -49,17 +63,28 @@ def linlogspace(dim: str,
     - Create edges with a linear and a logarithmic part:
         linlogspace(dim='x', edges=[1, 3, 8], scale=['linear', 'log'], num=[16, 20])
 
-
-    :param dim: The dimension of the ouptut Variable.
-    :param edges: The edges for the different parts of the mesh.
-    :param scale: A string or list of strings specifying the scaling for the different
+    Parameters
+    ----------
+    dim:
+        The dimension of the ouptut Variable.
+    edges:
+        The edges for the different parts of the mesh.
+    scale:
+        A string or list of strings specifying the scaling for the different
         parts of the mesh. Possible values for the scaling are `"linear"` and `"log"`.
         If a list is supplied, the length of the list must be one less than the length
         of the `edges` parameter.
-    :param num: An integer or a list of integers specifying the number of points to use
+    num:
+        An integer or a list of integers specifying the number of points to use
         in each part of the mesh. If a list is supplied, the length of the list must be
         one less than the length of the `edges` parameter.
-    :param unit: The unit of the ouptut Variable.
+    unit:
+        The unit of the ouptut Variable.
+
+    Returns
+    -------
+    :
+        Lin-log spaced Q-bin edges.
     """
     if not isinstance(scale, list):
         scale = [scale]
