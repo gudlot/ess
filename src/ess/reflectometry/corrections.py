@@ -40,7 +40,7 @@ def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     """
     Normalize the bin-summed data by the total number of counts.
 
-    Parmaeters
+    Parameters
     ----------
     data_array:
         Data array to be normalized.
