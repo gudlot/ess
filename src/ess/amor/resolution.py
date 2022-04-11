@@ -53,8 +53,8 @@ def sample_size_resolution(pixel_position: sc.Variable,
         Standard deviation of contribution from the sample size.
     """
     return fwhm_to_std(
-        sc.to_unit(
-            sample_size, 'm') / sc.to_unit(pixel_position.fields.z, 'm', copy=False))
+        sc.to_unit(sample_size, 'm') /
+        sc.to_unit(pixel_position.fields.z, 'm', copy=False))
 
 
 def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
@@ -79,11 +79,11 @@ def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
     """
     theta_unit = theta.bins.unit if theta.bins is not None else theta.unit
     return fwhm_to_std(
-        sc.to_unit(
-            sc.atan(
-                sc.to_unit(detector_spatial_resolution, 'm') /
-                sc.to_unit(
-                    pixel_position.fields.z, 'm')), theta_unit, copy=False)) / theta
+        sc.to_unit(sc.atan(
+            sc.to_unit(detector_spatial_resolution, 'm') /
+            sc.to_unit(pixel_position.fields.z, 'm')),
+                   theta_unit,
+                   copy=False)) / theta
 
 
 def sigma_Q(angular_resolution: sc.Variable, wavelength_resolution: sc.Variable,
