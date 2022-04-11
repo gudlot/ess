@@ -5,10 +5,10 @@ from .. import __version__
 from datetime import datetime
 import platform
 from orsopy import fileio
-from typing import Any
 
 
-def make_orso(owner: Any, sample: Any, creator: Any, reduction_script: str) -> Any:
+def make_orso(owner: fileio.base.Person, sample: fileio.data_source.Sample,
+              creator: fileio.base.Person, reduction_script: str) -> fileio.orso.Orso:
     """
     Generate the base Orso object for the Amor instrument.
     Populate the Orso object for metadata storage.
