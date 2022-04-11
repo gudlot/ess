@@ -20,26 +20,31 @@ def make_beamline(sample_rotation: sc.Variable,
     """
     Amor beamline components.
 
-    :param sample_rotation: Sample rotation (omega) angle.
-    :param beam_size: Size of the beam perpendicular to the scattering surface.
-        Default is `0.001 m`.
-    :param sample_size: Size of the sample in direction of the beam.
-        Default :code:`0.01 m`.
-    :param detector_spatial_resolution: Spatial resolution of the detector.
-        Default is `2.5 mm`.
-    :param gravity: Vector representing the direction and magnitude of the Earth's
-        gravitational field. Default is `[0, -g, 0]`.
-    :param chopper_chopper_distance: The distance between the two choppers of the
-        double blind system.
-    :param chopper_frequency: Rotational frequency of the chopper.
-        Default is `6.6666... Hz`.
-    :param chopper_phase: Phase offset between chopper pulse and ToF zero.
-        Default is `-8. degrees of arc`.
-    :param chopper_position: Position of the chopper.
-        Default is `-15 m`.
+    Parameters
+    ----------
+    sample_rotation:
+        Sample rotation (omega) angle.
+    beam_size:
+        Size of the beam perpendicular to the scattering surface. Default is `0.001 m`.
+    sample_size:
+        Size of the sample in direction of the beam. Default :code:`0.01 m`.
+    detector_spatial_resolution:
+        Spatial resolution of the detector. Default is `2.5 mm`.
+    gravity:
+        Vector representing the direction and magnitude of the Earth's gravitational
+        field. Default is `[0, -g, 0]`.
+    chopper_frequency:
+        Rotational frequency of the chopper. Default is `6.6666... Hz`.
+    chopper_phase:
+        Phase offset between chopper pulse and ToF zero. Default is `-8. degrees of
+        arc`.
+    chopper_position:
+        Position of the chopper. Default is `-15 m`.
 
-    :returns: A dict.
-    :rtype: dict
+    Returns
+    -------
+    :
+        A dict.
     """
     if beam_size is None:
         beam_size = 2.0 * sc.units.mm
@@ -86,7 +91,15 @@ def instrument_view_components(da: sc.DataArray) -> dict:
       - the sample
       - the source chopper
 
-    :param da: The DataArray containing the sample and source chopper coordinates.
+    Parameters
+    ----------
+    da:
+        The DataArray containing the sample and source chopper coordinates.
+
+    Returns
+    -------
+    :
+        Dict of instrument view definitions.
     """
     return {
         "sample": {
