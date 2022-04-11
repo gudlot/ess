@@ -31,7 +31,7 @@ test:
     - pythreejs
     - python-graphviz
     - sphinx
-    - sphinx-book-theme
+    - sphinx-book-theme<0.3
     - sphinx-copybutton
     - nbsphinx
     - pip

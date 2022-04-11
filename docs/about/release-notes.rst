@@ -3,6 +3,22 @@
 Release Notes
 =============
 
+v0.5.0 (April 2022)
+-------------------
+
+Features
+~~~~~~~~
+
+* Added resolution function for Amor and support for Orso file format in the ``reflectometry`` module `#115 <https://github.com/scipp/ess/pull/115>`_.
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Andrew McCluskey :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.4.0 (February 2022)
 ----------------------
 
