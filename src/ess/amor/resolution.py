@@ -80,7 +80,7 @@ def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
         sc.to_unit(
             sc.atan(
                 sc.to_unit(detector_spatial_resolution, 'm') /
-                sc.to_unit(pixel_position.fields.z, 'm')), theta.unit)) / theta
+                sc.to_unit(pixel_position.fields.z, 'm')), theta.bins.unit)) / theta
 
 
 def sigma_Q(angular_resolution: sc.Variable, wavelength_resolution: sc.Variable,
