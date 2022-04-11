@@ -4,6 +4,8 @@
 from . import data
 from . import conversions
 from . import calibrations
+from . import normalize
+from . import resolution
 from .beamline import make_beamline, instrument_view_components
 from .instrument_view import instrument_view
 from .load import load

@@ -1,29 +1,81 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 import scipp as sc
+from ..reflectometry import orso
 
 
-def supermirror_calibration(
-        coord: sc.Variable,
-        is_bin_edge: bool = True,
-        m_value: sc.Variable = sc.scalar(5, unit=sc.units.dimensionless),
-        critical_edge: sc.Variable = 0.022 * sc.Unit('1/angstrom'),
-        alpha: sc.Variable = 0.25 / 0.088 * sc.units.angstrom) -> sc.Variable:
+def supermirror_calibration(data_array: sc.DataArray,
+                            m_value: sc.Variable = None,
+                            critical_edge: sc.Variable = None,
+                            alpha: sc.Variable = None) -> sc.Variable:
     """
-    Determine calibration factor for the supermirror.
+    Calibrate supermirror measurements
 
-    :param coord: Q-bins or centres over which calibration is performed.
-    :param is_bin_edge: Defines if the coord is a bin edge.
-    :param m_value: m-value for the supermirror.
-    :param critical_edge: Supermirror critical edge.
-    :param alpha: Supermirror alpha value.
+    Parameters
+    ----------
+    data_array:
+        Data array to get q-bins/values from.
+    m_value:
+        m-value for the supermirror. Defaults to 5.
+    critical_edge:
+        Supermirror critical edge. Defaults to 0.022 1/angstrom.
+    alpha:
+        Supermirror alpha value. Defaults to 0.25 / 0.088 angstrom.
 
-    :return: Calibration factor at the midpoint of each Q-bin.
+    Returns
+    -------
+    :
+        Calibrated supermirror measurement.
     """
-    if is_bin_edge:
-        q = sc.midpoints(coord, 'Q')
-    else:
-        q = coord
+    if m_value is None:
+        m_value = sc.scalar(5, unit=sc.units.dimensionless)
+    if critical_edge is None:
+        critical_edge = 0.022 * sc.Unit('1/angstrom')
+    if alpha is None:
+        alpha = sc.scalar(0.25 / 0.088, unit=sc.units.angstrom)
+    calibration = calibration_factor(data_array, m_value, critical_edge, alpha)
+    data_array_cal = data_array * calibration
+    try:
+        data_array_cal.attrs['orso'].value.reduction.corrections += [
+            'supermirror calibration'
+        ]
+    except KeyError:
+        orso.not_found_warning()
+    return data_array_cal
+
+
+def calibration_factor(data_array: sc.DataArray,
+                       m_value: sc.Variable = None,
+                       critical_edge: sc.Variable = None,
+                       alpha: sc.Variable = None) -> sc.Variable:
+    """
+    Return the calibration factor for the supermirror.
+
+    Parameters
+    ----------
+    data_array:
+        Data array to get q-bins/values from.
+    m_value:
+        m-value for the supermirror. Defaults to 5.
+    critical_edge:
+        Supermirror critical edge. Defaults to 0.022 1/angstrom.
+    alpha:
+        Supermirror alpha value. Defaults to 0.25 / 0.088 angstrom.
+
+    Returns
+    -------
+    :
+        Calibration factor at the midpoint of each Q-bin.
+    """
+    if m_value is None:
+        m_value = sc.scalar(5, unit=sc.units.dimensionless)
+    if critical_edge is None:
+        critical_edge = 0.022 * sc.Unit('1/angstrom')
+    if alpha is None:
+        alpha = sc.scalar(0.25 / 0.088, unit=sc.units.angstrom)
+    q = data_array.coords['Q']
+    if data_array.coords.is_edges('Q'):
+        q = sc.midpoints(q)
     max_q = m_value * critical_edge
     lim = (q < critical_edge).astype(float)
     lim.unit = 'one'
