@@ -81,7 +81,7 @@ def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
     return fwhm_to_std(
         sc.to_unit(sc.atan(
             sc.to_unit(detector_spatial_resolution, 'm') /
-            sc.to_unit(pixel_position.fields.z, 'm')),
+            sc.to_unit(pixel_position.fields.z, 'm', copy=False)),
                    theta_unit,
                    copy=False)) / theta
 
