@@ -28,7 +28,7 @@ def wavelength_resolution(chopper_1_position: sc.Variable,
 def sample_size_resolution(pixel_position: sc.Variable,
                            sample_size: sc.Variable) -> sc.Variable:
     """
-    The resolution from the projected sample size, where is may be bigger
+    The resolution from the projected sample size, where it may be bigger
     than the detector pixel resolution as described in Secion 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
 
@@ -36,7 +36,8 @@ def sample_size_resolution(pixel_position: sc.Variable,
     :param sample_size: Size of sample.
     :return: Standard deviation of contribution from the sample size.
     """
-    return fwhm_to_std(sc.to_unit(sample_size, 'm') / pixel_position.fields.z)
+    return fwhm_to_std(
+        sc.to_unit(sample_size, 'm') / sc.to_unit(pixel_position.fields.z, 'm'))
 
 
 def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
@@ -49,8 +50,13 @@ def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
     :param theta: Theta values for events.
     :param detector_spatial_resolution: FWHM of detector pixel resolution.
     """
-    return fwhm_to_std(sc.atan(
-        detector_spatial_resolution / pixel_position.fields.z)) / theta
+    return fwhm_to_std(
+        sc.to_unit(
+            sc.atan(
+                sc.to_unit(
+                    detector_spatial_resolution,
+                    'm') / sc.to_unit(pixel_position.fields.z, 'm')),
+            theta.unit)) / theta
 
 
 def sigma_Q(angular_resolution: sc.Variable, wavelength_resolution: sc.Variable,
