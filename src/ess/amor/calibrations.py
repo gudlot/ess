@@ -16,11 +16,11 @@ def supermirror_calibration(data_array: sc.DataArray,
     data_array:
         Data array to get q-bins/values from.
     m_value:
-        m-value for the supermirror.
+        m-value for the supermirror. Defaults to 5.
     critical_edge:
-        Supermirror critical edge.
+        Supermirror critical edge. Defaults to 0.022 1/angstrom.
     alpha:
-        Supermirror alpha value.
+        Supermirror alpha value. Defaults to 0.25 / 0.088 angstrom.
 
     Returns
     -------
@@ -56,11 +56,11 @@ def calibration_factor(data_array: sc.DataArray,
     data_array:
         Data array to get q-bins/values from.
     m_value:
-        m-value for the supermirror.
+        m-value for the supermirror. Defaults to 5.
     critical_edge:
-        Supermirror critical edge.
+        Supermirror critical edge. Defaults to 0.022 1/angstrom.
     alpha:
-        Supermirror alpha value.
+        Supermirror alpha value. Defaults to 0.25 / 0.088 angstrom.
 
     Returns
     -------
