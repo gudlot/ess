@@ -45,7 +45,7 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
 
 
 def load(filename,
-         orso: Any = None,
+         orso: Optional[Any] = None,
          beamline: Optional[dict] = None,
          disable_warnings: Optional[bool] = True) -> sc.DataArray:
     """
