@@ -10,4 +10,3 @@ from .beamline import make_beamline, instrument_view_components
 from .instrument_view import instrument_view
 from .load import load
 from . import tools
-from .orso import make_orso

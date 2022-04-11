@@ -2,9 +2,10 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from .. import __version__
 
-from typing import Any
-import platform
 from datetime import datetime
+import platform
+from orsopy import fileio
+from typing import Any
 
 
 def make_orso(owner: Any, sample: Any, creator: Any, reduction_script: str) -> Any:
@@ -29,7 +30,6 @@ def make_orso(owner: Any, sample: Any, creator: Any, reduction_script: str) -> A
     :
         Orso object with the default parameters for the Amor instrument.
     """
-    from orsopy import fileio
     orso = fileio.orso.Orso.empty()
     orso.data_source.experiment.probe = 'neutrons'
     orso.data_source.experiment.facility = 'Paul Scherrer Institut'
