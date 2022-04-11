@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import warnings
 import scipp as sc
+from . import orso
 from ..amor.tools import fwhm_to_std
 
 
@@ -30,9 +30,7 @@ def footprint_correction(data_array: sc.DataArray) -> sc.DataArray:
             'footprint correction'
         ]
     except KeyError:
-        warnings.warn(
-            "To store information about corrections it is "
-            "necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return data_array_fp_correction
 
 
@@ -55,9 +53,7 @@ def normalize_by_counts(data_array: sc.DataArray) -> sc.DataArray:
     try:
         norm.attrs['orso'].value.reduction.corrections += ['total counts']
     except KeyError:
-        warnings.warn(
-            "To store information about corrections it is "
-            "necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return norm
 
 

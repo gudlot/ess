@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import warnings
 import scipp as sc
+from ..reflectometry import orso
 
 
 def normalize_by_supermirror(sample: sc.DataArray,
@@ -26,6 +26,5 @@ def normalize_by_supermirror(sample: sc.DataArray,
             'orso'].value.data_source.measurement.reference = supermirror.attrs[
                 'orso'].value.data_source.measurement.data_files
     except KeyError:
-        warnings.warn("For metadata to be logged in the data array, "
-                      "it is necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return normalized

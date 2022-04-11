@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import warnings
 import scipp as sc
+from ..reflectometry import orso
 
 
 def supermirror_calibration(data_array: sc.DataArray,
@@ -40,8 +40,7 @@ def supermirror_calibration(data_array: sc.DataArray,
             'supermirror calibration'
         ]
     except KeyError:
-        warnings.warn("For metadata to be logged in the data array, "
-                      "it is necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return data_array_cal
 
 

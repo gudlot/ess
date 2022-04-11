@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
-import warnings
 import scipp as sc
 from scipp.constants import m_n, h, pi
 from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype, _elem_unit
+from . import orso
 
 
 def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
@@ -138,8 +138,7 @@ def tof_to_wavelength(data_array: sc.DataArray,
                                        data_array_wav.coords['wavelength'].max().value,
                                        unit))
     except ImportError:
-        warnings.warn("For metadata to be logged in the data array, "
-                      "it is necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return data_array_wav
 
 
@@ -187,8 +186,7 @@ def wavelength_to_theta(data_array: sc.DataArray,
                 'gravity correction'
             ]
     except ImportError:
-        warnings.warn("For metadata to be logged in the data array, "
-                      "it is necessary to install the orsopy package.", UserWarning)
+        orso.not_found_warning()
     return data_array_theta
 
 
