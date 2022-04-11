@@ -9,11 +9,18 @@ def normalize_by_supermirror(sample: sc.DataArray,
     """
     Normalize the sample measurement by the (ideally calibrated) supermirror.
 
-    :param sample: Sample measurement with coords of 'Q' and 'detector_id'.
-    :param supermirror: Supermirror measurement with coords of 'Q' and 'detector_id',
-        ideally calibrated.
+    Parameters
+    ----------
+    sample:
+        Sample measurement with coords of 'Q' and 'detector_id'.
+    supermirror:
+        Supermirror measurement with coords of 'Q' and 'detector_id', ideally
+        calibrated.
 
-    :return: normalized sample.
+    Returns
+    -------
+    :
+        normalized sample.
     """
     normalized = sample / supermirror
     normalized.masks['no_reference_neutrons'] = (supermirror == sc.scalar(0)).data

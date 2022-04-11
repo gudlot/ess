@@ -16,6 +16,18 @@ def _tof_correction(data: sc.DataArray, dim: str = 'tof') -> sc.DataArray:
     A correction for the presense of the chopper with respect to the "true" ToF.
     Also fold the two pulses.
     TODO: generalise mechanism to fold any number of pulses.
+
+    Parameters
+    ----------
+    data:
+        Input data array to correct.
+    dim:
+        Name of the time of flight dimension.
+
+    Returns
+    -------
+    :
+        ToF corrected data array.
     """
     data.attrs['orso'].value.reduction.corrections += ['chopper ToF correction']
     tau = sc.to_unit(1 / (2 * data.coords['source_chopper_2'].value['frequency'].data),
@@ -43,15 +55,28 @@ def load(filename,
     """
     Loader for a single Amor data file.
 
-    :param filename: Path of the file to load.
-    :param owner: the owner of the data set, i.e. the main proposer of the measurement.
-    :param sample: A description of the sample.
-    :param creator: The creator of the reduced data, the person responsible for the
+    Parameters
+    ----------
+    filename:
+        Path of the file to load.
+    owner:
+        The owner of the data set, i.e. the main proposer of the measurement.
+    sample:
+        A description of the sample.
+    creator:
+        The creator of the reduced data, the person responsible for the
         reduction process.
-    :param reduction_script: The script or notebook used for reduction.
-    :param beamline: A dict defining the beamline parameters.
-    :param disable_warnings: Do not show warnings from file loading if `True`.
-        Default is `True`.
+    reduction_script:
+        The script or notebook used for reduction.
+    beamline:
+        A dict defining the beamline parameters.
+    disable_warnings:
+        Do not show warnings from file loading if `True`. Default is `True`.
+
+    Returns
+    -------
+    :
+        Data array object for Amor dataset.
     """
     get_logger('amor').info(
         "Loading '%s' as an Amor NeXus file",

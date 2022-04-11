@@ -11,11 +11,19 @@ def wavelength_resolution(chopper_1_position: sc.Variable,
     Find the wavelength resolution contribution as described in Section 4.3.3 of the
     Amor publication (doi: 10.1016/j.nima.2016.03.007).
 
-    :param chopper_1_position: Position of first chopper (the one closer to the source).
-    :param chopper_2_position: Position of second chopper
-        (the one closer to the sample).
-    :param pixel_position: Positions for detector pixels.
-    :return: The angular resolution variable, as standard deviation.
+    Parameters
+    ----------
+    chopper_1_position:
+        Position of first chopper (the one closer to the source).
+    chopper_2_position:
+        Position of second chopper (the one closer to the sample).
+    pixel_position:
+        Positions for detector pixels.
+
+    Returns
+    -------
+    :
+        The angular resolution variable, as standard deviation.
     """
     distance_between_choppers = (chopper_2_position.data.fields.z -
                                  chopper_1_position.data.fields.z)
@@ -32,9 +40,17 @@ def sample_size_resolution(pixel_position: sc.Variable,
     than the detector pixel resolution as described in Secion 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
 
-    :param pixel_position: Positions for detector pixels.
-    :param sample_size: Size of sample.
-    :return: Standard deviation of contribution from the sample size.
+    Parameters
+    ----------
+    pixel_position:
+        Positions for detector pixels.
+    sample_size:
+        Size of sample.
+
+    Returns
+    -------
+    :
+        Standard deviation of contribution from the sample size.
     """
     return fwhm_to_std(
         sc.to_unit(sample_size, 'm') / sc.to_unit(pixel_position.fields.z, 'm'))
@@ -46,9 +62,19 @@ def angular_resolution(pixel_position: sc.Variable, theta: sc.Variable,
     Determine the angular resolution as described in Section 4.3.3 of the Amor
     publication (doi: 10.1016/j.nima.2016.03.007).
 
-    :param pixel_position: Positions for detector pixels.
-    :param theta: Theta values for events.
-    :param detector_spatial_resolution: FWHM of detector pixel resolution.
+    Parameters
+    ----------
+    pixel_position:
+        Positions for detector pixels.
+    theta:
+        Theta values for events.
+    detector_spatial_resolution:
+        FWHM of detector pixel resolution.
+
+    Returns
+    -------
+    :
+        Angular resolution standard deviation
     """
     return fwhm_to_std(
         sc.to_unit(
@@ -62,11 +88,21 @@ def sigma_Q(angular_resolution: sc.Variable, wavelength_resolution: sc.Variable,
     """
     Combine all of the components of the resolution and add Q contribution.
 
-    :param angular_resolution: Angular resolution contribution.
-    :param wavelength_resolution: Wavelength resolution contribution.
-    :param sample_size_resolution: Sample size resolution contribution.
-    :param q_bins: Q-bin values.
-    :return: Combined resolution function.
+    Parameters
+    ----------
+    angular_resolution:
+        Angular resolution contribution.
+    wavelength_resolution:
+        Wavelength resolution contribution.
+    sample_size_resolution:
+        Sample size resolution contribution.
+    q_bins:
+        Q-bin values.
+
+    Returns
+    -------
+    :
+        Combined resolution function.
     """
     return sc.sqrt(angular_resolution**2 + wavelength_resolution**2 +
                    sample_size_resolution**2).max('detector_id') * sc.midpoints(q_bins)
