@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Scipp contributors (https://github.com/scipp)
 from typing import Any, Optional
 import warnings
-import platform
 from datetime import datetime
 import scipp as sc
 import scippneutron as scn
