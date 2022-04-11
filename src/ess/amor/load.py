@@ -102,8 +102,12 @@ def load(filename,
         data.coords[key] = value
 
     data.attrs['orso'] = sc.scalar(
-        populate_orso(data=data, filename=filename, owner=owner, sample=sample,
-                      creator=creator, reduction_script=reduction_script))
+        populate_orso(data=data,
+                      filename=filename,
+                      owner=owner,
+                      sample=sample,
+                      creator=creator,
+                      reduction_script=reduction_script))
 
     # Perform tof correction and fold two pulses
     return _tof_correction(data)
