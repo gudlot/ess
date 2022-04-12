@@ -10,7 +10,7 @@ Features
 ~~~~~~~~
 
 * Added resolution function for Amor and support for Orso file format in the ``reflectometry`` module `#115 <https://github.com/scipp/ess/pull/115>`_ (*Reflectometry*).
-* Added footprint correction, super-mirror calibration, and pixel-dependent normalization in the Amor workflow `#97 <https://github.com/scipp/ess/pull/97>`_ (*Reflectometry*).
+* Added footprint correction, super-mirror calibration, and normalisation between sample and supermirror measurements on a per-pixel & per-Q-bin level in the Amor workflow `#97 <https://github.com/scipp/ess/pull/97>`_ (*Reflectometry*).
 
 Contributors
 ~~~~~~~~~~~~
