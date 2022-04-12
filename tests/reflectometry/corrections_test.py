@@ -74,3 +74,4 @@ def test_beam_on_sample_array():
                                values=[10.01668613, 2.085829643],
                                unit=sc.units.mm)
     assert sc.allclose(expected_result, corrections.beam_on_sample(beam_size, theta))
+    assert False

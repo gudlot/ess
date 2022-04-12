@@ -33,7 +33,7 @@ jobs:
         with:
           commit_message: Apply automatic formatting
 
-  build:
+  conda_build:
     needs: formatting
     runs-on: ubuntu-latest
     # env:
@@ -58,7 +58,7 @@ jobs:
       #     path: ${{ env.DOCS_HTML_DIR }}
 
   tests_and_docs:
-    needs: build
+    needs: conda_build
     runs-on: ubuntu-latest
     env:
       DOCS_HTML_DIR: ${{ github.workspace }}/docs_html
@@ -71,8 +71,6 @@ jobs:
       - uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: docs/environment.yml
-          activate-environment: ess-docs-build
-          auto-activate-base: false
           cache-env: true
       - run: mamba install conda-package-*/*/*.tar.bz2
       - run: python -m pytest -v tests
