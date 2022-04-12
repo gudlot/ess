@@ -15,6 +15,7 @@ Modules
    calibrations
    conversions
    normalize
+   orso
    resolution
    tools
 
