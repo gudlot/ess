@@ -12,8 +12,23 @@ from numbers import Real
 import scipp as sc
 
 
+def _equivalent_bin_indices(a, b) -> bool:
+    a_begin = a.bins.constituents['begin'].squeeze()
+    a_end = a.bins.constituents['end'].squeeze()
+    b_begin = b.bins.constituents['begin'].squeeze()
+    b_end = b.bins.constituents['end'].squeeze()
+    non_empty = (a_begin != a_end)
+    return sc.all((a_begin == b_begin)[non_empty]).value and sc.all(
+        (a_end == b_end)[non_empty]).value
+
+
 @contextmanager
 def _temporary_bin_coord(data: sc.DataArray, name: str, coord: sc.Variable) -> None:
+    assert _equivalent_bin_indices(data, coord)
+    coord = sc.bins(data=coord.bins.constituents['data'],
+                    begin=data.bins.coords['pulse_time'].bins.constituents['begin'],
+                    end=data.bins.coords['pulse_time'].bins.constituents['end'],
+                    dim=coord.bins.constituents['dim'])
     data.bins.coords[name] = coord
     yield
     del data.bins.coords[name]
