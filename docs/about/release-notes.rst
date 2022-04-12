@@ -9,7 +9,8 @@ v0.5.0 (April 2022)
 Features
 ~~~~~~~~
 
-* Added resolution function for Amor and support for Orso file format in the ``reflectometry`` module `#115 <https://github.com/scipp/ess/pull/115>`_.
+* Added resolution function for Amor and support for Orso file format in the ``reflectometry`` module `#115 <https://github.com/scipp/ess/pull/115>`_ (*Reflectometry*).
+* Added footprint correction, super-mirror calibration, and pixel-dependent normalization in the Amor workflow `#97 <https://github.com/scipp/ess/pull/97>`_ (*Reflectometry*).
 
 Contributors
 ~~~~~~~~~~~~
