@@ -8,6 +8,7 @@ dependencies:
   - ipympl
   - mantid
   - pandoc
+  - pytest
   - pythreejs
   - python-graphviz
   - sphinx

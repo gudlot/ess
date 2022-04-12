@@ -57,7 +57,7 @@ jobs:
       #     name: DocumentationHTML
       #     path: ${{ env.DOCS_HTML_DIR }}
 
-  documentation:
+  tests_and_docs:
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -75,6 +75,7 @@ jobs:
           auto-activate-base: false
           cache-env: true
       - run: mamba install conda-package-*/*/*.tar.bz2
+      - run: python -m pytest -v tests
       - run: python docs/make_docs.py
 
       - uses: actions/upload-artifact@v2

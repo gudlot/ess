@@ -19,25 +19,27 @@ test:
     - ess.wfm
     - ess.amor
     - ess.reflectometry
-  requires:
-    # - ipympl
-    # - mantid
-    - ipywidgets
-    - pytest
-    # - pandoc
-    # - pythreejs
-    # - python-graphviz
-    # - sphinx
-    # - sphinx-book-theme<0.3
-    # - sphinx-copybutton
-    # - nbsphinx
-    # - pip
-  source_files:
-    - tests/
-    # - docs/
-  commands:
-    - python -m pytest -v tests
-    # - python docs/make_docs.py
+    - ess.sans
+    - ess.loki
+  # requires:
+  #   # - ipympl
+  #   # - mantid
+  #   - ipywidgets
+  #   - pytest
+  #   # - pandoc
+  #   # - pythreejs
+  #   # - python-graphviz
+  #   # - sphinx
+  #   # - sphinx-book-theme<0.3
+  #   # - sphinx-copybutton
+  #   # - nbsphinx
+  #   # - pip
+  # source_files:
+  #   - tests/
+  #   # - docs/
+  # commands:
+  #   - python -m pytest -v tests
+  #   # - python docs/make_docs.py
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
