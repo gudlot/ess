@@ -2,6 +2,7 @@ name: ess-docs-build
 
 channels:
   - conda-forge
+  - mantid
   - nodefaults
 
 dependencies:
