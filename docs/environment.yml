@@ -1,0 +1,20 @@
+name: ess-docs-build
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - ipympl
+  - mantid
+  - pandoc
+  - pythreejs
+  - python-graphviz
+  - sphinx
+  - sphinx-book-theme<0.3
+  - sphinx-copybutton
+  - nbsphinx
+  - pip
+  - pip:
+    - sphinx-autodoc-typehints>=1.17.0
+    - orsopy
