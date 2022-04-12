@@ -9,6 +9,7 @@ requirements:
   build:
     - setuptools
   run:
+    - matplotlib
     - pooch
     - scippneutron>=0.5
 
