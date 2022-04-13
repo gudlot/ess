@@ -72,7 +72,7 @@ jobs:
         with:
           environment-file: docs/environment.yml
           cache-env: true
-      - run: micromamba install conda-package-*/*/*.tar.bz2
+      - run: micromamba install noarch/ess*.tar.bz2
       - run: python -m pytest -v tests
       - run: python docs/make_docs.py
 
