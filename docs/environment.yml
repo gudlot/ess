@@ -7,7 +7,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - ipympl<0.9  # plots to not show up in the docs with version 0.9
+  - ipympl<0.9  # see https://github.com/matplotlib/ipympl/issues/462
   - mantid
   - nbsphinx
   - pandoc
