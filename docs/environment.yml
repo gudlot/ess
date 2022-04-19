@@ -7,7 +7,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - ipympl<0.9
+  - ipympl<0.9  # plots to not show up in the docs with version 0.9
   - mantid
   - nbsphinx
   - pandoc
@@ -17,7 +17,7 @@ dependencies:
   - python-graphviz
   - scippneutron>=0.5
   - sphinx
-  - sphinx-book-theme<0.3
+  - sphinx-book-theme<0.3  # custom buttons in top bar do not work with version 0.3
   - sphinx-copybutton
   - pip
   - pip:
