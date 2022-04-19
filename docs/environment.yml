@@ -9,6 +9,7 @@ channels:
 dependencies:
   - ipympl
   - mantid
+  - nbconvert=6.4.5
   - nbsphinx
   - pandoc
   - pooch
