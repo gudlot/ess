@@ -67,7 +67,7 @@ jobs:
           path: ${{ env.DOCS_HTML_DIR }}
 
   deploy_package:
-    needs: build
+    needs: tests_and_docs
     runs-on: ubuntu-latest
     steps:
       - uses: conda-incubator/setup-miniconda@v2
