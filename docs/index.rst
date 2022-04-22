@@ -10,7 +10,7 @@ The ``ess`` module is part of the software stack for data reduction:
 
 - ``scipp``, ``scippneutron``, and ``ess`` are Python packages that can be installed using ``conda``.
   Each package is released independently.
-- ``ess-notebooks`` is a ``git`` repository containing Jupyter notebooks with exampels and actual reduction workflows.
+- ``ess-notebooks`` is a ``git`` repository containing Jupyter notebooks with examples and actual reduction workflows.
 - Higher levels of the stack are optional, and it is absolutely possible to use ``scippneutron`` without ``ess``, or ``ess`` without ``ess-notebooks``.
 
 New features may frequently be introduced on the top of the software stack, for example in ``ess-notebooks``.
