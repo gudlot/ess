@@ -4,6 +4,7 @@ import scipp as sc
 from scipp.constants import m_n, h, pi
 from scippneutron.tof import conversions
 from scippneutron.core.conversions import _elem_dtype, _elem_unit
+from . import orso
 
 
 def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Variable,
@@ -14,6 +15,24 @@ def theta(gravity: sc.Variable, wavelength: sc.Variable, incident_beam: sc.Varia
     https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html#q-unit-conversion),
     but we ignore the horizontal `x` component.
     See the schematic in Fig 5 of doi: 10.1016/j.nima.2016.03.007.
+
+    Parameters
+    ----------
+    gravity:
+        The three-dimensional vector describing gravity.
+    wavelength:
+        Wavelength values for the events.
+    incident_beam:
+        Vector for incident beam.
+    scatter_beam:
+        Vector for scattered beam.
+    sample_rotation:
+        Rotation of sample wrt to incoming beam.
+
+    Returns
+    -------
+    :
+        Theta values, accounting for gravity.
     """
     grav = sc.norm(gravity)
     L2 = sc.norm(scattered_beam)
@@ -43,6 +62,18 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
     between gamma and omega.
     Note that this is identical the 'normal' Q defined in scippneutron, except that
     the `theta` angle is given as an input instead of `two_theta`.
+
+    Parameters
+    ----------
+    wavelength:
+        Wavelength values for the events.
+    theta:
+        Theta values, accounting for gravity.
+
+    Returns
+    -------
+    :
+        Q-values.
     """
     dtype = _elem_dtype(wavelength)
     c = (4 * pi).astype(dtype)
@@ -52,6 +83,11 @@ def reflectometry_q(wavelength: sc.Variable, theta: sc.Variable) -> sc.Variable:
 def specular_reflection() -> dict:
     """
     Generate a coordinate transformation graph for specular reflection reflectometry.
+
+    Returns
+    -------
+    :
+        Specular reflectometry graph.
     """
     graph = {**conversions.beamline(scatter=True), **conversions.elastic("tof")}
     del graph['two_theta']
@@ -61,3 +97,143 @@ def specular_reflection() -> dict:
     graph["theta"] = theta
     graph["Q"] = reflectometry_q
     return graph
+
+
+def tof_to_wavelength(data_array: sc.DataArray,
+                      wavelength_edges: sc.Variable = None,
+                      graph: dict = None) -> sc.DataArray:
+    """
+    Use :code:`transform_coords` to convert from ToF to wavelength, cutoff high and
+    low limits for wavelength, and add necessary ORSO metadata.
+
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    wavelength_edges:
+        The lower and upper limits for the wavelength.
+        If :code:`None`, no binning is performed.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with wavelength dimension.
+    """
+    graph = graph if graph is not None else specular_reflection()
+    data_array_wav = data_array.transform_coords(["wavelength"], graph=graph)
+    if wavelength_edges is not None:
+        data_array_wav = sc.bin(data_array_wav, edges=[wavelength_edges])
+    try:
+        from orsopy import fileio
+        unit = data_array_wav.coords['wavelength'].unit
+        # This insures that when the unit is Å it is written as
+        # angstrom in the ORSO object.
+        if unit == 'angstrom':
+            unit = 'angstrom'
+        data_array_wav.attrs[
+            'orso'].value.data_source.measurement.instrument_settings.wavelength = (
+                fileio.base.ValueRange(data_array_wav.coords['wavelength'].min().value,
+                                       data_array_wav.coords['wavelength'].max().value,
+                                       unit))
+    except ImportError:
+        orso.not_found_warning()
+    return data_array_wav
+
+
+def wavelength_to_theta(data_array: sc.DataArray,
+                        theta_edges: sc.Variable = None,
+                        graph: dict = None) -> sc.DataArray:
+    """
+    Use :code:`transform_coords` to find the theta values for the events and
+    potentially add ORSO metadata.
+
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    theta_edges:
+        The lower and upper limits for the theta. If :code:`None`, no
+        binning is performed.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with theta coordinate.
+    """
+    graph = graph if graph is not None else specular_reflection()
+    data_array_theta = data_array.transform_coords(['theta'], graph=graph)
+    if theta_edges is not None:
+        data_array_theta = sc.bin(data_array_theta, edges=[theta_edges])
+    try:
+        from orsopy import fileio
+        data_array_theta.attrs[
+            'orso'].value.data_source.measurement.instrument_settings.incident_angle = (
+                fileio.base.ValueRange(
+                    data_array_theta.coords['theta'].min().value,
+                    data_array_theta.coords['theta'].max().value,
+                    data_array_theta.bins.coords['theta'].min().unit))
+        import inspect
+        # Determine if 'gravity' is in the graph and if to add the gravity correction
+        if any([
+                'gravity' in i.parameters.keys()
+                for i in map(inspect.signature, graph.values())
+        ]):
+            data_array_theta.attrs['orso'].value.reduction.corrections += [
+                'gravity correction'
+            ]
+    except ImportError:
+        orso.not_found_warning()
+    return data_array_theta
+
+
+def theta_to_q(data_array: sc.DataArray,
+               q_edges: sc.Variable = None,
+               graph: dict = None) -> sc.DataArray:
+    """
+    Convert from theta to Q and if necessary bin in Q.
+
+    Parameters
+    ----------
+    data_array:
+        Data array to convert.
+    q_edges:
+        The lower and upper limits for the Q. If :code:`None`, no
+        binning is performed.
+    graph:
+        Graph for :code:`transform_coords`.
+
+    Returns
+    -------
+    :
+        New data array with theta coordinate.
+    """
+    graph = graph if graph is not None else specular_reflection()
+    data_array_q = data_array.transform_coords(["Q"], graph=graph)
+    if q_edges is not None:
+        data_array_q = sc.bin(data_array_q, edges=[q_edges])
+    return data_array_q
+
+
+def sum_bins(data_array: sc.DataArray):
+    """
+    Sum the event bins and propogate the maximum resolution, where available.
+
+    Parameters
+    ----------
+    data_array:
+        Data array to be summed.
+
+    Returns
+    -------
+    :
+        Summed data array.
+    """
+    data_array_summed = data_array.bins.sum()
+    if 'angular_resolution' in data_array.bins.coords:
+        data_array_summed.coords['angular_resolution'] = data_array.bins.coords[
+            'angular_resolution'].max('detector_id')
+    return data_array_summed

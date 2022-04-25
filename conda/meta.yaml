@@ -9,13 +9,10 @@ requirements:
   build:
     - setuptools
   run:
-    - astropy
     - ipywidgets
     - matplotlib
     - pooch
     - scippneutron>=0.5
-    - scipy
-    - tifffile
 
 test:
   imports:
@@ -23,31 +20,13 @@ test:
     - ess.wfm
     - ess.amor
     - ess.reflectometry
-  requires:
-    - ipympl
-    - mantid
-    - pytest
-    - pandoc
-    - pythreejs
-    - python-graphviz
-    - sphinx
-    - sphinx-book-theme
-    - sphinx-copybutton
-    - nbsphinx
-    - pip
-  source_files:
-    - tests/
-    - docs/
-  commands:
-    - python -m pytest -v tests
-    - python docs/make_docs.py
+    - ess.sans
+    - ess.loki
 
 build:
   number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
   noarch: python
   script:
-    - wget https://files.pythonhosted.org/packages/04/51/4b4a0740fbde50408a2f956cbb190bdc01f1c7a562627e7f102b6a30d9b4/sphinx_autodoc_typehints-1.17.0-py3-none-any.whl
-    - pip install sphinx_autodoc_typehints-1.17.0-py3-none-any.whl
     - pip install .
 
 about:

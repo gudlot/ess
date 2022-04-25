@@ -4,13 +4,15 @@ import scipp as sc
 from ..reflectometry.conversions import specular_reflection as spec_relf_graph
 
 
-def incident_beam(*, source_chopper: sc.Variable,
+def incident_beam(*, source_chopper_1: sc.Variable, source_chopper_2: sc.Variable,
                   sample_position: sc.Variable) -> sc.Variable:
     """
     Compute the incident beam vector from the source chopper position vector,
     instead of the source_position vector.
     """
-    return sample_position - source_chopper.value['position'].data
+    chopper_midpoint = (source_chopper_1.value['position'].data +
+                        source_chopper_2.value['position'].data) * sc.scalar(0.5)
+    return sample_position - chopper_midpoint
 
 
 def specular_reflection() -> dict:
