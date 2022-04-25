@@ -3,6 +3,36 @@
 Release Notes
 =============
 
+v0.6.0 (unreleased)
+--------------------
+
+Features
+~~~~~~~~
+
+* Added exploratory POWGEN workflow and powder diffraction modules `#113 <https://github.com/scipp/ess/pull/113>`_
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+Bugfixes
+~~~~~~~~
+
+Documentation
+~~~~~~~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+Stability, Maintainability, and Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Contributors
+~~~~~~~~~~~~
+
+Simon Heybrock :sup:`a`\ ,
+Neil Vaytet :sup:`a`\ ,
+and Jan-Lukas Wynen :sup:`a`
+
 v0.5.0 (April 2022)
 -------------------
 
