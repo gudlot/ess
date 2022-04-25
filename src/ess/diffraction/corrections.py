@@ -62,8 +62,7 @@ def normalize_by_monitor(data: sc.DataArray,
 def normalize_by_vanadium(data: sc.DataArray,
                           *,
                           vanadium: sc.DataArray,
-                          edges: sc.Variable,
-                          in_place: bool = False) -> sc.DataArray:
+                          edges: sc.Variable) -> sc.DataArray:
     """
     Normalize sample data by a vanadium measurement.
 
@@ -75,9 +74,6 @@ def normalize_by_vanadium(data: sc.DataArray,
         Vanadium data.
     edges:
         `vanadium` is histogrammed into these bins before dividing the data by it.
-    in_place:
-        If ``True``, `data` is modified in order to safe memory.
-        Otherwise, the input data is unchanged.
 
     Returns
     -------
@@ -85,7 +81,6 @@ def normalize_by_vanadium(data: sc.DataArray,
         `data` normalized by `vanadium`.
     """
     norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
-    if in_place:
-        data.bins /= norm
-        return data
-    return data.bins / norm
+    # Converting to unit 'one' because the division might produce a unit with a large scale
+    # if the proton charges in data and vanadium were measured with different units.
+    return (data.bins / norm).to(unit='one', copy=False)
