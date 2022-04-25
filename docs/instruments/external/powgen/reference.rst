@@ -3,6 +3,14 @@
 Reference
 =========
 
+Loading
+-------
+
+.. autosummary::
+   :toctree: ../../generated
+
+   load_and_preprocess_vanadium
+
 Modules
 -------
 

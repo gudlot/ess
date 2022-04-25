@@ -59,9 +59,7 @@ def normalize_by_monitor(data: sc.DataArray,
     return data.bins / sc.lookup(func=mon, dim='wavelength')
 
 
-def normalize_by_vanadium(data: sc.DataArray,
-                          *,
-                          vanadium: sc.DataArray,
+def normalize_by_vanadium(data: sc.DataArray, *, vanadium: sc.DataArray,
                           edges: sc.Variable) -> sc.DataArray:
     """
     Normalize sample data by a vanadium measurement.
@@ -81,6 +79,7 @@ def normalize_by_vanadium(data: sc.DataArray,
         `data` normalized by `vanadium`.
     """
     norm = sc.lookup(sc.histogram(vanadium, bins=edges), dim=edges.dim)
-    # Converting to unit 'one' because the division might produce a unit with a large scale
-    # if the proton charges in data and vanadium were measured with different units.
+    # Converting to unit 'one' because the division might produce a unit
+    # with a large scale if the proton charges in data and vanadium were
+    # measured with different units.
     return (data.bins / norm).to(unit='one', copy=False)
