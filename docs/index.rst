@@ -36,11 +36,13 @@ Documentation
 
    instruments/amor/amor
    instruments/loki/loki
+   instruments/external/external
 
 .. toctree::
    :maxdepth: 3
    :caption: Techniques
 
+   techniques/diffraction/diffraction
    techniques/reflectometry/reflectometry
    techniques/sans/sans
    techniques/wfm/wfm
