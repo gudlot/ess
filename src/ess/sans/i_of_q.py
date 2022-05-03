@@ -87,8 +87,7 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             background = (below.sum().data + above.sum().data) / divisor
             monitors = monitors - background
         #TODO: Fix this properly with if when bins for monitors are None
-        #result = sc.rebin(monitors, "wavelength", wavelength_bins)
-        result = sc.histogram(monitors, wavelength_bins)
+        result = sc.rebin(monitors, "wavelength", wavelength_bins)
         return result
 
 
