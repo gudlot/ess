@@ -7,6 +7,7 @@ from .common import gravity_vector
 from . import conversions
 from . import normalization
 from scipp.interpolate import interp1d
+from scipp.signal import butter, sosfiltfilt
 
 
 def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
@@ -262,6 +263,13 @@ def to_I_of_Q(data: sc.DataArray,
 
     transmission_fraction = normalization.transmission_fraction(
         data_monitors=monitors['data'], direct_monitors=monitors['direct'])
+
+    trans_fract = transmission_fraction
+    midpoints = sc.midpoints(transmission_fraction.coords['wavelength'])
+    trans_fract.coords['wavelength'] = midpoints
+
+    sos = butter(transmission_fraction.coords['wavelength'], N=4, Wn=1 / sc.units.angstrom)
+    transmission_fraction = sosfiltfilt(sc.values(trans_fract), 'wavelength', sos=sos)
 
     direct_beam = resample_direct_beam(direct_beam=direct_beam,
                                        wavelength_bins=wavelength_bins)
