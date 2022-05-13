@@ -7,6 +7,7 @@ from .common import gravity_vector
 from . import conversions
 from . import normalization
 from scipp.interpolate import interp1d
+import scippneutron as scn
 
 
 def make_coordinate_transform_graphs(gravity: bool) -> Tuple[dict, dict]:
@@ -303,3 +304,47 @@ def to_I_of_Q(data: sc.DataArray,
     normalized = normalization.normalize(numerator=data_q, denominator=denominator_q)
 
     return normalized
+
+def q_resolution(data, direct_beam, lam_edges, moderator, l_collimation, r1, r2, dr):
+    moderator = sc.rebin(moderator, 'wavelength', lam_edges)
+
+    solid_angle = normalization.solid_angle_of_rectangular_pixels(
+        data,
+        pixel_width=data.coords['pixel_width'],
+        pixel_height=data.coords['pixel_height'])
+
+    d = sc.Dataset({'data': data, 'norm': solid_angle * direct_beam})
+
+    d_lam = lam_edges['wavelength', 1:] - lam_edges['wavelength', :-1]  # bin widths
+    lam = 0.5 * (lam_edges['wavelength', 1:] + lam_edges['wavelength', :-1])  # bin centres
+
+    l2 = scn.L2(d)
+    theta = scn.scattering_angle(d)
+    inv_l3 = (l_collimation + l2) / (l_collimation * l2)
+
+    # Terms in Mildner and Carpenter equation.
+    # See https://docs.mantidproject.org/nightly/algorithms/TOFSANSResolutionByPixel-v1.html
+    a1 = (r1 / l_collimation) * (r1 / l_collimation) * 3.0
+    a2 = (r2 * inv_l3) * (r2 * inv_l3) * 3.0
+    a3 = (dr / l2) * (dr / l2)
+    q_sq = 4.0 * sc.pi * sc.sin(theta) * sc.reciprocal(lam)  # keep in wav dim to prevent broadcast
+    q_sq *= q_sq
+
+    tof = moderator.data.copy()
+    tof.variances = None  # shortcoming of Mantid or Mantid converter?
+    tof.rename_dims({'wavelength': 'tof'})  # TODO overly restrictive check in convert (rename)
+    tof.unit = sc.units.us
+    mod = sc.Dataset(coords={
+        'tof': tof,
+        'position': data['sample'].coords['position'],
+        'source_position': data['sample'].coords['source_position'],
+        'sample_position': data['sample'].coords['sample_position']})
+
+    s = scn.convert(mod, 'tof', 'wavelength').coords['wavelength']
+
+    std_dev_lam_sq = (d_lam * d_lam) / 12 + s * s
+    std_dev_lam_sq *= sc.reciprocal(lam * lam)
+    f = (4 * sc.pi * sc.pi) * sc.reciprocal(12 * lam * lam)
+
+    return sc.DataArray(f * (a1 + a2 + a3) + (q_sq * std_dev_lam_sq),
+                        coords={'wavelength': lam, 'spectrum': d.coords['spectrum'].copy()})
