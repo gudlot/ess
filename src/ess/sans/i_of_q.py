@@ -81,10 +81,7 @@ def denoise_and_rebin_monitors(monitors: Union[dict, sc.DataArray],
             dim = non_background_range.dim
             below = monitors[dim, :non_background_range[0]]
             above = monitors[dim, non_background_range[1]:]
-            # TODO: if we implement `ones_like` for data arrays, we could use that here
-            # instead of dividing the below and above pieces by themselves
-            divisor = sc.nansum(below / below).data + sc.nansum(above / above).data
-            background = (below.sum().data + above.sum().data) / divisor
+            background = sc.concat([below.data, above.data], dim=dim).mean()
             monitors = monitors - background
         return sc.rebin(monitors, "wavelength", wavelength_bins)
 
