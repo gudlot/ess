@@ -153,10 +153,6 @@ def _convert_events_to_q_and_merge_spectra(
     Convert event data to momentum vector Q.
     """
     data_q = data.transform_coords("Q", graph=graph)
-
-    # TODO: once scipp-0.12 is out, we no longer need to move the attr into the coords
-    data_q.bins.coords['wavelength'] = data_q.bins.attrs.pop('wavelength')
-
     q_summed = data_q.bins.concat('spectrum')
     return sc.bin(q_summed, edges=[wavelength_bands, q_bins])
 
