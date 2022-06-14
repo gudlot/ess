@@ -386,7 +386,7 @@ def markers():
     """ Creates a list of markers for plots
     
     """
-    return [',', '+', '.', 'o', '*','1','2','x','P','v','X','^']
+    return ['+', '.', 'o', '*','1','2','x','P','v','X','^', 'd']
 
 def line_colors(number_of_lines):
     """
@@ -1258,11 +1258,14 @@ def plot_fluo_peak_int(fluo_da: sc.DataArray, name, wllim=None, wulim=None, wl_u
     display(fig)
 
 
-
 def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, medfilter=True, kernel_size=None):
-    """ Plots multiple peak intensities for fluo
+    """ Plots multiple peak intensities for fluo spectr
     
     """
+    import itertools
+    marker = itertools.cycle(markers()) 
+
+
     print(filelist)
 
     figure_size=(15,5)
@@ -1274,23 +1277,27 @@ def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, 
     for name in filelist:
         fluo_dict=load_fluo(name)
         fluo_da=normalize_fluo(**fluo_dict)
-        #extract max int value and corresponding wavelength position
-        fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=True, kernel_size=kernel_size)  
+        #extract max int value and corresponding wavelength position, median filter is applied
+        fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=medfilter, kernel_size=kernel_size)  
         # attach filename as attribute to dataarray
         #fluo_filt_max.attrs['filename'] = sc.scalar(name)
         #display(fluo_filt_max)
         ds_list.append(fluo_filt_max)
         unique_mwl.append(np.unique(fluo_filt_max.coords['monowavelengths'].values))
         #print(fluo_filt_max)
-        ax[0].plot(fluo_filt_max.coords['monowavelengths'].values, fluo_filt_max['intensity_max'].values, 'o', label=f'{name}')
-        ax[0].set_ylabel('Max. Intensity')
-        ax[0].set_title('Max. Intensity')
 
-        ax[1].plot(fluo_filt_max.coords['monowavelengths'].values, fluo_filt_max['wavelength_max'].values,'x', label=f'{name}')
+        #same marker for both plots for the same file
+        markerchoice=next(marker)
+
+        ax[0].plot(fluo_filt_max.coords['monowavelengths'].values, fluo_filt_max['intensity_max'].values, label=f'{name}', linestyle="None", marker=markerchoice, markersize=10)
+        ax[0].set_ylabel('Max. Intensity')
+        ax[0].set_title('Fluo - max. intensity')
+
+        ax[1].plot(fluo_filt_max.coords['monowavelengths'].values, fluo_filt_max['wavelength_max'].values, label=f'{name}', linestyle="None", marker=markerchoice, markersize=10)
         unit_str=str(fluo_filt_max['wavelength_max'].unit)
 
         ax[1].set_ylabel(f'Wavelength [{unit_str}]')
-        ax[1].set_title(f'Corresponding wavelength')
+        ax[1].set_title(f'Fluo - corresponding wavelength')
 
     # show the lowest monowavelength as lower boundary on the y-axis
     ax[1].set_ylim(bottom=0.9*np.min(fluo_filt_max.coords['monowavelengths'].values))
@@ -1307,7 +1314,7 @@ def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, 
         axes.set_xlabel('Monowavelengths')
     
     
-    plt.show()
+    display(fig)
 
 
 def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size: Optional[int] = None,  wllim: Optional[int] = None, wulim: Optional[int] = None, wl_unit: Optional[sc.Unit] = None) -> dict:
