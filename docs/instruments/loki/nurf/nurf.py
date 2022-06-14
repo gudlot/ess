@@ -1115,6 +1115,9 @@ def uv_turbidity_fit(uv_da: sc.DataArray, wl_unit=None, fit_llim=None, fit_ulim=
 
 
 def uv_multi_turbidity_fit(filelist, wl_unit=sc.Unit('nm'), fit_llim=300, fit_ulim=850, b_llim=450, b_ulim=700,m=0.1, plot_corrections=False):
+    """ Applies turbidity correction to uv spectra for a set of  LoKI.nxs files. 
+    
+    """
 
     uv_collection={}
     for name in filelist:
@@ -1170,9 +1173,9 @@ def fluo_peak_int(fluo_da: sc.DataArray, wllim=None, wulim=None, wl_unit=None, m
         wl_unit: sc.Unit
             Unit of the wavelength
         medfilter: boolean
-            If medfilter=False, not medfilter is applied
+            If medfilter=False, not medfilter is applied. Default: True
         kernel_size: int
-            kernel for medianfilter
+            kernel for medianfilter. Default value is applied if no value is given.
 
         Returns
         ----------
@@ -1182,7 +1185,7 @@ def fluo_peak_int(fluo_da: sc.DataArray, wllim=None, wulim=None, wl_unit=None, m
     
     """
     if not isinstance(fluo_da,sc.DataArray):
-        raise TypeError
+        raise TypeError("fluo_da has to be an sc.DataArray!")
 
     # apply medfiler with kernel_size
     if medfilter is True:
@@ -1245,7 +1248,7 @@ def plot_fluo_peak_int(fluo_da: sc.DataArray, name, wllim=None, wulim=None, wl_u
     #extract max int value and corresponding wavelength position
     fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=medfilter, kernel_size=kernel_size)  
     # attach filename as attribute to dataarray
-    fluo_da.attrs['filename'] = sc.scalar(name)
+    fluo_da.attrs['name'] = sc.scalar(name)
     display(fluo_da)
 
 
@@ -1299,8 +1302,8 @@ def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, 
         fluo_da=normalize_fluo(**fluo_dict)
         #extract max int value and corresponding wavelength position, median filter is applied
         fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=medfilter, kernel_size=kernel_size)  
-        # attach filename as attribute to dataarray
-        #fluo_filt_max.attrs['filename'] = sc.scalar(name)
+        # attach filename as attribute to dataset, TODO: should this happen in fluo_peak_int ?
+        fluo_filt_max.attrs['name'] = sc.scalar(name)
         #display(fluo_filt_max)
         ds_list.append(fluo_filt_max)
         unique_mwl.append(np.unique(fluo_filt_max.coords['monowavelengths'].values))
