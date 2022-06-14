@@ -1243,7 +1243,7 @@ def plot_fluo_peak_int(fluo_da: sc.DataArray, name, wllim=None, wulim=None, wl_u
     """
 
     #extract max int value and corresponding wavelength position
-    fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=True, kernel_size=kernel_size)  
+    fluo_filt_max=fluo_peak_int(fluo_da, wllim=wllim, wulim=wulim, wl_unit=wl_unit, medfilter=medfilter, kernel_size=kernel_size)  
     # attach filename as attribute to dataarray
     fluo_da.attrs['filename'] = sc.scalar(name)
     display(fluo_da)
@@ -1260,13 +1260,31 @@ def plot_fluo_peak_int(fluo_da: sc.DataArray, name, wllim=None, wulim=None, wl_u
 
 
 def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, medfilter=True, kernel_size=None):
-    """ Plots multiple peak intensities for fluo spectr
+    """ Plot multiple max peak intensities for given wavelength range and corresponding position of found maximum for a series of fluo measurements.
+
+    Parameters
+    ----------
+    filelist: list
+        List of complete filenames for LoKI.nxs containing fluo spectra
+    wllim: float
+        Wavelength range lower limit
+    wulim: float
+        Wavelength range upper limit
+    wl_unit: sc.Unit
+        Unit of the wavelength
+    medfilter: boolean
+        If medfilter=False, no medfilter is applied
+    kernel_size: int
+        kernel for medianfilter
+
+    Returns
+    ----------
     
+        
     """
  
     #setting the scene for the markers
     marker = itertools.cycle(markers()) 
-
 
     print(filelist)
 
@@ -1319,7 +1337,7 @@ def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, 
     display(fig)
 
 
-def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size: Optional[int] = None,  wllim: Optional[int] = None, wulim: Optional[int] = None, wl_unit: Optional[sc.Unit] = None) -> dict:
+def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size: Optional[int] = None,  wllim: Optional[float] = None, wulim: Optional[float] = None, wl_unit: Optional[sc.Unit] = None) -> dict:
     """ This function extracts a specific fluo spectrum from all given files. Ideally, the user provides the number index.
         A median filter can be applied to the input data. A lower and upper wavelength range will be used for a zoomed-in image.
         Selected spectra are all plotted in one graph.
@@ -1332,10 +1350,10 @@ def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size
         Index of spectrum for selection
     kernel_size: int
         Scalar giving the size of the median filter window. Elements of kernel_size should be odd. Default size is 3
-    wllim: int
-        Lower wavelength range
-    wulim: int
-        Upper wavelength range
+    wllim: float
+        Lower wavelength limit
+    wulim: float
+        Upper wavelength limit
     wl_unit: sc.Unit
         Wavelength unit of a fluo spectum
 
