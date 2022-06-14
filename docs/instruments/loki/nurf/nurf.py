@@ -1259,7 +1259,7 @@ def plot_fluo_peak_int(fluo_da: sc.DataArray, name, wllim=None, wulim=None, wl_u
 
 
 
-def plot_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, medfilter=True, kernel_size=None):
+def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, medfilter=True, kernel_size=None):
     """ Plots multiple peak intensities for fluo
     
     """
