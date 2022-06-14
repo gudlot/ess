@@ -21,6 +21,7 @@ print('This is scipp ',sc.__version__)
 
 
 import numpy as np
+import itertools
 
 
 
@@ -1262,7 +1263,8 @@ def plot_fluo_multiple_peak_int(filelist, wllim=None, wulim=None, wl_unit=None, 
     """ Plots multiple peak intensities for fluo spectr
     
     """
-    import itertools
+ 
+    #setting the scene for the markers
     marker = itertools.cycle(markers()) 
 
 
