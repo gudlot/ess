@@ -1366,40 +1366,35 @@ def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size
         sc.Dataset containing selected spectra for each input LoKI.nxs 
 
     """
-    # This is maybe not necessary, because scipp catches this later, but I can catch it earlier.
+    # This is maybe not necessary, because scipp catches it later, but I can catch it earlier.
     if not isinstance(spectral_idx, int):
             raise TypeError("Spectral index should be of type int.")
 
-  
     if wllim is None:
         wllim=300
     if wulim is None:
         wulim=400
 
-    #obtain unit of wavelength, I extract it from the first element in the flist_num
+    #obtain unit of wavelength, I extract it from the first element in the flist_num,
+    # but I have to load it
     fluo_dict=load_fluo(flist_num[0])
     final_fluo = normalize_fluo(**fluo_dict)
     if wl_unit is None:
         wl_unit=final_fluo.coords['wavelength'].unit
     else:
         if not isinstance(wl_unit, sc.Unit):
-            raise TypeError
+            raise TypeError("wl_unit should be of type sc.Unit.")
         assert wl_unit == final_fluo.coords['wavelength'].unit  #we check that the given unit corresponds to the unit for the wavelength
     
-
-    fluo_spec_idx_dict={}
+    
+    #prepare data        
+    fluo_spec_idx_ds=sc.Dataset()
     for name in flist_num:
         fluo_dict=load_fluo(name)   # this is dictionary with scipp.DataArrays in it
         fluo_normalized = normalize_fluo(**fluo_dict)  # this is one scipp.DataArray
-        final_fluo =  apply_medfilter(fluo_normalized, kernel_size=kernel_size)
-
-        fluo_spec_idx_dict[f'{name}']=final_fluo['spectrum', spectral_idx]  # this returns the sc.DataArray
-        #final_fluo.data['spectrum', spectral_idx]    # with the .data in place, it retuns a sc.Variable      
-      
-        
-    #This is not really elegant as it presents another for-loop. But having here a sc.Dataset has the advantage, that I can drag with me all metadata. With a dataarray, I would lose information.
-    fluo_spec_idx_ds=sc.Dataset({name:fluo_spec_idx_dict[name] for name in flist_num}) #if you remove here .data you take with you also the attributes
-   
+        final_fluo =  apply_medfilter(fluo_normalized, kernel_size=kernel_size) #apply medfilter
+        fluo_spec_idx_ds[name]=final_fluo['spectrum', spectral_idx] #append data array to dataset
+    
 
     # Plotting, TODO: should it be decoupled form the loading?
     legend_props={"show": True,'loc': (1.04, 0)}
@@ -1409,8 +1404,6 @@ def plot_fluo_spectrum_selection(flist_num: list, spectral_idx: int, kernel_size
     ax1 = fig.add_subplot(gs[0, 1])
     out0=sc.plot(fluo_spec_idx_ds, grid=True, linestyle='dashed' ,title=f'Normalized fluo spectra, selected spectrum #{spectral_idx}' , legend=legend_props, ax=ax0) #would also work with fluo_spec_idx_dict
     out1=sc.plot(fluo_spec_idx_ds['wavelength',wllim*wl_unit:wulim*wl_unit], grid=True, linestyle='dashed',title=f'Normalized fluo spectra, selected spectrum #{spectral_idx}' , legend=legend_props, ax=ax1)
-    # dirty xaxis filtering, ignores the y-axis, so rather bad
-    #ax1.set_xlim(wllim, wulim)
     display(fig)
 
     return fluo_spec_idx_ds
