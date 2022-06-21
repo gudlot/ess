@@ -1,12 +1,16 @@
 import numpy as np
 import itertools
+import scippneutron as scn
+import scippnexus as snx
+import scipp as sc
+
+
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.gridspec as gridspec
-import scippneutron as scn
-import scippnexus as snx
 
-import scipp as sc
+
+
 import os
 from IPython.display import display, HTML
 
