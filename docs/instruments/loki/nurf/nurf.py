@@ -1,27 +1,24 @@
-import numpy as np
+# standard library imports
 import itertools
-import scippneutron as scn
-import scippnexus as snx
-import scipp as sc
+import os
+from typing import Optional
 
-
+# related third party imports
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.gridspec as gridspec
-
-
-
-import os
 from IPython.display import display, HTML
-
 # possibilites for median filters, I did not benchmark, apparently median_filter
 # could be the faster and medfilt2d is faster than medfilt
 from scipy.ndimage import median_filter
 from scipy.signal import medfilt
 from scipy.optimize import leastsq  # needed for fitting of turbidity
 
-from typing import Optional
-
+# local application imports
+import scippneutron as scn
+import scippnexus as snx
+import scipp as sc
 print("This is scippneutron ", scn.__version__)
 print("This is scippnexus ", snx.__version__)
 print("This is scipp ", sc.__version__)
