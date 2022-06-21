@@ -22,7 +22,6 @@ import scipp as sc
 print("This is scippneutron ", scn.__version__)
 print("This is scippnexus ", snx.__version__)
 print("This is scipp ", sc.__version__)
-print('Hallo Welt')
 
 
 def complete_fname(scan_numbers):
