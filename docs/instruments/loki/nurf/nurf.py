@@ -70,8 +70,9 @@ def single_contributions(da):
     # We have already a condition variable 'is_dark' and we separate the incoming
     #  sc.DataArray accordingly
     dark = da[da.coords["is_dark"]].squeeze()
-    ref = da[da.coords["is_reference"]].squeeze()
-    data = da[da.coords["is_data"]]
+    ref = da[da.coords["is_reference"]].squeeze()git config --get remote.origin.url
+    #TODO: wpotrzebowski points out that dark, reference are also data. Should we convert the entry into the proposed LoKI.nxs to 'is_sample'?
+    data = da[da.coords["is_data"]]    
     # Why do we have to use .sequeeze() here?
     # GL: Dark and ref have only one spectrum, but data could have multiple in it. So
     # we need to squeeze dark, ref, but not data.
