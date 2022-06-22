@@ -21,31 +21,6 @@ import scippnexus as snx
 import scipp as sc
 
 
-
-def complete_fname(scan_numbers):
-    """Converts a list of input numbers to a filename uses at ILL.
-
-    Parameters
-    ----------
-    scan_numbers: list of int or a single int
-        List of filenumbers or one filenumnber.
-
-    Returns:
-    ----------
-    flist_num: list of str or  one  str
-        List of filenames following ILL style or string following ILL style.
-
-    """
-    if isinstance(scan_numbers, int):
-        flist_num = f"{str(scan_numbers).zfill(6)}.nxs"
-
-    if isinstance(scan_numbers, list):
-        # convert a list of input numbers to real filename
-        flist_num = [str(i).zfill(6) + ".nxs" for i in scan_numbers]
-
-    return flist_num
-
-
 def single_contributions(da):
     """Separate incoming dataarray into the three contributions: data, dark, reference.
 
@@ -69,8 +44,7 @@ def single_contributions(da):
     #  sc.DataArray accordingly
     dark = da[da.coords["is_dark"]].squeeze()
     ref = da[da.coords["is_reference"]].squeeze()
-    #TODO: wpotrzebowski points out that dark, reference are also data. Should we convert the entry into the proposed LoKI.nxs to 'is_sample'?
-    data = da[da.coords["is_data"]]    
+    data = da[da.coords["is_sample"]]    
     # Why do we have to use .sequeeze() here?
     # GL: Dark and ref have only one spectrum, but data could have multiple in it. So
     # we need to squeeze dark, ref, but not data.
@@ -1655,7 +1629,7 @@ def fluo_peak_int(
     fluo_filt_max.coords["integration_time"] = fluo_da.coords["integration_time"]
     fluo_filt_max.coords["is_dark"] = fluo_da.coords["is_dark"]
     fluo_filt_max.coords["is_reference"] = fluo_da.coords["is_reference"]
-    fluo_filt_max.coords["is_data"] = fluo_da.coords["is_data"]
+    fluo_filt_max.coords["is_sample"] = fluo_da.coords["is_sample"]
     fluo_filt_max.coords["monowavelengths"] = fluo_da.coords["monowavelengths"]
     fluo_filt_max.coords["time"] = fluo_da.coords["time"]
 
