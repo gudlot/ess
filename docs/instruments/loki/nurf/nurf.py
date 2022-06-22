@@ -134,7 +134,7 @@ def process_uv(name):
 
      Returns
     ----------
-    normalized.mean('spectrum'): sc.DataArray
+    normalized: 
         One averaged UV spectrum. Averaged over all UV spectra contained in the file
         under UV entry data.
 
