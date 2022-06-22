@@ -95,7 +95,7 @@ def normalize_uv(
 
     """
 
-    normalized = sc.log(
+    normalized = sc.log10(
         (reference - dark) / (sample - dark)
     )  # results in DataArrays with multiple spectra
 
@@ -322,8 +322,15 @@ def normalize_fluo(
     """
 
     # all spectra in this file are converted to final_fluo
-    # final_fluo = (sample - dark) - (reference - dark)
-    # If the dark is the same, it simplifies to final_fluo = sample - reference
+    # More explanation on the dark here.
+    # We keep dark here for consistency reasons. 
+    # The dark measurement is necessary for this type of detector. Sometimes, 
+    # one can use the fluorescence emission without the reference. In that case 
+    # having the dark is important.
+    # In most cases the reference should have no fluorescence emission, 
+    # basically flat. In more complex solvent the reference may have some 
+    # intrinsic fluorescence that would need to be substracted.
+
     final_fluo = (sample - dark) - (reference - dark)
 
     return final_fluo
