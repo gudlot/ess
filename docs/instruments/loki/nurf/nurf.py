@@ -633,11 +633,17 @@ def fluo_maxint_max_wavelen(
 
     fluo_int_dict = defaultdict(dict)
 
+ 
+
     for name in flist_num:
         fluo_dict = load_fluo(name)
         fluo_da = normalize_fluo(**fluo_dict)
-        print(f'Number of fluo spectra in {name}: {fluo_da.sizes["spectrum"]}')
+        # check for the unit
+        if wl_unit is None:
+            wl_unit = fluo_da.coords["wavelength"].unit
 
+
+        print(f'Number of fluo spectra in {name}: {fluo_da.sizes["spectrum"]}')
         print(f"This is the fluo dataarray for {name}.")
         display(fluo_da)
 
@@ -658,14 +664,14 @@ def fluo_maxint_max_wavelen(
         # create entries into dict
         for mwl in unique_monowavelen:
             fluo_int_max = fluo_filt_max["intensity_max"][
-                fluo_filt_max.coords["monowavelengths"] == mwl * sc.Unit("nm")
+                fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
             ].values  # returns a numpy array
             fluo_wavelen_max = fluo_filt_max["wavelength_max"][
-                fluo_filt_max.coords["monowavelengths"] == mwl * sc.Unit("nm")
+                fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
             ].values  # returns a numpy array
 
             # I collect the values in a dict with nested dicts, separated by wavelength
-            fluo_int_dict[f"{mwl}{sc.Unit('nm')}"][f"{name}"] = {
+            fluo_int_dict[f"{mwl}{wl_unit}"][f"{name}"] = {
                 "intensity_max": fluo_int_max,
                 "wavelength_max": fluo_wavelen_max,
             }
