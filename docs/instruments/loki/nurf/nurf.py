@@ -21,7 +21,7 @@ import scippnexus as snx
 import scipp as sc
 
 
-def split_contributions(da):
+def split_sample_dark_reference(da):
     """Separate incoming dataarray into the three contributions: sample, dark, reference.
 
     Parameters
@@ -69,14 +69,14 @@ def load_uv(name):
         uv = f["entry/instrument/uv"][()]
 
     # separation
-    uv_dict = split_contributions(uv)
+    uv_dict = split_sample_dark_reference(uv)
 
     return uv_dict
 
 
 def normalize_uv(
     *, data: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
-) -> sc.DataArray:  # <- here the star means that the function accepts only keyword arguments. It eliminates the risk of messing up the order of arguments
+) -> sc.DataArray: 
     """Calculates the absorbance of the UV signal.
 
     Parameters
@@ -295,7 +295,7 @@ def load_fluo(name):
         fluo = f["entry/instrument/fluorescence"][()]
 
     # separation
-    fluo_dict = split_contributions(fluo)
+    fluo_dict = split_sample_dark_reference(fluo)
 
     return fluo_dict
 
