@@ -301,13 +301,13 @@ def load_fluo(name):
 
 
 def normalize_fluo(
-    *, data: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
+    *, sample: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
 ) -> sc.DataArray:
     """Calculates the corrected fluo signal for each given fluo spectrum in a given sc.DataArray
 
     Parameters
     ----------
-    data: sc.DataArray
+    sample: sc.DataArray
         DataArray containing sample fluo signal, one spectrum or multiple spectra.
     reference: sc.DataArray
         DataArray containing reference fluo signal, one spectrum expected.
@@ -322,7 +322,7 @@ def normalize_fluo(
     """
 
     # all spectra in this file are converted to final_fluo
-    final_fluo = (data - dark) - (reference - dark)
+    final_fluo = (sample - dark) - (reference - dark)
 
     return final_fluo
 
