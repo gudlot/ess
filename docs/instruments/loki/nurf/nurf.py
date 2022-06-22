@@ -21,38 +21,28 @@ import scippnexus as snx
 import scipp as sc
 
 
-def single_contributions(da):
-    """Separate incoming dataarray into the three contributions: data, dark, reference.
+def split_contributions(da):
+    """Separate incoming dataarray into the three contributions: sample, dark, reference.
 
     Parameters
     ----------
     da: scipp.DataArray
-            sc.DataArray that contains spectroscopy contributions data, dark, reference
+            sc.DataArray that contains spectroscopy contributions sample, dark, reference
 
     Returns:
     ----------
     da_dict: dict
             Dictionary that contains spectroscopy data signal (data) from the sample,
             the reference, and the dark measurement.
-            Keys: data, reference, dark
+            Keys: sample, reference, dark
 
     """
-
     assert isinstance(da, sc.DataArray)
 
-    # We have already a condition variable 'is_dark' and we separate the incoming
-    #  sc.DataArray accordingly
     dark = da[da.coords["is_dark"]].squeeze()
     ref = da[da.coords["is_reference"]].squeeze()
     data = da[da.coords["is_sample"]]    
-    # Why do we have to use .sequeeze() here?
-    # GL: Dark and ref have only one spectrum, but data could have multiple in it. So
-    # we need to squeeze dark, ref, but not data.
-    # SH: It allows for the subsequent operation to broadcast this input, i.e., use the
-    #  same dark spectrum for all signal spectra.
-    # SH: You cannot combine things in operations that have different length along a
-    # dimensions
-
+    
     # gather single DataArrays in a dictionary
     da_dict = {"data": data, "reference": ref, "dark": dark}
 
@@ -81,7 +71,7 @@ def load_uv(name):
         uv = f["entry/instrument/uv"][()]
 
     # separation
-    uv_dict = single_contributions(uv)
+    uv_dict = split_contributions(uv)
 
     return uv_dict
 
@@ -307,7 +297,7 @@ def load_fluo(name):
         fluo = f["entry/instrument/fluorescence"][()]
 
     # separation
-    fluo_dict = single_contributions(fluo)
+    fluo_dict = split_contributions(fluo)
 
     return fluo_dict
 
