@@ -665,10 +665,10 @@ def fluo_maxint_max_wavelen(
         for mwl in unique_monowavelen:
             fluo_int_max = fluo_filt_max["intensity_max"][
                 fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
-            ].values  # returns a numpy array
+            ].values 
             fluo_wavelen_max = fluo_filt_max["wavelength_max"][
                 fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
-            ].values  # returns a numpy array
+            ].values  
 
             # I collect the values in a dict with nested dicts, separated by wavelength
             fluo_int_dict[f"{mwl}{wl_unit}"][f"{name}"] = {
