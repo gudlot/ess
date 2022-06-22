@@ -633,8 +633,6 @@ def fluo_maxint_max_wavelen(
 
     fluo_int_dict = defaultdict(dict)
 
- 
-
     for name in flist_num:
         fluo_dict = load_fluo(name)
         fluo_da = normalize_fluo(**fluo_dict)
@@ -757,7 +755,7 @@ def fluo_plot_maxint_max_wavelen(fluo_int_dict: dict):
 
 def apply_medfilter(
     da: sc.DataArray, kernel_size: Optional[int] = None
-) -> sc.DataArray:  # https://docs.python.org/3/library/typing.html#typing.Optional
+) -> sc.DataArray:
     """Applies a median filter to a sc.DataArray that contains fluo or uv spectra to remove spikes
     Filter used: from scipy.ndimage import median_filter. This filter function is maybe subject to change for another scipy function.
     Caution:  The scipy mean (median?) filter will just ignore errorbars on counts according to Neil Vaytet.
