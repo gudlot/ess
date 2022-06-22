@@ -756,6 +756,7 @@ def fluo_plot_maxint_max_wavelen(fluo_int_dict: dict):
 def apply_medfilter(
     da: sc.DataArray, kernel_size: Optional[int] = None
 ) -> sc.DataArray:
+    #TODO: Rewrite this function with median filters offered by scipp.
     """Applies a median filter to a sc.DataArray that contains fluo or uv spectra to remove spikes
     Filter used: from scipy.ndimage import median_filter. This filter function is maybe subject to change for another scipy function.
     Caution:  The scipy mean (median?) filter will just ignore errorbars on counts according to Neil Vaytet.
@@ -1603,7 +1604,7 @@ def fluo_peak_int(
 
     # there is no function in scipp similar to xr.argmax
     # access to data np.ndarray in fluo_filt
-    fluo_filt_data = fluo_filt.data.values
+    fluo_filt_data = fluo_filt.values
     # max intensity values along the wavelength axis, here axis=1, but they have seen a median filter. TODO: check with Cedric, is it okay to continue with this intensity value?
     fluo_filt_max_int = fluo_filt.data.max("wavelength").values
     # corresponding indices
