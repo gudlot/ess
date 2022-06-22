@@ -4,8 +4,6 @@ import h5py
 import numpy as np
 import copy 
 
-
-
 def complete_fname(scan_numbers):
     """Converts a list of input numbers to a filename uses at ILL.
 
@@ -322,7 +320,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs['wavelength_indices'] = 1
         
 
-        grp_fluo.attrs['is_data_indices'] = 0
+        grp_fluo.attrs['is_sample_indices'] = 0
         grp_fluo.attrs['is_dark_indices'] = 0
         grp_fluo.attrs['is_reference_indices'] = 0  
 
