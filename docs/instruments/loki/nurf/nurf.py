@@ -141,8 +141,8 @@ def process_uv(name):
     """
 
     uv_dict = load_uv(name)
-    normalized = normalize_uv(**uv_dict)  # results in DataArrays with multiple spectra
-
+    normalized = normalize_uv(**uv_dict) 
+    
     # returns averaged uv spectrum
     return normalized.mean("spectrum")
 
