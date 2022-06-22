@@ -41,10 +41,10 @@ def split_sample_dark_reference(da):
 
     dark = da[da.coords["is_dark"]].squeeze()
     ref = da[da.coords["is_reference"]].squeeze()
-    data = da[da.coords["is_sample"]]    
+    sample = da[da.coords["is_sample"]]    
        
     #TODO Instead of a dict a sc.Dataset? 
-    return {"data": data, "reference": ref, "dark": dark}
+    return {"sample": data, "reference": ref, "dark": dark}
 
 
 def load_uv(name):
