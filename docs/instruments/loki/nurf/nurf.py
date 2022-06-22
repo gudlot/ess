@@ -142,7 +142,7 @@ def process_uv(name):
 
     uv_dict = load_uv(name)
     normalized = normalize_uv(**uv_dict) 
-    
+
     # returns averaged uv spectrum
     return normalized.mean("spectrum")
 
@@ -322,6 +322,8 @@ def normalize_fluo(
     """
 
     # all spectra in this file are converted to final_fluo
+    # final_fluo = (sample - dark) - (reference - dark)
+    # If the dark is the same, it simplifies to final_fluo = sample - reference
     final_fluo = (sample - dark) - (reference - dark)
 
     return final_fluo
