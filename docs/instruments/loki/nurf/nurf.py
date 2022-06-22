@@ -514,15 +514,8 @@ def export_uv(name, path_output):
 
     """
 
-    uv_dict = load_uv(name)  # dict of scipp.DataArrays
-    normalized = normalize_uv(
-        **uv_dict
-    )  # results in one DataArray, all uv spectra normalized
+    normalized_avg= process_uv(name) 
 
-    # In case you want to visualize the normalized sc.DataArray
-    # display(normalized)
-
-    normalized_avg = normalized.mean("spectrum")
 
     # prepare for export as .dat files
     output_filename = f"{name}_uv.dat"
