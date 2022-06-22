@@ -42,11 +42,9 @@ def split_contributions(da):
     dark = da[da.coords["is_dark"]].squeeze()
     ref = da[da.coords["is_reference"]].squeeze()
     data = da[da.coords["is_sample"]]    
-    
-    # gather single DataArrays in a dictionary
-    da_dict = {"data": data, "reference": ref, "dark": dark}
-
-    return da_dict
+       
+    #TODO Instead of a dict a sc.Dataset? 
+    return {"data": data, "reference": ref, "dark": dark}
 
 
 def load_uv(name):
