@@ -631,7 +631,6 @@ def fluo_maxint_max_wavelen(
 
     from collections import defaultdict
 
-    # I need the help of the defaultdic function.
     fluo_int_dict = defaultdict(dict)
 
     for name in flist_num:
