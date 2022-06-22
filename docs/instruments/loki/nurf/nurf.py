@@ -75,13 +75,13 @@ def load_uv(name):
 
 
 def normalize_uv(
-    *, data: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
+    *, sample: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
 ) -> sc.DataArray: 
     """Calculates the absorbance of the UV signal.
 
     Parameters
     ----------
-    data: sc.DataArray
+    sample: sc.DataArray
         DataArray containing sample UV signal, one spectrum or multiple spectra.
     reference: sc.DataArray
         DataArray containing reference UV signal, one spectrum expected.
@@ -96,7 +96,7 @@ def normalize_uv(
     """
 
     normalized = sc.log(
-        (reference - dark) / (data - dark)
+        (reference - dark) / (sample - dark)
     )  # results in DataArrays with multiple spectra
 
     return normalized
