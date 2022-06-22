@@ -536,7 +536,7 @@ def export_uv(name, path_output):
     data_to_save = np.column_stack(
         (
             normalized.coords["wavelength"].values.transpose(),
-            normalized_avg.data.values.transpose(),
+            normalized_avg.values.transpose(),
             normalized.values.transpose()
         )
     )
