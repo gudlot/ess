@@ -514,8 +514,14 @@ def export_uv(name, path_output):
 
     """
 
-    normalized_avg= process_uv(name) 
+    uv_dict = load_uv(name)  
+    normalized = normalize_uv(
+        **uv_dict
+    ) 
+    # In case you want to visualize the normalized sc.DataArray
+    # display(normalized)
 
+    normalized_avg = normalized.mean("spectrum")
 
     # prepare for export as .dat files
     output_filename = f"{name}_uv.dat"
