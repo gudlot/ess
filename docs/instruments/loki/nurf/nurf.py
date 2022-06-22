@@ -518,9 +518,7 @@ def export_uv(name, path_output):
     normalized = normalize_uv(
         **uv_dict
     ) 
-    # In case you want to visualize the normalized sc.DataArray
-    # display(normalized)
-
+   
     normalized_avg = normalized.mean("spectrum")
 
     # prepare for export as .dat files
@@ -539,7 +537,7 @@ def export_uv(name, path_output):
         (
             normalized.coords["wavelength"].values.transpose(),
             normalized_avg.data.values.transpose(),
-            normalized.data["spectrum", :].values.transpose(),
+            normalized.values.transpose()
         )
     )
     path_to_save = os.path.join(path_output, output_filename)
