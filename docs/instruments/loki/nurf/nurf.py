@@ -19,9 +19,7 @@ from scipy.optimize import leastsq  # needed for fitting of turbidity
 import scippneutron as scn
 import scippnexus as snx
 import scipp as sc
-print("This is scippneutron ", scn.__version__)
-print("This is scippnexus ", snx.__version__)
-print("This is scipp ", sc.__version__)
+
 
 
 def complete_fname(scan_numbers):
