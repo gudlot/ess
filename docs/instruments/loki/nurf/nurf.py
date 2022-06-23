@@ -1461,7 +1461,7 @@ def uv_multi_turbidity_fit(
     for name in filelist:
         uv_dict = load_uv(name)
         uv_da = normalize_uv(**uv_dict)
-        uv_turbidity_fit(
+        uv_da_turbcorr = uv_turbidity_fit(
             uv_da,
             wl_unit=wl_unit,
             fit_llim=fit_llim,
