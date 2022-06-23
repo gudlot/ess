@@ -27,6 +27,20 @@ def complete_fname(scan_numbers):
 
     return flist_num
 
+# This cell contains function to convert ILL raw data to the forseen Loki file format
+
+def loki_file_creator(loki_path, loki_filename):
+    """
+    This function creates a dummy loki_basic.nxs that has the expected file structure for ESS Loki.
+    Afterwards, I will append the nurf data and rename the file.
+    """
+    with h5py.File(os.path.join(loki_path,loki_filename), 'w') as hf:
+        nxentry = hf.create_group("entry")
+        nxentry.attrs['NX_class'] = 'NXentry'
+        nxinstrument=nxentry.create_group("instrument") 
+        nxinstrument.attrs['NX_class'] = 'NXinstrument'
+
+
 def load_one_spectro_file(file_handle, path_rawdata):
     """
     This function loads one .nxs file containing spectroscopy data (fluo, uv). Data is stored in multiple np.ndarrays.
@@ -190,7 +204,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_uv.attrs['wavelength_indices'] = 1
 
         # introducing a key that is interpretable for sample, dark, and reference 
-        grp_uv.attrs['is_sample_indices'] = 0
+        grp_uv.attrs['is_data_indices'] = 0
         grp_uv.attrs['is_dark_indices'] = 0
         grp_uv.attrs['is_reference_indices'] = 0  
 
@@ -320,7 +334,7 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
         grp_fluo.attrs['wavelength_indices'] = 1
         
 
-        grp_fluo.attrs['is_sample_indices'] = 0
+        grp_fluo.attrs['is_data_indices'] = 0
         grp_fluo.attrs['is_dark_indices'] = 0
         grp_fluo.attrs['is_reference_indices'] = 0  
 
@@ -390,4 +404,35 @@ def nurf_file_creator(loki_file, path_to_loki_file, data):
 
         #grp_densito = hf.create_group("/entry/instrument/densitometer")
         #grp_densito.attrs["NX_class"] = 'NXdetector'
-        #grp_densito.create_dataset("description", data='Densitometer') 
+        #grp_densito.create_dataset("description", data='Densitometer')
+
+def convert_ill2loki(scan_numbers, path_to_loki_file, loki_file, path_rawdata, process_folder):
+    """
+    Convert ill data sets of files to new LoKI data structure.
+    scan_numbers: list of filenumbers without trailing zero
+    path_to_loki_file: path to LOKI_basics.nxs
+    loki_file:  LOKI_Baiscs.nxs, dummy LOKI file
+    path_rawdata: filepath/to/ILL/rawdata
+    process_folder: filepath/to/folder/with/files/with/new/LOKI structure
+
+    """
+
+    # convert numbers into strings
+    flist_num=[str(i).zfill(6) for i in scan_numbers]
+
+    for i in flist_num:
+        print(i, type(i))
+
+        # create new LOKI_basics.nxs
+        loki_file_creator(path_to_loki_file, loki_file)
+
+        # load old ILL data and extract data
+        data=load_one_spectro_file(i, path_rawdata)
+
+        # put extracted data into the new LOKI file structure by appending to loki_file
+        nurf_file_creator(loki_file, path_to_loki_file, data)
+
+        # rename LOKI_basic files to new file name
+        os.chdir(process_folder)
+        final_fname=i+'.nxs'
+        os.rename(loki_file, final_fname)
