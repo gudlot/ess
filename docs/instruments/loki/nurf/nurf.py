@@ -41,10 +41,10 @@ def split_sample_dark_reference(da):
 
     dark = da[da.coords["is_dark"]].squeeze()
     ref = da[da.coords["is_reference"]].squeeze()
-    sample = da[da.coords["is_sample"]]    
+    sample = da[da.coords["is_data"]]    
        
     #TODO Instead of a dict a sc.Dataset? 
-    return {"sample": data, "reference": ref, "dark": dark}
+    return {"sample": sample, "reference": ref, "dark": dark}
 
 
 def load_uv(name):
@@ -170,7 +170,7 @@ def plot_uv(name):
 
     # How to plot raw data spectra in each file?
     out1 = sc.plot(
-        sc.collapse(uv_dict["data"], keep="wavelength"),
+        sc.collapse(uv_dict["sample"], keep="wavelength"),
         linestyle="dashed",
         marker=".",
         grid=True,
@@ -364,7 +364,7 @@ def plot_fluo(name):
 
     # plot all fluo raw spectra
     out1 = sc.plot(
-        sc.collapse(fluo_dict["data"]["spectrum", :], keep="wavelength"),
+        sc.collapse(fluo_dict["sample"]["spectrum", :], keep="wavelength"),
         linestyle="dashed",
         grid=True,
         legend=legend_props,
@@ -387,8 +387,8 @@ def plot_fluo(name):
     # specific for ILL data, every second sppectrum good, pay attention to range() where
     #  the selection takes place
     only_bad_spectra = {}  # make empty dict
-    for i in range(0, fluo_dict["data"].sizes["spectrum"], 2):
-        only_bad_spectra[f"spectrum-{i}"] = fluo_dict["data"]["spectrum", i]
+    for i in range(0, fluo_dict["sample"].sizes["spectrum"], 2):
+        only_bad_spectra[f"spectrum-{i}"] = fluo_dict["sample"]["spectrum", i]
     out3 = sc.plot(
         only_bad_spectra,
         linestyle="dashed",
@@ -400,8 +400,8 @@ def plot_fluo(name):
     display(out3)
 
     only_good_spectra = {}  # make empty dict
-    for i in range(1, fluo_dict["data"].sizes["spectrum"], 2):
-        only_good_spectra[f"spectrum-{i}"] = fluo_dict["data"]["spectrum", i]
+    for i in range(1, fluo_dict["sample"].sizes["spectrum"], 2):
+        only_good_spectra[f"spectrum-{i}"] = fluo_dict["sample"]["spectrum", i]
     out4 = sc.plot(
         only_good_spectra,
         linestyle="dashed",
@@ -414,7 +414,7 @@ def plot_fluo(name):
 
     # plot only good spectra with wavelength in legend name
     only_good_fspectra = {}  # make empty dict
-    for i in range(1, fluo_dict["data"].sizes["spectrum"], 2):
+    for i in range(1, fluo_dict["sample"].sizes["spectrum"], 2):
         mwl = str(final_fluo.coords["monowavelengths"][i].value) + "nm"
         only_good_fspectra[f"spectrum-{i}, {mwl}"] = final_fluo["spectrum", i]
     out5 = sc.plot(
@@ -1461,7 +1461,7 @@ def uv_multi_turbidity_fit(
     for name in filelist:
         uv_dict = load_uv(name)
         uv_da = normalize_uv(**uv_dict)
-        uv_da_turbcorr = uv_turbidity_fit(
+        uv_turbidity_fit(
             uv_da,
             wl_unit=wl_unit,
             fit_llim=fit_llim,
@@ -1627,7 +1627,7 @@ def fluo_peak_int(
     fluo_filt_max.coords["integration_time"] = fluo_da.coords["integration_time"]
     fluo_filt_max.coords["is_dark"] = fluo_da.coords["is_dark"]
     fluo_filt_max.coords["is_reference"] = fluo_da.coords["is_reference"]
-    fluo_filt_max.coords["is_sample"] = fluo_da.coords["is_sample"]
+    fluo_filt_max.coords["is_data"] = fluo_da.coords["is_data"]
     fluo_filt_max.coords["monowavelengths"] = fluo_da.coords["monowavelengths"]
     fluo_filt_max.coords["time"] = fluo_da.coords["time"]
 
