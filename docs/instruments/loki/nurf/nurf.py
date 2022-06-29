@@ -531,7 +531,7 @@ def export_uv(name, path_output):
     l = "".join(
         ["dark_{0}\t".format(i) for i in range(uv_dict['dark'].ndim)
         ]
-    )
+        )
     m="".join(
         ["reference_{0}\t".format(i) for i in range(uv_dict['reference'].ndim)
         ]
@@ -582,6 +582,9 @@ def export_uv(name, path_output):
 def export_fluo(name, path_output):
     """Export corrected fluo data contained in a LoKI.nxs file to .dat file
 
+    Attention: Current output format follows custom format for an individual user, not
+    any other software.
+
     Parameters
     ----------
     name: str
@@ -592,7 +595,9 @@ def export_fluo(name, path_output):
 
     Returns
     ----------
-    Tab-limited .dat file with columns wavelength and multiple fluo spectra. Header of each fluo spectrum column contains the incident excitation energy.
+    Tab-limited .dat file with columns wavelength, dark, reference, multiple raw fluo 
+    spectra, and multiple normalized fluo spectra.
+    Header of each fluo spectrum column contains the incident excitation energy.
 
     """
     # export of all calculated fluo data in a LOKI.nxs name to .dat
@@ -605,13 +610,37 @@ def export_fluo(name, path_output):
     output_filename = f"{name}_fluo.dat"
     path_to_save = os.path.join(path_output, output_filename)
 
-    l = "".join([f"{i}nm\t" for i in final_fluo.coords["monowavelengths"].values])
+    
+    
+    l = "".join(
+        ["dark_{0}\t".format(i) for i in range(fluo_dict['dark'].ndim)
+        ]
+        )
+    m = "".join(
+        ["reference_{0}\t".format(i) for i in range(fluo_dict['reference'].ndim)
+        ]
+        )
+    
+    n= "".join([f"raw_{i}nm\t" for i in final_fluo.coords["monowavelengths"].values])
+
+    o= "".join([f"norm_{i}nm\t" for i in final_fluo.coords["monowavelengths"].values])
+
+
+
     hdrtxt = "wavelength [nm]\t"
-    final_header = hdrtxt + l
+    final_header = hdrtxt + l + m + n + o
+    print(final_header)
 
     data_to_save = np.column_stack(
         (
             final_fluo.coords["wavelength"].values.transpose(),
+            # dark
+            fluo_dict['dark'].values.transpose(),
+            # reference
+            fluo_dict['reference'].values.transpose(),
+            # sample
+            fluo_dict['sample'].values.transpose(),
+            # final fluo spectra
             final_fluo.data["spectrum", :].values.transpose(),
         )
     )
@@ -621,7 +650,8 @@ def export_fluo(name, path_output):
         np.savetxt(
             f,
             data_to_save,
-            fmt="".join(["%.5f\t"] + ["%.5e\t"] * final_fluo.sizes["spectrum"]),
+            fmt="".join(["%.5f\t"] + ["%.5e\t"] * (fluo_dict['dark'].ndim + 
+                        fluo_dict['reference'].ndim + 2*final_fluo.sizes["spectrum"])),
             delimiter="\t",
             header=final_header,
         )
