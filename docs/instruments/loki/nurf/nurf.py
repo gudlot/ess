@@ -60,7 +60,7 @@ def load_uv(name):
     uv_dict: dict
         Dictionary that contains UV data signal (data) from the sample, the reference,
         and the dark measurement.
-        Keys: data, reference, dark
+        Keys: sample, reference, dark
 
     """
 
