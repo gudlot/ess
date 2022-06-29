@@ -524,20 +524,49 @@ def export_uv(name, path_output):
     # prepare for export as .dat files
     output_filename = f"{name}_uv.dat"
 
+    # puzzle the header together
     l = "".join(
-        [
-            "uv_spectra_{0}\t".format(i)
-            for i, x in enumerate(range(normalized.sizes["spectrum"]))
+        ["dark_{0}\t".format(i) for i in range(uv_dict['dark'].ndim)
         ]
     )
-    hdrtxt = "wavelength [nm]\t uv_spectra_avg\t"
-    final_header = hdrtxt + l
+    m="".join(
+        ["reference_{0}\t".format(i) for i in range(uv_dict['reference'].ndim)
+        ]
+        )
+
+    n="".join(
+        [   
+            "uv_raw_spectra_{0}\t".format(i)
+            for i, x in enumerate(range(uv_dict['sample'].sizes["spectrum"]))
+        ]
+        )
+    o="".join(    
+        [   
+            "uv_norm_spectra_{0}\t".format(i)
+            for i, x in enumerate(range(normalized.sizes["spectrum"]))
+        ]
+        )
+    
+    p = "uv_spectra_avg\t" 
+  
+
+    hdrtxt = "wavelength [nm]\t"
+    final_header = hdrtxt + l + m + n + o + p
+
 
     data_to_save = np.column_stack(
         (
             normalized.coords["wavelength"].values.transpose(),
+
+            # raw data
+            uv_dict['dark'].values.transpose(),
+            uv_dict['reference'].values.transpose(),
+            uv_dict['sample'].values.transpose(),
+
+            # reduced data
+            normalized.values.transpose(),
             normalized_avg.values.transpose(),
-            normalized.values.transpose()
+            
         )
     )
     path_to_save = os.path.join(path_output, output_filename)
