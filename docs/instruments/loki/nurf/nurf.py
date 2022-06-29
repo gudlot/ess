@@ -500,6 +500,7 @@ def modify_plt_app(fig_handles):
 def export_uv(name, path_output):
     """Export normalized all uv data and an averaged uv spectrum in a LoKI.nxs file to .dat file
 
+
     Parameters
     ----------
     name: str
@@ -510,7 +511,7 @@ def export_uv(name, path_output):
 
     Returns
     ----------
-    Tab-limited .dat file with columns wavelength, one averaged uv spectrum, (multiple) normalized uv spectra
+    Tab-limited .dat file with columns wavelength, dark, reference, (multiple) raw uv spectra, (multiple) corrected uv spectra, one averaged uv spectrum
 
     """
 
