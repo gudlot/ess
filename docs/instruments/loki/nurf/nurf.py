@@ -629,8 +629,7 @@ def export_fluo(name, path_output):
 
     hdrtxt = "wavelength [nm]\t"
     final_header = hdrtxt + l + m + n + o
-    print(final_header)
-
+ 
     data_to_save = np.column_stack(
         (
             final_fluo.coords["wavelength"].values.transpose(),
