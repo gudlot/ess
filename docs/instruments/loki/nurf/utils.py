@@ -73,7 +73,7 @@ def load_nurfloki_file(name: str, exp_meth: str ):
         raise TypeError('exp_math needs to be of type str.')
 
     if not exp_meth in nurf_meth:
-        raise ValueError('Wrong string. That methods does not exist for NurF at LoKi.')
+        raise ValueError('Wrong string. This method does not exist for NurF at LoKi.')
 
     path_to_group=f"entry/instrument/{exp_meth}"
     
