@@ -1,7 +1,7 @@
 # standard library imports
 import itertools
 import os
-from typing import Optional
+from typing import Optional, Type
 
 # related third party imports
 import numpy as np
@@ -45,3 +45,42 @@ def split_sample_dark_reference(da):
        
     #TODO Instead of a dict a sc.Dataset? 
     return {"sample": sample, "reference": ref, "dark": dark}
+
+
+def load_nurfloki_file(name: str, exp_meth: str ):
+    """ Loads data of a specified experimental method from the corresponding entry in a
+     NUrF-Loki.nxs file. 
+    
+
+    Parameters
+    ----------
+    name: str
+        Filename, e.g. 066017.nxs
+    exp_meth: str
+        Experimental method available with the NUrF exp. configuration.
+        Current default values: uv, fluorescence. TODO in the future: raman
+
+    Returns
+    ----------
+    exp_meth_dict: dict
+        Dictionary of sc.DataArrays. Keys: data, reference, dark. 
+        Data contains all relevant signals of the sample.
+
+    """
+    nurf_meth=['uv', 'fluorescence']
+
+    if not isinstance(exp_meth, str):
+        raise TypeError('exp_math needs to be of type str.')
+
+    if not exp_meth in nurf_meth:
+        raise ValueError('Wrong string. That methods does not exist for NurF at LoKi.')
+
+    path_to_group=f"entry/instrument/{exp_meth}"
+    
+    with snx.File(name) as fnl:
+        meth = fnl[path_to_group][()]
+
+    # separation
+    exp_meth_dict = split_sample_dark_reference(meth)
+
+    return exp_meth_dict
