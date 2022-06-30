@@ -19,3 +19,29 @@ from scipy.optimize import leastsq  # needed for fitting of turbidity
 import scippneutron as scn
 import scippnexus as snx
 import scipp as sc
+
+
+def split_sample_dark_reference(da):
+    """Separate incoming dataarray into the three contributions: sample, dark, reference.
+
+    Parameters
+    ----------
+    da: scipp.DataArray
+            sc.DataArray that contains spectroscopy contributions sample, dark, reference
+
+    Returns:
+    ----------
+    da_dict: dict
+            Dictionary that contains spectroscopy data signal (data) from the sample,
+            the reference, and the dark measurement.
+            Keys: sample, reference, dark
+
+    """
+    assert isinstance(da, sc.DataArray)
+
+    dark = da[da.coords["is_dark"]].squeeze()
+    ref = da[da.coords["is_reference"]].squeeze()
+    sample = da[da.coords["is_data"]]    
+       
+    #TODO Instead of a dict a sc.Dataset? 
+    return {"sample": sample, "reference": ref, "dark": dark}
