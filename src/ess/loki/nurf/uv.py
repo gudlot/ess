@@ -1,3 +1,5 @@
+import scipp as sc
+
 def normalize_uv(
     *, sample: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
 ) -> sc.DataArray: 
@@ -35,7 +37,7 @@ def load_and_normalize_uv(name):
     name: str
         Filename, e.g. 066017.nxs
 
-    Returns:
+    Returns
     ----------
     normalized: sc.DataArray
         DataArray that contains the normalized UV signal, one spectrum or mulitple spectra.
