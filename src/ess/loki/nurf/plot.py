@@ -1,3 +1,26 @@
+# standard library imports
+import itertools
+import os
+from typing import Optional, Type
+
+# related third party imports
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import matplotlib.gridspec as gridspec
+from IPython.display import display, HTML
+
+from scipy.optimize import leastsq  # needed for fitting of turbidity
+
+# local application imports
+import scippneutron as scn
+import scippnexus as snx
+import scipp as sc
+from scipp.ndimage import median_filter
+
+from ess.loki.nurf import uv, fluo, utils
+
+
 def markers():
     """Creates a list of markers for plots"""
     return ["+", ".", "o", "*", "1", "2", "x", "P", "v", "X", "^", "d"]
@@ -78,6 +101,10 @@ def plot_uv(name):
     figs, axs = plt.subplots(1, 4, figsize=(16, 3))
 
     # How to plot raw data spectra in each file?
+    #TODO: You could put all the common options (of the 4 plots) into a dict, 
+    # and then use **options here, do avoid the duplication and make changes easier.
+    # --> I am not sure currently, I wait for Simon's advice
+
     out1 = sc.plot(
         sc.collapse(uv_dict["sample"], keep="wavelength"),
         linestyle="dashed",
@@ -191,10 +218,12 @@ def plot_uv_peak_int(
         Unit of the wavelength
     tol: float
         Tolerance, 2*tol defines the interval around the given wavelength
-    medfilter: boolean
-        If medfilter==False, not medfilter is applied
-    kernel_size: int
-        kernel for medianfilter
+    medfilter: bool
+        If medfilter=False, not medfilter is applied. Default: True
+        A medfilter is applied to the fluo spectra as fluo is often more noisy
+    kernel_size: int or sc.Variable
+        kernel for median_filter along the wavelength dimension. Expected dims
+        'spectrum' and 'wavelength' in sc.DataArray
 
     Returns
     ----------
@@ -206,8 +235,13 @@ def plot_uv_peak_int(
         raise TypeError
 
     if medfilter is not False:
-        # apply medianfilter
-        uv_da = apply_medfilter(uv_da, kernel_size=kernel_size)
+        # apply medfiler with kernel_size along the wavelength dimension
+        if ('spectrum' and 'wavelength') in fluo_da.dims:
+            kernel_size_sc={'spectrum':1, 'wavelength':kernel_size}
+        else:
+            raise ValueError('Dimensions spectrum and wavelength expected.')
+        uv_da=median_filter(uv_da, size=kernel_size_sc)
+
 
     # process
     uv_peak_int_dict = uv_peak_int(
@@ -261,13 +295,17 @@ def uv_quick_data_check(
     # out= sc.Dataset({name:load_and_normalize_uv(name) for name in filelist})
 
     # Let's try dictionary comprehension ... yeap that works
-    uv_dict = {name: load_and_normalize_uv(name) for name in filelist}
+    uv_dict = {name: uv.load_and_normalize_uv(name) for name in filelist}
 
     # apply medianfilter
     if medfilter is not False:
-        # apply_medfilter expects a sc.DataArray
+        # apply medfilter with kernel_size along the wavelength dimension
+        if ('spectrum' and 'wavelength') in fluo_da.dims:
+            kernel_size_sc={'spectrum':1, 'wavelength':kernel_size}
+        else:
+            raise ValueError('Dimensions spectrum and wavelength expected.')
         uv_dict = {
-            name: apply_medfilter(uv_dict[name], kernel_size=kernel_size)
+            name: median_filter(uv_dict[name], size=kernel_size_sc)
             for name in filelist
         }
 
@@ -510,7 +548,6 @@ def plot_fluo_multiple_peak_int(
     Returns
     ----------
 
-
     """
 
     # setting the scene for the markers
@@ -526,8 +563,8 @@ def plot_fluo_multiple_peak_int(
     unique_mwl = []
     ds_list = []
     for name in filelist:
-        fluo_dict = load_fluo(name)
-        fluo_da = normalize_fluo(**fluo_dict)
+        fluo_dict=utils.load_nurfloki_file(name,'fluorescence')
+        fluo_da = fluo.normalize_fluo(**fluo_dict)
         # extract max int value and corresponding wavelength position, median filter is applied
         fluo_filt_max = fluo_peak_int(
             fluo_da,
@@ -637,8 +674,8 @@ def plot_fluo_spectrum_selection(
 
     # obtain unit of wavelength, I extract it from the first element in the flist_num,
     # but I have to load it
-    fluo_dict = load_fluo(flist_num[0])
-    final_fluo = normalize_fluo(**fluo_dict)
+    fluo_dict=utils.load_nurfloki_file(flist_num[0],'fluorescence')
+    final_fluo = fluo.normalize_fluo(**fluo_dict)
     if wl_unit is None:
         wl_unit = final_fluo.coords["wavelength"].unit
     else:
@@ -651,8 +688,8 @@ def plot_fluo_spectrum_selection(
     # prepare data
     fluo_spec_idx_ds = sc.Dataset()
     for name in flist_num:
-        fluo_dict = load_fluo(name)  # this is dictionary with scipp.DataArrays in it
-        fluo_normalized = normalize_fluo(**fluo_dict)  # this is one scipp.DataArray
+        fluo_dict=utils.load_nurfloki_file(name,'fluorescence') 
+        fluo_normalized = fluo.normalize_fluo(**fluo_dict)
         final_fluo = apply_medfilter(
             fluo_normalized, kernel_size=kernel_size
         )  # apply medfilter
@@ -688,6 +725,187 @@ def plot_fluo_spectrum_selection(
 
 
 
+def plot_uv_turbidity_fit(uv_da: sc.DataArray, 
+    fit_llim: Optional[sc.Variable] = None,
+    fit_ulim: Optional[sc.Variable] = None,
+    b_llim: Optional[sc.Variable] = None,
+    b_ulim: Optional[sc.Variable] = None,
+    m=None):
+
+    # carry out the fit
+    uv_da_turbcorr= uv.uv_turbidity_fit(
+    uv_da, 
+    fit_llim=fit_llim, 
+    fit_ulim=fit_ulim,
+    b_llim=b_llim,
+    b_ulim=b_ulim,
+    m=m
+    )
+    # get the values for the fit ranges
+    fit_llim, fit_ulim=uv_da_turbcorr.attrs["turbidity_fit_range"]
+    b_llim, b_ulim= uv_da_turbcorr.attrs["b_fit_range"]
+  
+    # select the UV wavelength range for fitting the turbidity
+    uv_da_filt = uv_da["wavelength", fit_llim  : fit_ulim ]
+
+    # How many spectra are in the file?
+    num_spec = uv_da_filt.sizes["spectrum"]
+
+ 
+    # Plotting results as sc.plot
+    fig2, ax2 = plt.subplots(ncols=2, figsize=(12, 5))
+    out0 = sc.plot(
+        sc.collapse(uv_da, keep="wavelength"),
+        grid=True,
+        title="before correction",
+        ax=ax2[0],
+    )
+    out1 = sc.plot(
+        sc.collapse(uv_da_turbcorr, keep="wavelength"),
+        grid=True,
+        title="after correction",
+        ax=ax2[1],
+    )
+
+    # Plotting intermediate steps
+    fig, ax = plt.subplots(ncols=num_spec + 1, figsize=(18, 5))
+    out3 = sc.plot(
+        sc.collapse(uv_da_filt, keep="wavelength"),
+        grid=True,
+        title="Selection for turbidity fit",
+        ax=ax[-1],
+    )
+
+    for i in range(num_spec):
+        # collect the fitting parameters for each spectrum to avoid new fitting
+        popt = [
+            uv_da_turbcorr.attrs["fit-offset_b"]["spectrum", i].values,
+            uv_da_turbcorr.attrs["fit-slope_m"]["spectrum", i].values,
+        ]
+
+        ax[i].plot(
+            uv_da.coords["wavelength"].values,
+            uv_da["spectrum", i].values,
+            "s",
+            label=f"Full UV raw data {i}",
+        )
+        ax[i].plot(
+            uv_da.coords["wavelength"].values,
+            uv_da["spectrum", i].values
+            - uv.turbidity(uv_da.coords["wavelength"].values, popt[0], popt[1]),
+            "x",
+            label=f"Whole UV spectrum, fitted turbidity subtracted {i}",
+        )
+        ax[i].plot(
+            uv_da.coords["wavelength"].values,
+            uv.turbidity(uv_da.coords["wavelength"].values, popt[0], popt[1]),
+            "^",
+            label=f"Full turbidity {i}",
+        )
+
+        ax[i].plot(
+            uv_da_filt.coords["wavelength"].values,
+            uv.turbidity(uv_da_filt.coords["wavelength"].values, popt[0], popt[1]),
+            ".",
+            label=f"Fitted turbidity {i}, b={popt[0]:.3f}, m={popt[1]:.3f}, [{fit_llim.value}:{fit_ulim.value}]{fit_llim.unit}",
+        )
+
+        # ax[i].plot(uv_da['wavelength', b_llim*wl_unit: b_ulim*wl_unit]['spectrum',i].coords['wavelength'].values, uv_da['wavelength',
+        #   b_llim*wl_unit: b_ulim*wl_unit]['spectrum',i].values,'v', label=f'Selection for b0 {i}')
+        # No need to slice in the spectrum dimension for the x values
+        ax[i].plot(
+            uv_da["wavelength", b_llim : b_ulim ]
+            .coords["wavelength"]
+            .values,
+            uv_da["wavelength", b_llim:b_ulim]["spectrum", i].values,
+            "v",
+            label=f"Selection for b0 {i}: [{b_llim.value}:{b_ulim.value}]{b_llim.unit}",
+        )
+
+        ax[i].grid(True)
+        ax[i].set_xlabel("Wavelength [nm]")
+        ax[i].set_ylabel("Absorbance")
+        ax[i].legend()
+        ax[i].set_title(f"Spectrum {str(i)}")
+        # set limits, np.isfinite filters out inf (and nan) values
+        ax[i].set_ylim(
+            [
+                -0.5,
+                1.1
+                * uv_da["spectrum", i]
+                .values[np.isfinite(uv_da["spectrum", i].values)]
+                .max(),
+            ]
+        )
+
+    display(fig2)
+
+def plot_uv_multi_turbidity_fit(
+    filelist,
+    fit_llim: Optional[sc.Variable] = None,
+    fit_ulim: Optional[sc.Variable] = None,
+    b_llim: Optional[sc.Variable] = None,
+    b_ulim: Optional[sc.Variable] = None,
+    m=None 
+):
+
+    multi_uv_turb_corr_da=uv.uv_multi_turbidity_fit(filelist,
+    fit_llim=fit_llim,
+    fit_ulim=fit_ulim,
+    b_llim=b_llim,
+    b_ulim=b_ulim,
+    m=m )
+
+    fig, ax = plt.subplots(ncols=3, figsize=(21, 7))
+    legend_props = {"show": True, "loc": 1}
+    num_spectra = multi_uv_turb_corr_da.sizes["spectrum"]
+
+    out = sc.plot(
+        sc.collapse(multi_uv_turb_corr_da, keep="wavelength"),
+        grid=True,
+        ax=ax[0],
+        legend=legend_props,
+        title=f"All turbidity corrected UV spectra for {num_spectra} spectra",
+    )
+    ax[0].set_ylim(
+        [
+            -1,
+            1.2
+            * multi_uv_turb_corr_da.data.values[
+                np.isfinite(multi_uv_turb_corr_da.data.values)
+            ].max(),
+        ]
+    )
+
+    out2 = sc.plot(
+        sc.collapse(multi_uv_turb_corr_da.attrs["fit-offset_b"], keep="spectrum"),
+        title=f"All fit-offset b for {num_spectra} spectra",
+        ax=ax[1],
+        grid=True,
+    )
+
+    # ax0.set_xticks(np.arange(0,len(filelist),1), labels=[f'{name}' for name in filelist], rotation=90)
+    secx = ax[1].secondary_xaxis(-0.2)
+    secx.set_xticks(
+        np.arange(0, num_spectra, 1),
+        labels=[f"{name}" for name in multi_uv_turb_corr_da.attrs["source"].values],
+        rotation=90,
+    )
+    out3 = sc.plot(
+        sc.collapse(multi_uv_turb_corr_da.attrs["fit-slope_m"], keep="spectrum"),
+        title=f"All fit-slope m for {num_spectra} spectra",
+        ax=ax[2],
+        grid=True,
+    )
+    secx2 = ax[2].secondary_xaxis(-0.2)
+    secx2.set_xticks(
+        np.arange(0, num_spectra, 1),
+        labels=[f"{name}" for name in multi_uv_turb_corr_da.attrs["source"].values],
+        rotation=90,
+    )
+
+
+
 
 
 ################################################
@@ -697,7 +915,7 @@ def plot_fluo_spectrum_selection(
 ################################################
 
 
-def plot_fluo(name):
+def plot_fluo(name: str):
     """Plots all fluo spectra contained in a LoKI.nxs
         Currently, we separate between good and bad fluo spectra collected during a ILL experiment. This differentiation can later go for LoKI.
         First graph: Plot of all raw fluo spectra
@@ -713,11 +931,9 @@ def plot_fluo(name):
         Filename of a LoKI.nxs file
 
     """
-    # Plots fluo spectra in LOKI.nxs of file name
-    # Input: name, str
 
-    fluo_dict = load_fluo(name)  # this is dictionary with scipp.DataArrays in it
-    final_fluo = normalize_fluo(**fluo_dict)  # this is one scipp.DataArray
+    fluo_dict=utils.load_nurfloki_file(name,'fluorescence')  
+    final_fluo = fluo.normalize_fluo(**fluo_dict)  
 
     # set figure size and legend props
     figure_size = (8, 4)
@@ -880,6 +1096,5 @@ def fluo_plot_maxint_max_wavelen(fluo_int_dict: dict):
             labels=[f"{name}" for name in max_int_wavelen_dict],
             rotation=90,
         )
-
 
 
