@@ -420,11 +420,7 @@ def uv_multi_turbidity_fit(
    
     uv_collection = {}
     for name, uv_da in filelist.items():
-       
-        #uv_dict = utils.load_nurfloki_file(name, 'uv')
-        #uv_da = normalize_uv(**uv_dict)
-        #uv_da=load_and_normalize_uv(name)
-
+     
         uv_da_turbcorr = uv_turbidity_fit(
             uv_da,
             fit_llim=fit_llim,
