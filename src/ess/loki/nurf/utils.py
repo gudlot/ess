@@ -82,7 +82,7 @@ def load_nurfloki_file(name: str, exp_meth: str ):
     
     with snx.File(name) as fnl:
         meth = fnl[path_to_group][()]
-        meth.attrs['source']=sc.scalar(name)
+        meth.attrs['source'] = sc.scalar(name).broadcast(['spectrum'], [meth.sizes['spectrum']])
 
     # separation
     exp_meth_dict = split_sample_dark_reference(meth)
