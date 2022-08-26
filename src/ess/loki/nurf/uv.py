@@ -82,17 +82,16 @@ def average_uv(name: str) -> sc.DataArray :
     ----------
     normalized: 
         One averaged UV spectrum. Averaged over all UV spectra contained in the file
-        under UV entry data.
+        under UV entry data. Preserves original source.
 
     """
     #uv_dict = utils.load_nurfloki_file(name, 'uv')
     #normalized = normalize_uv(**uv_dict) 
     normalized = load_and_normalize_uv(name)
 
-    #TODO: Think, what could be done with the meta data. Mean drops attributes.
-
     # returns averaged uv spectrum
-    return normalized.mean("spectrum")
+    return normalized.groupby('source').mean('spectrum').squeeze()
+
 
 def gather_uv_avg_set(filelist:list) -> sc.Dataset:
     """Creates a sc.DataSet for set of given filenames for an experiment composed of 
@@ -405,7 +404,7 @@ def uv_turbidity_fit(
  
 
 def uv_multi_turbidity_fit(
-    filelist: list,
+    filelist: dict,
     fit_llim: Optional[sc.Variable] = None,
     fit_ulim: Optional[sc.Variable] = None,
     b_llim: Optional[sc.Variable] = None,
@@ -414,14 +413,17 @@ def uv_multi_turbidity_fit(
 )-> sc.DataArray:
     """Applies turbidity correction to UV spectra for a set of  LoKI.nxs files.
     b: offset, m: slope. Same values are applied to all given spectra.
-    
+    filelist: dict 
+        Dict of sc.DataArrays, key: filename, value: sc.DataArray
+
     """
    
     uv_collection = {}
-    for name in filelist:
+    for name, uv_da in filelist.items():
+       
         #uv_dict = utils.load_nurfloki_file(name, 'uv')
         #uv_da = normalize_uv(**uv_dict)
-        uv_da=load_and_normalize_uv(name)
+        #uv_da=load_and_normalize_uv(name)
 
         uv_da_turbcorr = uv_turbidity_fit(
             uv_da,
