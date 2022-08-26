@@ -1,3 +1,24 @@
+# standard library imports
+import itertools
+import os
+from typing import Optional, Type, Union
+
+# related third party imports
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import matplotlib.gridspec as gridspec
+from IPython.display import display, HTML
+from scipy.optimize import leastsq  # needed for fitting of turbidity
+
+# local application imports
+import scippnexus as snx
+import scipp as sc
+from ess.loki.nurf import utils
+from scipp.ndimage import median_filter
+
+
+
 def normalize_fluo(
     *, sample: sc.DataArray, reference: sc.DataArray, dark: sc.DataArray
 ) -> sc.DataArray:
@@ -34,6 +55,30 @@ def normalize_fluo(
     return final_fluo
 
 
+def load_and_normalize_fluo(name) -> sc.DataArray :
+    """Loads the fluo data from the corresponding entry in the LoKI.nxs filename and 
+    calculates the final fluo spectrum of each spectrum.
+    
+    Parameters
+    ----------
+    name: str
+        Filename, e.g. 066017.nxs
+
+    Returns
+    ----------
+    normalized: sc.DataArray 
+        DataArray that contains the normalized fluo signal, one spectrum or mulitple spectra.
+
+    """
+    fluo_dict = utils.load_nurfloki_file(name, 'fluorescence')
+    normalized = normalize_fluo(**fluo_dict)
+    # provide source of each spectrum in the file
+    normalized.attrs['source'] = sc.scalar(name).broadcast(['spectrum'], [normalized.sizes['spectrum']])
+
+    return normalized 
+
+
+
 def fluo_maxint_max_wavelen(
     flist_num,
     wllim=300,
@@ -56,9 +101,10 @@ def fluo_maxint_max_wavelen(
     wl_unit: sc.Unit
         Unit of the wavelength
     medfilter: bool
+        If medfilter=False, not medfilter is applied. Default: True
         A medfilter is applied to the fluo spectra as fluo is often more noisy
-    kernel_size: int, uneven, min>=3
-        The width of the median filter, uneven, and at least a value of 3.
+    kernel_size: int or sc.Variable
+        kernel for median_filter along the wavelength dimension
 
     Returns
     ----------
@@ -138,10 +184,12 @@ def fluo_peak_int(
         Wavelength range upper limit
     wl_unit: sc.Unit
         Unit of the wavelength
-    medfilter: boolean
+    medfilter: bool
         If medfilter=False, not medfilter is applied. Default: True
-    kernel_size: int
-        kernel for medianfilter. Default value is applied if no value is given.
+        A medfilter is applied to the fluo spectra as fluo is often more noisy
+    kernel_size: int or sc.Variable
+        kernel for median_filter along the wavelength dimension. Expected dims
+        'spectrum' and 'wavelength' in sc.DataArray
 
     Returns
     ----------
@@ -153,9 +201,14 @@ def fluo_peak_int(
     if not isinstance(fluo_da, sc.DataArray):
         raise TypeError("fluo_da has to be an sc.DataArray!")
 
-    # apply medfiler with kernel_size
+    # apply medfiler with kernel_size along the wavelength dimension
     if medfilter is True:
-        fluo_da = apply_medfilter(fluo_da, kernel_size=kernel_size)
+        if ('spectrum' and 'wavelength') in fluo_da.dims:
+            kernel_size_sc={'spectrum':1, 'wavelength':kernel_size}
+        else:
+            raise ValueError('Dimensions spectrum and wavelength expected.')
+        fluo_da=median_filter(fluo_da, size=kernel_size_sc)
+        
 
     # obtain unit of wavelength:
     if wl_unit is None:
