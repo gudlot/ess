@@ -21,10 +21,11 @@ from scipp.ndimage import median_filter
 from ess.loki.nurf import uv, fluo, utils
 
 
-def markers():
+def markers(number_lines):
     """Creates a list of markers for plots"""
-    return ["+", ".", "o", "*", "1", "2", "x", "P", "v", "X", "^", "d"]
-
+    marker_list=["+", ".", "o", "*", "1", "2", "x", "P", "v", "X", "^", "d", "3", "4"]
+    repetition= int(np.ceil(number_lines/marker_list.__len__()))
+    return marker_list*repetition
 
 def line_colors(number_of_lines):
     """
@@ -66,10 +67,10 @@ def modify_plt_app(fig_handles):
         for i in range(0, number_lines):
             pl1.ax.get_lines()[i].set_color(colors[i])
             pl1.ax.get_legend().legendHandles[i].set_color(colors[i])
-            pl1.ax.get_lines()[i].set_marker(markers()[i])
+            pl1.ax.get_lines()[i].set_marker(markers(number_lines)[i])
             pl1.ax.get_lines()[i].set_markersize(5)
             pl1.ax.get_lines()[i].set_markevery(5)
-            pl1.ax.get_legend().legendHandles[i].set_marker(markers()[i])
+            pl1.ax.get_legend().legendHandles[i].set_marker(markers(number_lines)[i])
             pl1.ax.get_lines()[i].set_linewidth(1)
 
 
@@ -947,18 +948,24 @@ def plot_fluo(name: str):
         legend=legend_props,
         figsize=figure_size,
         title=f"{name}, raw fluo spectrum - all",
-    )  # legend={"show": True, "loc": (1.0, 1.0)} #figsize=(width, height)
+    )  
     display(out1)
 
     # plot raw and dark spectra for fluo part
-    out2 = sc.plot(
-        {"dark": fluo_dict["dark"], "reference": fluo_dict["reference"]},
+    figure_size2 = (10, 6)
+    legend_props = {"show": True, "loc": (1.04, 0)}
+
+    to_plot = {}
+    for group in ('dark', 'reference'):
+        for key, da in sc.collapse(fluo_dict[group]["spectrum", :], keep="wavelength").items():
+            to_plot[f'{group}-{key}'] = da
+    out2= sc.plot(to_plot, 
         linestyle="dashed",
         grid=True,
         legend=legend_props,
-        figsize=figure_size,
-        title=f"{name}, dark and reference",
-    )  # legend={"show": True, "loc": (1.0, 1.0)} #figsize=(width, height))
+        figsize=figure_size2,
+        title=f"{name}, dark and reference spectra - all"
+        )
     display(out2)
 
     # specific for ILL data, every second sppectrum good, pay attention to range() where
@@ -1019,6 +1026,7 @@ def plot_fluo(name: str):
     display(out6)
 
     fig_handles = [out1, out2, out3, out4, out5, out5, out6]
+    #fig_handles=[out3]
     modify_plt_app(fig_handles)
 
 
