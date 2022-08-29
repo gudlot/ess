@@ -42,9 +42,20 @@ def split_sample_dark_reference(da):
     """
     assert isinstance(da, sc.DataArray)
 
-    dark = da[da.coords["is_dark"]].squeeze()
-    ref = da[da.coords["is_reference"]].squeeze()
-    sample = da[da.coords["is_data"]]    
+    #dark = da[da.coords["is_dark"]].squeeze()
+    #ref = da[da.coords["is_reference"]].squeeze()
+    #sample = da[da.coords["is_data"]]    
+
+    dark = da[da.coords["is_dark"]]   #spectrum: 1, wavelength: 1044
+    ref = da[da.coords["is_reference"]] #spectrum: 1, wavelength: 1044
+    sample = da[da.coords["is_data"]]  #spectrum: 12, wavelength: 1044 (example)
+
+    # Current suggestion to keep meta data along the calculation.
+    dark=dark.squeeze().broadcast(sizes=sample.sizes)
+    dark.attrs['source']=dark.attrs['source'].broadcast(['spectrum'], [sample.sizes['spectrum']])
+    ref=ref.squeeze().broadcast(sizes=sample.sizes)
+    ref.attrs['source']=ref.attrs['source'].broadcast(['spectrum'], [sample.sizes['spectrum']])
+  
        
     #TODO Instead of a dict a sc.Dataset? 
     return {"sample": sample, "reference": ref, "dark": dark}
