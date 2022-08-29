@@ -42,10 +42,6 @@ def split_sample_dark_reference(da):
     """
     assert isinstance(da, sc.DataArray)
 
-    #dark = da[da.coords["is_dark"]].squeeze()
-    #ref = da[da.coords["is_reference"]].squeeze()
-    #sample = da[da.coords["is_data"]]    
-
     dark = da[da.coords["is_dark"]]   #spectrum: 1, wavelength: 1044
     ref = da[da.coords["is_reference"]] #spectrum: 1, wavelength: 1044
     sample = da[da.coords["is_data"]]  #spectrum: 12, wavelength: 1044 (example)
