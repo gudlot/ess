@@ -47,6 +47,7 @@ def split_sample_dark_reference(da):
     sample = da[da.coords["is_data"]]  #spectrum: 12, wavelength: 1044 (example)
 
     # Current suggestion to keep meta data along the calculation.
+    # Indirect assumption dark and reference are from the same Loki.nxs file
     dark=dark.squeeze().broadcast(sizes=sample.sizes)
     dark.attrs['source']=dark.attrs['source'].broadcast(['spectrum'], [sample.sizes['spectrum']])
     ref=ref.squeeze().broadcast(sizes=sample.sizes)
