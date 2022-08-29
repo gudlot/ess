@@ -50,6 +50,7 @@ def normalize_fluo(
     # basically flat. In more complex solvent the reference may have some 
     # intrinsic fluorescence that would need to be substracted.
 
+
     final_fluo = (sample - dark) - (reference - dark)
 
     return final_fluo
@@ -73,7 +74,7 @@ def load_and_normalize_fluo(name) -> sc.DataArray :
     fluo_dict = utils.load_nurfloki_file(name, 'fluorescence')
     normalized = normalize_fluo(**fluo_dict)
     # provide source of each spectrum in the file
-    normalized.attrs['source'] = sc.scalar(name).broadcast(['spectrum'], [normalized.sizes['spectrum']])
+    #normalized.attrs['source'] = sc.scalar(name).broadcast(['spectrum'], [normalized.sizes['spectrum']])
 
     return normalized 
 
