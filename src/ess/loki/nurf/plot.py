@@ -94,8 +94,9 @@ def plot_uv(name):
 
     """
     # extracting and preparing uv data
-    uv_dict = load_uv(name)
-    normalized = normalize_uv(**uv_dict)  # results in DataArrays with multiple spectra
+    uv_dict = utils.load_nurfloki_file(name, 'uv')
+    normalized = uv.normalize_uv(**uv_dict)  # results in DataArrays with multiple spectra
+    #normalized =  uv.load_and_normalize_uv(name)
 
     # legend property
     legend_props = {"show": True, "loc": 1}
@@ -117,15 +118,32 @@ def plot_uv(name):
     )
 
     # How to plot dark and reference?
-    out4 = sc.plot(
-        {"dark": uv_dict["dark"], "reference": uv_dict["reference"]},
+    #out4 = sc.plot(
+    #    {"dark": uv_dict["dark"], "reference": uv_dict["reference"]},
+    #    linestyle="dashed",
+    #    marker=".",
+    #    grid=True,
+    #    legend=legend_props,
+    #    title=f"{name} - dark and reference",
+    #    ax=axs[1],
+    #)
+    # How to plot dark and reference?
+    to_plot = {}
+    for group in ('dark', 'reference'):
+        for key, da in sc.collapse(uv_dict[group]["spectrum", :], keep="wavelength").items():
+            to_plot[f'{group}-{key}'] = da
+
+    out4= sc.plot(to_plot, 
         linestyle="dashed",
-        marker=".",
         grid=True,
+        marker='.',
         legend=legend_props,
-        title=f"{name} - dark and reference",
+        #figsize=figure_size2,
+        title=f"{name}, dark and reference spectra - all",
         ax=axs[1],
-    )
+        )
+    #display(out4)
+
 
     # How to plot individual calculated spectra from one .nxs file
     out2 = sc.plot(
@@ -137,6 +155,7 @@ def plot_uv(name):
         title=f"{name} - calculated",
         ax=axs[2],
     )
+    #display(out2)
 
     # How to plot averaged spectra (.mean and NOT .sum)
     out3 = sc.plot(
@@ -148,7 +167,8 @@ def plot_uv(name):
         title=f"{name} - averaged",
         ax=axs[3],
     )
-    # display(figs)
+    #display(out3)
+    #display(figs)
 
 def plot_uv_set(flist_num, lambda_min=None, lambda_max=None, vmin=None, vmax=None):
     """Plots a set of averaged UV spectra
@@ -399,26 +419,26 @@ def plot_multiple_uv_peak_int(
     """
 
     # currently I cannot rely on having the same number of spectra in each file currently, sc.Dataset will not work
-    fig = plt.figure(figsize=(15, 5))
+    fig = plt.figure(figsize=(24, 7))
     gs = gridspec.GridSpec(
-        nrows=1, ncols=2, width_ratios=[1, 1], wspace=0.3, height_ratios=[1]
+        nrows=1, ncols=2, width_ratios=[1, 1], wspace=0.2, height_ratios=[1], top=0.9, bottom=0.15, left=0.1, right=0.9
     )
     ax0 = fig.add_subplot(gs[0, 0])
     ax1 = fig.add_subplot(gs[0, 1])
 
+
+
     for i, name in enumerate(filelist):
-        uv_dict = load_uv(name)
-        uv_da = normalize_uv(**uv_dict)
+        uv_dict= utils.load_nurfloki_file(name, 'uv') 
+        uv_da = uv.normalize_uv(**uv_dict)
 
         # check for medfilter
         if medfilter is not False:
             # apply medianfilter
-            uv_da = apply_medfilter(uv_da, kernel_size=kernel_size)
+            uv_da = utils.nurf_median_filter( uv_da,kernel_size=kernel_size )
 
         # process
-        uv_peak_int_dict = uv_peak_int(
-            uv_da, wavelength=wavelength, wl_unit=wl_unit, tol=tol
-        )
+        uv_peak_int_dict=uv.uv_peak_int(uv_da , wavelength=wavelength, tol=tol)
         # append name to dict
         uv_peak_int_dict["filename"] = name
 
@@ -434,10 +454,11 @@ def plot_multiple_uv_peak_int(
             "o",
             label=f"{name}",
         )
-        ax0.legend()
+        ax0.legend(  loc="best")
+        ax0.set_ylabel("Abs")
         ax0.grid(visible=True)
         ax0.set_title(
-            f"UV peak intensity for {uv_peak_int_dict['wavelength']} {uv_peak_int_dict['unit']} "
+            f"UV peak intensity for {uv_peak_int_dict['wavelength'].value} {uv_peak_int_dict['wavelength'].unit} "
         )
 
         ax1.plot(
@@ -446,10 +467,11 @@ def plot_multiple_uv_peak_int(
             "o",
             label=f"{name}",
         )
-        ax1.legend()
+        ax1.legend(loc="best")
+        ax1.set_ylabel("Abs")
         ax1.grid(visible=True)
         ax1.set_title(
-            f"UV peak intensity for intervall [{uv_peak_int_dict['wavelength']-uv_peak_int_dict['tol']} , {uv_peak_int_dict['wavelength']+uv_peak_int_dict['tol']}]{uv_peak_int_dict['unit']}"
+            f"UV peak intensity for intervall [{uv_peak_int_dict['wavelength'].value-uv_peak_int_dict['tol'].value} , {uv_peak_int_dict['wavelength'].value+uv_peak_int_dict['tol'].value}]{uv_peak_int_dict['wavelength'].unit}"
         )
 
     # overwrite xticks in ax0
@@ -465,7 +487,62 @@ def plot_multiple_uv_peak_int(
         rotation=90,
     )
 
-    display(fig)
+
+
+    # a quick hack for the poster
+    cm = 1/2.54  # centimeters in inches
+    #figsize_b=8
+    #figsize_a=1.333*figsize_b
+    figsize_a=15
+    figsize_b= figsize_a*0.75
+    
+    fig3, ax0 = plt.subplots(1, 1, constrained_layout=True, figsize=(figsize_a*cm, figsize_b*cm) )
+
+    
+    for i, name in enumerate(filelist):
+        uv_dict= utils.load_nurfloki_file(name, 'uv') 
+        uv_da = uv.normalize_uv(**uv_dict)
+
+        # check for medfilter
+        if medfilter is not False:
+            # apply medianfilter
+            uv_da = utils.nurf_median_filter( uv_da,kernel_size=kernel_size )
+
+        # process
+        uv_peak_int_dict=uv.uv_peak_int(uv_da , wavelength=wavelength, tol=tol)
+        # append name to dict
+        uv_peak_int_dict["filename"] = name
+
+        num_spec = uv_peak_int_dict["wl_interval"]["spectrum", :].values.size
+
+        # prints number of spectra in each file and artifical x-value
+        # print(num_spec,i*np.ones(num_spec))
+
+        # to offset each spectrum on the x-axis, I create an artifical x-axis at the moment, TODO: could be later replaced by the pertubation parmeter (time, concentration)
+        ax0.plot(
+            i * np.ones(num_spec),
+            uv_peak_int_dict["one_wavelength"]["spectrum", :].values,
+            "o",
+            label=f"{name}",
+        )
+        ax0.legend( bbox_to_anchor=(1.05, 1.03), loc="upper left" )
+        ax0.set_ylabel("Abs")
+        ax0.grid(visible=True)
+        ax0.set_title(
+            f"UV peak intensity for {uv_peak_int_dict['wavelength'].value} {uv_peak_int_dict['wavelength'].unit} "
+        )
+
+
+    # overwrite xticks in ax0
+    ax0.set_xticks(
+        np.arange(0, len(filelist), 1),
+        labels=[f"{name}" for name in filelist],
+        rotation=90,
+    )
+  
+
+    return fig3
+    #display(fig)
 
 
 def plot_fluo_peak_int(
@@ -552,14 +629,25 @@ def plot_fluo_multiple_peak_int(
     """
 
     # setting the scene for the markers
-    marker = itertools.cycle(markers())
+    marker = itertools.cycle(markers(15))
 
     print(filelist)
 
-    figure_size = (15, 5)
-    fig, ax = plt.subplots(
-        nrows=1, ncols=2, figsize=figure_size, constrained_layout=True
-    )
+    #mpr,a;
+    #figure_size = (15, 5)
+    #fig, ax = plt.subplots(
+    #    nrows=1, ncols=2, figsize=figure_size, constrained_layout=True
+    #)
+
+    #poster hack
+    cm = 1/2.54  # centimeters in inches
+    #figsize_b=8
+    #figsize_a=1.333*figsize_b
+    figsize_a=13
+    figsize_b= figsize_a*1.6
+    
+    fig, ax = plt.subplots(2, 1, constrained_layout=True, figsize=(figsize_a*cm, figsize_b*cm) )
+
 
     unique_mwl = []
     ds_list = []
@@ -567,7 +655,7 @@ def plot_fluo_multiple_peak_int(
         fluo_dict=utils.load_nurfloki_file(name,'fluorescence')
         fluo_da = fluo.normalize_fluo(**fluo_dict)
         # extract max int value and corresponding wavelength position, median filter is applied
-        fluo_filt_max = fluo_peak_int(
+        fluo_filt_max = fluo.fluo_peak_int(
             fluo_da,
             wllim=wllim,
             wulim=wulim,
@@ -576,7 +664,7 @@ def plot_fluo_multiple_peak_int(
             kernel_size=kernel_size,
         )
         # attach filename as attribute to dataset, TODO: should this happen in fluo_peak_int ?
-        fluo_filt_max.attrs["name"] = sc.scalar(name)
+        #fluo_filt_max.attrs["name"] = sc.scalar(name)
         # display(fluo_filt_max)
         ds_list.append(fluo_filt_max)
         unique_mwl.append(np.unique(fluo_filt_max.coords["monowavelengths"].values))
@@ -594,7 +682,8 @@ def plot_fluo_multiple_peak_int(
             markersize=10,
         )
         ax[0].set_ylabel("Max. Intensity")
-        ax[0].set_title("Fluo - max. intensity")
+        #ax[0].set_title("Fluo - max. intensity")
+        ax[0].set_title(r'Fluo - $\mathrm{Int}_{\mathrm{max}}$')
 
         ax[1].plot(
             fluo_filt_max.coords["monowavelengths"].values,
@@ -607,7 +696,8 @@ def plot_fluo_multiple_peak_int(
         unit_str = str(fluo_filt_max["wavelength_max"].unit)
 
         ax[1].set_ylabel(f"Wavelength [{unit_str}]")
-        ax[1].set_title("Fluo - corresponding wavelength")
+        #ax[1].set_title("Fluo - corresponding wavelength")
+        ax[1].set_title(r'Fluo - $\lambda_{\mathrm{max}}$')
 
     # show the lowest monowavelength as lower boundary on the y-axis
     ax[1].set_ylim(bottom=0.9 * np.min(fluo_filt_max.coords["monowavelengths"].values))
@@ -624,11 +714,13 @@ def plot_fluo_multiple_peak_int(
 
     for axes in ax:
         # axes.legend(loc='upper right', bbox_to_anchor=(1.1, 1.00))
-        axes.legend(bbox_to_anchor=(1.04, 1))
+        axes.legend(bbox_to_anchor=(1.04, 1.03))
         axes.grid(True)
-        axes.set_xlabel("Monowavelengths")
+        axes.set_xlabel("Monowavelengths [nm]")
 
-    display(fig)
+
+    return fig
+    #display(fig)
 
 
 def plot_fluo_spectrum_selection(
@@ -940,11 +1032,20 @@ def plot_fluo(name: str):
     figure_size = (8, 4)
     legend_props = {"show": True, "loc": (1.04, 0)}
 
+    all_fluo_raw_spectra={}
+    #should this be more consistent? 
+    #possible via fluo_dict["sample"] or final_fluo
+    for i in range(1, fluo_dict["sample"].sizes["spectrum"]):
+        mwl = str(final_fluo.coords["monowavelengths"][i].value) + "nm"
+        all_fluo_raw_spectra[f"spectrum:{i}, {mwl}"] = final_fluo["spectrum", i]
+
     # plot all fluo raw spectra
     out1 = sc.plot(
-        sc.collapse(fluo_dict["sample"]["spectrum", :], keep="wavelength"),
+        #sc.collapse(fluo_dict["sample"]["spectrum", :], keep="wavelength"),
+        all_fluo_raw_spectra,
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size,
         title=f"{name}, raw fluo spectrum - all",
@@ -962,6 +1063,7 @@ def plot_fluo(name: str):
     out2= sc.plot(to_plot, 
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size2,
         title=f"{name}, dark and reference spectra - all"
@@ -972,11 +1074,12 @@ def plot_fluo(name: str):
     #  the selection takes place
     only_bad_spectra = {}  # make empty dict
     for i in range(0, fluo_dict["sample"].sizes["spectrum"], 2):
-        only_bad_spectra[f"spectrum-{i}"] = fluo_dict["sample"]["spectrum", i]
+        only_bad_spectra[f"spectrum-{i}, {mwl}"] = fluo_dict["sample"]["spectrum", i]
     out3 = sc.plot(
         only_bad_spectra,
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size,
         title=f"{name} - all bad raw spectra",
@@ -985,11 +1088,12 @@ def plot_fluo(name: str):
 
     only_good_spectra = {}  # make empty dict
     for i in range(1, fluo_dict["sample"].sizes["spectrum"], 2):
-        only_good_spectra[f"spectrum-{i}"] = fluo_dict["sample"]["spectrum", i]
+        only_good_spectra[f"spectrum-{i}, {mwl}"] = fluo_dict["sample"]["spectrum", i]
     out4 = sc.plot(
         only_good_spectra,
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size,
         title=f"{name} - all good raw spectra",
@@ -1005,6 +1109,7 @@ def plot_fluo(name: str):
         only_good_fspectra,
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size,
         title=f"{name} - all good final spectra",
@@ -1016,6 +1121,7 @@ def plot_fluo(name: str):
         only_good_fspectra,
         linestyle="dashed",
         grid=True,
+        marker='.',
         legend=legend_props,
         figsize=figure_size,
         title=f"{name} - all good final spectra",
