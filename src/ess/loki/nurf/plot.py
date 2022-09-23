@@ -659,7 +659,6 @@ def plot_fluo_multiple_peak_int(
             fluo_da,
             wllim=wllim,
             wulim=wulim,
-            wl_unit=wl_unit,
             medfilter=medfilter,
             kernel_size=kernel_size,
         )
