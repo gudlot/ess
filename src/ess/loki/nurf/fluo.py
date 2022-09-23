@@ -16,6 +16,7 @@ import scippnexus as snx
 import scipp as sc
 from ess.loki.nurf import utils
 from scipp.ndimage import median_filter
+from utils import nurf_median_filter
 
 
 
@@ -81,10 +82,9 @@ def load_and_normalize_fluo(name) -> sc.DataArray :
 
 
 def fluo_maxint_max_wavelen(
-    flist_num,
-    wllim=300,
-    wulim=400,
-    wl_unit=None,
+    flist_num: list,
+    wllim: Optional[sc.Variable] = None,
+    wulim: Optional[sc.Variable] = None,
     medfilter=True,
     kernel_size=15,
 ):
@@ -95,12 +95,10 @@ def fluo_maxint_max_wavelen(
     ----------
     flist_num: list
         List of filename for a LoKI.nxs file containting Fluo entry.
-    wllim: float
+    wllim: sc.Variable
         Lower wavelength limit where the search for the maximum should begin
-    wulim: float
+    wulim: sc.Variable
         Upper wavelength limit where the search for the maximum should end
-    wl_unit: sc.Unit
-        Unit of the wavelength
     medfilter: bool
         If medfilter=False, not medfilter is applied. Default: True
         A medfilter is applied to the fluo spectra as fluo is often more noisy
@@ -119,8 +117,18 @@ def fluo_maxint_max_wavelen(
 
     fluo_int_dict = defaultdict(dict)
 
+    # set default parameter
+    if wllim is None:
+        wllim=sc.scalar(300, unit='nm')
+    if wulim is None:
+        wulim=sc.scalar(400, unit='nm')
+    if wllim is not None and wulim is not None:
+        assert (wllim < wulim.value, "wllim < wulim"
+    if not wllim.unit==wulim.unit:
+        raise ValueError("Use same unit for wavelength range.")
+
     for name in flist_num:
-        fluo_dict = load_nurfloki_file(name, 'fluorescence')
+        fluo_dict = utils.load_nurfloki_file(name, 'fluorescence')
         fluo_da = normalize_fluo(**fluo_dict)
         # check for the unit
         if wl_unit is None:
@@ -135,7 +143,6 @@ def fluo_maxint_max_wavelen(
             fluo_da,
             wllim=wllim,
             wulim=wulim,
-            wl_unit=wl_unit,
             medfilter=medfilter,
             kernel_size=kernel_size,
         )
@@ -165,11 +172,10 @@ def fluo_maxint_max_wavelen(
 
 def fluo_peak_int(
     fluo_da: sc.DataArray,
-    wllim=None,
-    wulim=None,
-    wl_unit=None,
+    wllim: Optional[sc.Variable] = None,
+    wulim: Optional[sc.Variable] = None,
     medfilter=True,
-    kernel_size=None,
+    kernel_size=15,
 ):
     """Main task: Extract for a given wavelength range [wllim, wulim]*wl_unit the maximum fluo intensity and its corresponding wavelength position.
     A median filter is automatically applied to the fluo data and data is extracted after its application.
@@ -179,18 +185,17 @@ def fluo_peak_int(
     ----------
     fluo_da: sc.DataArray
         DataArray containing uv spectra
-    wllim: float
+    wllim: sc.Variable
         Wavelength range lower limit
-    wulim: float
+    wulim: sc.Variable
         Wavelength range upper limit
-    wl_unit: sc.Unit
-        Unit of the wavelength
     medfilter: bool
         If medfilter=False, not medfilter is applied. Default: True
         A medfilter is applied to the fluo spectra as fluo is often more noisy
     kernel_size: int or sc.Variable
         kernel for median_filter along the wavelength dimension. Expected dims
         'spectrum' and 'wavelength' in sc.DataArray
+        Default kernel_size in wavelength direction: 15
 
     Returns
     ----------
@@ -202,15 +207,24 @@ def fluo_peak_int(
     if not isinstance(fluo_da, sc.DataArray):
         raise TypeError("fluo_da has to be an sc.DataArray!")
 
-    # apply medfiler with kernel_size along the wavelength dimension
-    if medfilter is True:
-        if ('spectrum' and 'wavelength') in fluo_da.dims:
-            kernel_size_sc={'spectrum':1, 'wavelength':kernel_size}
-        else:
-            raise ValueError('Dimensions spectrum and wavelength expected.')
-        fluo_da=median_filter(fluo_da, size=kernel_size_sc)
-        
+    # set default parameter
+    if wllim is None:
+        wllim=sc.scalar(300, unit='nm')
+    if wulim is None:
+        wulim=sc.scalar(400, unit='nm')
+    if wllim is not None and wulim is not None:
+        assert (wllim < wulim.value, "wllim < wulim"
+    if not wllim.unit==wulim.unit:
 
+
+    # apply medfiler with kernel_size along the wavelength dimension
+    if (medfilter is True and kernel_size is not None):
+        fluo_da=utils.nurf_median_filterfluo_da, kernel_size=kernel_size)
+    elif (medfilter is True and kernel_size is None):
+        kernel_size=15
+        fluo_da=utils.nurf_median_filterfluo_da, kernel_size=kernel_size)
+
+        
     # obtain unit of wavelength:
     if wl_unit is None:
         wl_unit = fluo_da.coords["wavelength"].unit
