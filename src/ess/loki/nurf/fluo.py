@@ -213,7 +213,7 @@ def fluo_peak_int(
     if wulim is None:
         wulim=sc.scalar(400, unit='nm')
     if wllim is not None and wulim is not None:
-        assert (wllim < wulim.value, "wllim < wulim"
+        assert (wllim < wulim.value, "wllim < wulim, lower wavelength limit needs to be smaller than upper wavelength limit"
     if not wllim.unit==wulim.unit:
 
 
@@ -224,30 +224,10 @@ def fluo_peak_int(
         kernel_size=15
         fluo_da=utils.nurf_median_filterfluo_da, kernel_size=kernel_size)
 
-        
-    # obtain unit of wavelength:
-    if wl_unit is None:
-        wl_unit = fluo_da.coords["wavelength"].unit
-    else:
-        if not isinstance(wl_unit, sc.Unit):
-            raise TypeError
-        assert (
-            wl_unit == fluo_da.coords["wavelength"].unit
-        )  # we check that the given unit corresponds to the unit for the wavelength
-
-    # set defaul values for wllim and wulim for wavelength interval where to search for the maximum
-    if wllim is None:
-        wllim = 300
-    if wulim is None:
-        wulim = 400
-
-    assert (
-        wllim < wulim
-    ), "Lower wavelength limit needs to be smaller than upper wavelength limit"
 
     # let's go and filter
     # filter spectrum values for the specified interval, filtered along the wavelength dimension
-    fluo_filt = fluo_da["wavelength", wllim * wl_unit : wulim * wl_unit]
+    fluo_filt = fluo_da["wavelength", wllim  : wulim ]
 
     # there is no function in scipp similar to xr.argmax
     # access to data np.ndarray in fluo_filt
