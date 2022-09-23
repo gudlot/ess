@@ -103,7 +103,7 @@ def fluo_maxint_max_wavelen(
         If medfilter=False, not medfilter is applied. Default: True
         A medfilter is applied to the fluo spectra as fluo is often more noisy
     kernel_size: int or sc.Variable
-        kernel for median_filter along the wavelength dimension
+        kernel for median_filter along the wavelength dimension. Default: 15
 
     Returns
     ----------
@@ -122,18 +122,18 @@ def fluo_maxint_max_wavelen(
         wllim=sc.scalar(300, unit='nm')
     if wulim is None:
         wulim=sc.scalar(400, unit='nm')
-    if wllim is not None and wulim is not None:
-        assert (wllim < wulim.value, "wllim < wulim"
+    if (wllim is not None and wulim is not None):
+        assert wllim.value < wulim.value, "wllim < wulim"
     if not wllim.unit==wulim.unit:
         raise ValueError("Use same unit for wavelength range.")
+       
 
     for name in flist_num:
         fluo_dict = utils.load_nurfloki_file(name, 'fluorescence')
         fluo_da = normalize_fluo(**fluo_dict)
         # check for the unit
-        if wl_unit is None:
-            wl_unit = fluo_da.coords["wavelength"].unit
-
+        #if wl_unit is None:
+        #    wl_unit = fluo_da.coords["wavelength"].unit
 
         print(f'Number of fluo spectra in {name}: {fluo_da.sizes["spectrum"]}')
         print(f"This is the fluo dataarray for {name}.")
@@ -151,14 +151,15 @@ def fluo_maxint_max_wavelen(
 
         # print(f'{name} Unique mwl:', np.unique(fluo_filt_max.coords['monowavelengths'].values))
         unique_monowavelen = np.unique(fluo_filt_max.coords["monowavelengths"].values)
+        unique_monowavelen_unit = np.unique(fluo_filt_max.coords["monowavelengths"].unit)
 
         # create entries into dict
         for mwl in unique_monowavelen:
             fluo_int_max = fluo_filt_max["intensity_max"][
-                fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
+                fluo_filt_max.coords["monowavelengths"] == mwl * unique_monowavelen_unit
             ].values 
             fluo_wavelen_max = fluo_filt_max["wavelength_max"][
-                fluo_filt_max.coords["monowavelengths"] == mwl * wl_unit
+                fluo_filt_max.coords["monowavelengths"] == mwl * unique_monowavelen_unit
             ].values  
 
             # I collect the values in a dict with nested dicts, separated by wavelength
@@ -212,17 +213,18 @@ def fluo_peak_int(
         wllim=sc.scalar(300, unit='nm')
     if wulim is None:
         wulim=sc.scalar(400, unit='nm')
-    if wllim is not None and wulim is not None:
-        assert (wllim < wulim.value, "wllim < wulim, lower wavelength limit needs to be smaller than upper wavelength limit"
+    if (wllim is not None and wulim is not None):
+        assert wllim.value < wulim.value, "wllim < wulim, lower wavelength limit needs to be smaller than upper wavelength limit"
     if not wllim.unit==wulim.unit:
+        raise ValueError("Use same unit for wavelength range.")
 
 
-    # apply medfiler with kernel_size along the wavelength dimension
+    # apply nurf_median_filter with kernel_size along the wavelength dimension
     if (medfilter is True and kernel_size is not None):
-        fluo_da=utils.nurf_median_filterfluo_da, kernel_size=kernel_size)
+        fluo_da=utils.nurf_median_filter(fluo_da, kernel_size=kernel_size)
     elif (medfilter is True and kernel_size is None):
         kernel_size=15
-        fluo_da=utils.nurf_median_filterfluo_da, kernel_size=kernel_size)
+        fluo_da=utils.nurf_median_filter(fluo_da, kernel_size=kernel_size)
 
 
     # let's go and filter
@@ -245,7 +247,7 @@ def fluo_peak_int(
         dims=["spectrum"], values=fluo_filt_max_int
     )
     fluo_filt_max["wavelength_max"] = sc.Variable(
-        dims=["spectrum"], values=fluo_filt_max_wl, unit=wl_unit
+        dims=["spectrum"], values=fluo_filt_max_wl, unit=wllim.unit
     )
 
     # add previous information to this dataarray

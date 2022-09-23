@@ -601,7 +601,6 @@ def plot_fluo_multiple_peak_int(
     filelist,
     wllim=None,
     wulim=None,
-    wl_unit=None,
     medfilter=True,
     kernel_size=None,
 ):
@@ -634,19 +633,19 @@ def plot_fluo_multiple_peak_int(
     print(filelist)
 
     #mpr,a;
-    #figure_size = (15, 5)
-    #fig, ax = plt.subplots(
-    #    nrows=1, ncols=2, figsize=figure_size, constrained_layout=True
-    #)
+    figure_size = (15, 5)
+    fig, ax = plt.subplots(
+        nrows=1, ncols=2, figsize=figure_size, constrained_layout=True
+    )
 
     #poster hack
-    cm = 1/2.54  # centimeters in inches
+    #cm = 1/2.54  # centimeters in inches
     #figsize_b=8
     #figsize_a=1.333*figsize_b
-    figsize_a=13
-    figsize_b= figsize_a*1.6
+    #figsize_a=13
+    #figsize_b= figsize_a*1.6
     
-    fig, ax = plt.subplots(2, 1, constrained_layout=True, figsize=(figsize_a*cm, figsize_b*cm) )
+    #fig, ax = plt.subplots(2, 1, constrained_layout=True, figsize=(figsize_a*cm, figsize_b*cm) )
 
 
     unique_mwl = []
@@ -712,13 +711,13 @@ def plot_fluo_multiple_peak_int(
     # ax[1].legend(loc='upper right', bbox_to_anchor=(1.05, 1.05))
 
     for axes in ax:
-        # axes.legend(loc='upper right', bbox_to_anchor=(1.1, 1.00))
-        axes.legend(bbox_to_anchor=(1.04, 1.03))
+        #axes.legend(loc='upper right', bbox_to_anchor=(1.1, 1.00))
+        axes.legend(loc='best')#, bbox_to_anchor=(1.06, 1.03))
         axes.grid(True)
         axes.set_xlabel("Monowavelengths [nm]")
 
 
-    return fig
+    #return fig
     #display(fig)
 
 
