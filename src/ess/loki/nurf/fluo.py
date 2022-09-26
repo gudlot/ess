@@ -163,7 +163,7 @@ def fluo_maxint_max_wavelen(
             ].values  
 
             # I collect the values in a dict with nested dicts, separated by wavelength
-            fluo_int_dict[f"{mwl}{wl_unit}"][f"{name}"] = {
+            fluo_int_dict[f"{mwl}{unique_monowavelen_unit}"][f"{name}"] = {
                 "intensity_max": fluo_int_max,
                 "wavelength_max": fluo_wavelen_max,
             }
@@ -177,11 +177,11 @@ def fluo_peak_int(
     wulim: Optional[sc.Variable] = None,
     medfilter=True,
     kernel_size=15,
-):
-    """Main task: Extract for a given wavelength range [wllim, wulim]*wl_unit the maximum fluo intensity and its corresponding wavelength position.
+) -> sc.Dataset:
+    """Main task: Extract for a given wavelength range [wllim, wulim] the maximum fluo intensity and its corresponding wavelength position.
     A median filter is automatically applied to the fluo data and data is extracted after its application.
     TODO: Check with Cedric if it is ok to use max intensity values after filtering
-
+   
     Parameters
     ----------
     fluo_da: sc.DataArray
@@ -249,6 +249,10 @@ def fluo_peak_int(
     fluo_filt_max["wavelength_max"] = sc.Variable(
         dims=["spectrum"], values=fluo_filt_max_wl, unit=wllim.unit
     )
+    # adding source information to each data entry in the dataset
+    fluo_filt_max["intensity_max"].attrs['source']=fluo_da.attrs['source'].broadcast(['spectrum'], [fluo_da.sizes['spectrum']])
+    fluo_filt_max["wavelength_max"].attrs['source']=fluo_da.attrs['source'].broadcast(['spectrum'], [fluo_da.sizes['spectrum']])
+
 
     # add previous information to this dataarray
     # TODO: Can we copy multiple coordinates from one array to another?
