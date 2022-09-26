@@ -547,35 +547,41 @@ def plot_multiple_uv_peak_int(
 
 def plot_fluo_peak_int(
     fluo_da: sc.DataArray,
-    name,
-    wllim=None,
-    wulim=None,
-    wl_unit=None,
+    wllim: Optional[sc.Variable] = None,
+    wulim: Optional[sc.Variable] = None,
     medfilter=True,
-    kernel_size=None,
+    kernel_size=15,
 ):
-    """Plot max intensity value found in a given wavelength interval and corresponding wavelength, both as function monowavelengths in one file "name" """
+    """Plot max intensity value found in a given wavelength interval and 
+    corresponding wavelength, both as function monowavelengths in one 
+    file "name"
+    
+    """
 
     # extract max int value and corresponding wavelength position
-    fluo_filt_max = fluo_peak_int(
+    fluo_filt_max = fluo.fluo_peak_int(
         fluo_da,
         wllim=wllim,
         wulim=wulim,
-        wl_unit=wl_unit,
         medfilter=medfilter,
         kernel_size=kernel_size,
     )
     # attach filename as attribute to dataarray
-    fluo_da.attrs["name"] = sc.scalar(name)
-    display(fluo_da)
+    #fluo_da.attrs["name"] = sc.scalar(name) #not necessary anymore
+    #print('This is the fluo_da scipp array received as input.')
+    #display(fluo_da)
 
-    fig = plt.figure(figsize=(20, 10))
+    source = np.unique(fluo_da.attrs['source'].values)
+    name = (lambda x: x)(*source)   #https://stackoverflow.com/questions/33161448/getting-only-element-from-a-single-element-list-in-python
+
+
+    fig = plt.figure(figsize=(22, 7))
     gs = gridspec.GridSpec(
-        nrows=2,
-        ncols=3,
-        width_ratios=[1, 1, 1],
+        nrows=1,
+        ncols=2,
+        width_ratios=[1, 1],
         wspace=0.3,
-        height_ratios=[1, 1],
+        height_ratios=[1],
     )
     ax0 = fig.add_subplot(gs[0, 0])
     ax1 = fig.add_subplot(gs[0, 1])
@@ -587,6 +593,12 @@ def plot_fluo_peak_int(
         title=f"Sample: {name}",
         ax=ax0,
     )
+
+    x = np.arange(len(fluo_filt_max.coords['monowavelengths'].values))  # the label locations
+    out0.ax.set_xticks(x)
+    # Set ticks labels for x-axis
+    out0.ax.set_xticklabels(fluo_filt_max.coords['monowavelengths'].values)
+
     out1 = sc.plot(
         fluo_filt_max["wavelength_max"]["spectrum", :],
         grid=True,
@@ -594,15 +606,17 @@ def plot_fluo_peak_int(
         title=f"Sample: {name}",
         ax=ax1,
     )
-    display(fig)
+    out1.ax.set_xticks(x)
+    out1.ax.set_xticklabels(fluo_filt_max.coords['monowavelengths'].values)
+    #display(fig)
 
 
 def plot_fluo_multiple_peak_int(
-    filelist,
-    wllim=None,
-    wulim=None,
+    filelist: list,
+    wllim: Optional[sc.Variable] = None,
+    wulim: Optional[sc.Variable] = None,
     medfilter=True,
-    kernel_size=None,
+    kernel_size: Optional[int] = None,
 ):
     """Plot multiple max peak intensities for given wavelength range and corresponding
     position of found maximum for a series of fluo measurements.
@@ -615,8 +629,6 @@ def plot_fluo_multiple_peak_int(
         Wavelength range lower limit
     wulim: float
         Wavelength range upper limit
-    wl_unit: sc.Unit
-        Unit of the wavelength
     medfilter: boolean
         If medfilter=False, no medfilter is applied
     kernel_size: int
@@ -633,7 +645,7 @@ def plot_fluo_multiple_peak_int(
     print(filelist)
 
     #mpr,a;
-    figure_size = (15, 5)
+    figure_size = (17, 5)
     fig, ax = plt.subplots(
         nrows=1, ncols=2, figsize=figure_size, constrained_layout=True
     )
