@@ -108,6 +108,9 @@ def nurf_median_filter( da:sc.DataArray, kernel_size: Optional[int] = None )-> s
         I don't check for int because scipp does it.
     """
 
+    if not ('spectrum' and 'wavelength') in da.dims:
+        raise ValueError('Dimensions spectrum and wavelength expected.')
+    
     # set a default value
     if kernel_size is None:
         kernel_size=3
