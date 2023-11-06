@@ -105,10 +105,9 @@ def nurf_median_filter( da:sc.DataArray, kernel_size: Optional[int] = None )-> s
         Default kernel_size in wavelength direction: 3
         #TODO: Take care of this option, when hardware is ready for integration.
         If not, and currently this is the case for the spectrometer, kernel_size has to be int, odd or even.
-        I don't check for int because scipp does it.
+        I don't check for int because scipp does it.y
     """
-
-    if not ('spectrum' and 'wavelength') in da.dims:
+    if not {'spectrum', 'wavelength'}.issubset(da.dims):
         raise ValueError('Dimensions spectrum and wavelength expected.')
     
     # set a default value
