@@ -16,7 +16,7 @@ import scippneutron as scn
 import scippnexus as snx
 import scipp as sc
 from ess.loki.nurf import utils
-from scipp.ndimage import median_filter
+from scipp.scipy.ndimage import median_filter
 
 
 def normalize_uv(

@@ -16,7 +16,7 @@ from scipy.optimize import leastsq  # needed for fitting of turbidity
 import scippneutron as scn
 import scippnexus as snx
 import scipp as sc
-from scipp.ndimage import median_filter
+from scipp.scipy.ndimage import median_filter
 
 from ess.loki.nurf import uv, fluo, utils
 
