@@ -16,7 +16,6 @@ import scippnexus as snx
 import scipp as sc
 from ess.loki.nurf import utils
 from scipp.scipy.ndimage import median_filter
-from utils import nurf_median_filter
 
 
 
